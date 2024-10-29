@@ -1,5 +1,6 @@
 import 'package:coffeeapp/controllers/config_controller.dart';
 import 'package:coffeeapp/controllers/menu_controller.dart';
+import 'package:coffeeapp/controllers/promotion_controller.dart';
 import 'package:coffeeapp/models/payment_model.dart';
 import 'package:coffeeapp/views/screens/pos/classification.dart';
 import 'package:coffeeapp/views/screens/pos/find_customer.dart';
@@ -52,6 +53,9 @@ class _POSScreenState extends State<POSScreen> {
   bool hasTaxMode = false;
   String selectedOrderType = 'Mang đi';
   String? _selectedPromotionCode;
+  double? _promotionValue;
+  String? _promotionType;
+  double? _promotionMinValue;
 
   @override
   void initState() {
@@ -129,7 +133,7 @@ class _POSScreenState extends State<POSScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${item['name']} - ${item['quantity']} x ${item['price'].toStringAsFixed(0)} đ',
+                        '${item['name']} - ${item['quantity']} x ${item['price'].toStringAsFixed(0)} VNĐ',
                         style: const TextStyle(fontSize: 14.0),
                       ),
                       if (item.containsKey('size'))
@@ -154,11 +158,25 @@ class _POSScreenState extends State<POSScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
+                      //khuyến mãi
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Khuyến mãi:',
+                            style: TextStyle(fontSize: 18.0)),
+                        Text(
+                          _selectedPromotionCode != null
+                              ? '$_promotionValue ${_promotionType == 'percentage' ? '%' : 'VNĐ'}'
+                              : 'Không',
+                          style: const TextStyle(fontSize: 18.0),
+                        ),
+                      ],
+                    ),
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Phụ thu:',
                             style: TextStyle(fontSize: 18.0)),
-                        Text('${_surcharge.toStringAsFixed(2)} đ',
+                        Text('${_surcharge.toStringAsFixed(2)} VNĐ',
                             style: const TextStyle(fontSize: 18.0)),
                       ],
                     ),
@@ -171,7 +189,7 @@ class _POSScreenState extends State<POSScreen> {
                               fontWeight: FontWeight.bold, fontSize: 16.0),
                         ),
                         Text(
-                          '${(_totalPrice + _tax).toStringAsFixed(0)} đ',
+                          '${(hasTaxMode ? (_totalPrice + _tax - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)) : _totalPrice - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)).toStringAsFixed(0)} VNĐ',
                           style: const TextStyle(fontSize: 16.0),
                         ),
                       ],
@@ -267,11 +285,24 @@ class _POSScreenState extends State<POSScreen> {
                     orderDate: DateTime.now(),
                     status: 'Paid',
                     description:
-                        'Order from POS${_surcharge > 0 ? ', Phụ thu: $_surcharge đ, Lý do: $_surchargeReason' : ''}',
+                        'Order from POS${_surcharge > 0 ? ', Phụ thu: $_surcharge VNĐ, Lý do: $_surchargeReason' : ''}',
                   );
 
                   addBill(
-                    totalAmount: _totalPrice + _tax,
+                    totalAmount: hasTaxMode
+                        ? (_totalPrice +
+                            _tax -
+                            (_promotionValue != null
+                                ? _promotionType == 'percentage'
+                                    ? _totalPrice * (_promotionValue! / 100)
+                                    : _promotionValue!
+                                : 0))
+                        : _totalPrice -
+                            (_promotionValue != null
+                                ? _promotionType == 'percentage'
+                                    ? _totalPrice * (_promotionValue! / 100)
+                                    : _promotionValue!
+                                : 0),
                     paymentMethod: _selectedPaymentMethod,
                     paymentDate: DateTime.now(),
                   );
@@ -282,7 +313,7 @@ class _POSScreenState extends State<POSScreen> {
                       quantity: item['quantity'],
                       price: item['price'],
                       description:
-                          'Giá: ${item['price'].toString()} đ, Số lượng: ${item['quantity']}, ${item.containsKey('size') ? 'Size: ${item['size']}, ' : 'Size: M, '}${item.containsKey('toppings') && item['toppings'].isNotEmpty ? 'Topping: ${item['toppings'].map((topping) => '$topping').join(', ')}, ' : 'Toppings: Không, '}${item.containsKey('sugar') ? 'Đường: ${item['sugar']}%' : 'Đường: 100%'}',
+                          'Giá: ${item['price'].toString()} VNĐ, Số lượng: ${item['quantity']}, ${item.containsKey('size') ? 'Size: ${item['size']}, ' : 'Size: M, '}${item.containsKey('toppings') && item['toppings'].isNotEmpty ? 'Topping: ${item['toppings'].map((topping) => '$topping').join(', ')}, ' : 'Toppings: Không, '}${item.containsKey('sugar') ? 'Đường: ${item['sugar']}%' : 'Đường: 100%'}',
                     );
                   }
                 } catch (e) {
@@ -309,6 +340,11 @@ class _POSScreenState extends State<POSScreen> {
                 setState(() {
                   _cartItems.clear();
                   _calculateTotal();
+                  _selectedPromotionCode =
+                      null; // Xóa mã giảm giá sau khi thanh toán
+                  _promotionValue = null;
+                  _promotionType = null;
+                  _promotionMinValue = null;
                 });
 
                 Navigator.of(context).pop();
@@ -325,7 +361,21 @@ class _POSScreenState extends State<POSScreen> {
   Future<Widget> qr_code() async {
     WidgetsFlutterBinding.ensureInitialized();
     PaymentService paymentService = PaymentService(
-        amount: int.parse((_totalPrice + _tax).toStringAsFixed(0)),
+        amount: int.parse((hasTaxMode
+                ? (_totalPrice +
+                    _tax -
+                    (_promotionValue != null
+                        ? _promotionType == 'percentage'
+                            ? _totalPrice * (_promotionValue! / 100)
+                            : _promotionValue!
+                        : 0))
+                : _totalPrice -
+                    (_promotionValue != null
+                        ? _promotionType == 'percentage'
+                            ? _totalPrice * (_promotionValue! / 100)
+                            : _promotionValue!
+                        : 0))
+            .toStringAsFixed(0)),
         // ignore: unnecessary_string_interpolations
         addInfo: "${DateFormat('yyyyMMddhhmmss').format(DateTime.now())}");
     try {
@@ -337,6 +387,26 @@ class _POSScreenState extends State<POSScreen> {
       print('An error occurred: $e');
       return const Center(child: Text('Failed to load QR code'));
     }
+  }
+
+  void takeDiscountValue(String query) async {
+    try {
+      List<dynamic> promotions =
+          await PromotionController.searchPromotionscustomer(query);
+      if (promotions.isNotEmpty) {
+        // Gán giá trị giảm giá cho _selectedPromotionCode và trả về discount_value
+        setState(() {
+          _promotionValue = double.parse(promotions[0]['discount_value']);
+          _promotionType = promotions[0]['discount_type'];
+          _promotionMinValue = double.parse(promotions[0]['min_order_value']);
+        });
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print('Lỗi mã giảm giá: $e');
+    }
+
+    return null; // Trả về null nếu không tìm thấy kết quả
   }
 
   @override
@@ -435,7 +505,7 @@ class _POSScreenState extends State<POSScreen> {
                                           Padding(
                                             padding: const EdgeInsets.all(8.0),
                                             child: Text(
-                                              'Giá: ${double.parse(item['price'].toString())} đ',
+                                              'Giá: ${double.parse(item['price'].toString())} VNĐ',
                                               style: const TextStyle(
                                                   fontWeight: FontWeight.bold),
                                             ),
@@ -615,7 +685,8 @@ class _POSScreenState extends State<POSScreen> {
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Giá: ${item['price'].toString()} đ'),
+                                    Text(
+                                        'Giá: ${item['price'].toString()} VNĐ'),
                                     Text('Số lượng: ${item['quantity']}'),
                                     if (item.containsKey('size'))
                                       Text('Size: ${item['size']}')
@@ -674,12 +745,26 @@ class _POSScreenState extends State<POSScreen> {
                         ),
                         child: Column(
                           children: [
+                            if (_selectedPromotionCode != null) ...[
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text('Mã giảm giá:',
+                                      style: TextStyle(fontSize: 18.0)),
+                                  Text(
+                                    '- ${_promotionValue.toString()} ${_promotionType == 'percentage' ? '%' : 'VNĐ'}',
+                                    style: const TextStyle(fontSize: 18.0),
+                                  ),
+                                ],
+                              ),
+                            ],
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text('Tổng cộng:',
                                     style: TextStyle(fontSize: 18.0)),
-                                Text('${_totalPrice.toStringAsFixed(2)} đ',
+                                Text('${_totalPrice.toStringAsFixed(2)} VNĐ',
                                     style: const TextStyle(fontSize: 18.0)),
                               ],
                             ),
@@ -690,7 +775,7 @@ class _POSScreenState extends State<POSScreen> {
                                 children: [
                                   const Text('Phụ thu:',
                                       style: TextStyle(fontSize: 18.0)),
-                                  Text('${_surcharge.toStringAsFixed(2)} đ',
+                                  Text('${_surcharge.toStringAsFixed(2)} VNĐ',
                                       style: const TextStyle(fontSize: 18.0)),
                                 ],
                               ),
@@ -702,7 +787,7 @@ class _POSScreenState extends State<POSScreen> {
                                 children: [
                                   const Text('VAT (10%):',
                                       style: TextStyle(fontSize: 18.0)),
-                                  Text('${_tax.toStringAsFixed(2)} đ',
+                                  Text('${_tax.toStringAsFixed(2)} VNĐ',
                                       style: const TextStyle(fontSize: 18.0)),
                                 ],
                               ),
@@ -718,7 +803,7 @@ class _POSScreenState extends State<POSScreen> {
                                       fontSize: 20.0),
                                 ),
                                 Text(
-                                  '${(_totalPrice + _tax).toStringAsFixed(2)} đ',
+                                  '${(hasTaxMode ? (_totalPrice + _tax - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)) : _totalPrice - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)).toStringAsFixed(2)} VNĐ',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 20.0),
@@ -803,6 +888,8 @@ class _POSScreenState extends State<POSScreen> {
                                             onPromotionSelected: (code) {
                                               setState(() {
                                                 _selectedPromotionCode = code;
+                                                takeDiscountValue(
+                                                    _selectedPromotionCode!);
                                               });
                                             },
                                           ),
@@ -830,6 +917,8 @@ class _POSScreenState extends State<POSScreen> {
                                   _selectedPromotionCode != null
                                       ? 'Mã giảm giá: $_selectedPromotionCode'
                                       : 'Khuyến mãi',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 18.0),
                                 ),
                               ),
                             ),
@@ -848,7 +937,7 @@ class _POSScreenState extends State<POSScreen> {
                                 ),
                                 child: Text(
                                   _surcharge > 0
-                                      ? 'Phụ thu: ${_surcharge.toStringAsFixed(2)} đ'
+                                      ? 'Phụ thu: ${_surcharge.toStringAsFixed(2)} VNĐ'
                                       : 'Phụ thu',
                                   textAlign: TextAlign.center,
                                 ),
@@ -929,7 +1018,7 @@ class _POSScreenState extends State<POSScreen> {
     for (int i = 0; i < _cartItems.length; i++) {
       final item = _cartItems[i];
       invoiceContent +=
-          '${i + 1}   | ${item['name']} | ${item['quantity']} | ${item['price']} đ | ';
+          '${i + 1}   | ${item['name']} | ${item['quantity']} | ${item['price']} VNĐ | ';
 
       // Thêm thông tin tùy chọn
       // ignore: unused_local_variable
@@ -948,15 +1037,25 @@ class _POSScreenState extends State<POSScreen> {
       invoiceContent += '\n--------------------------------\n';
     }
 
-    invoiceContent += 'Phụ thu: ${_surcharge.toStringAsFixed(2)} đ\n';
+    invoiceContent +=
+        'Khuyến mãi: ${(_promotionValue ?? 0).toString()} ${_promotionType == 'percentage' ? '%' : 'VNĐ'}\n';
+    invoiceContent += 'Phụ thu: ${_surcharge.toStringAsFixed(2)} VNĐ\n';
     if (_surchargeReason.isNotEmpty) {
       invoiceContent += 'Lý do phụ thu: $_surchargeReason\n';
     }
-    invoiceContent += 'Tổng cộng: ${_totalPrice.toStringAsFixed(2)} đ\n';
-    invoiceContent += 'VAT (10%): ${_tax.toStringAsFixed(2)} đ\n';
-    invoiceContent += '--------------------------------\n';
     invoiceContent +=
-        'Thanh toán: ${(_totalPrice + _tax).toStringAsFixed(2)} đ\n';
+        'Tổng cộng: ${(_totalPrice - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)).toStringAsFixed(2)} VNĐ\n';
+    if (hasTaxMode) {
+      invoiceContent += 'VAT (10%): ${_tax.toStringAsFixed(2)} VNĐ\n';
+    }
+    invoiceContent += '--------------------------------\n';
+    if (hasTaxMode) {
+      invoiceContent +=
+          'Thanh toán (đã bao gồm VAT): ${(_totalPrice + _tax - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)).toStringAsFixed(2)} VNĐ\n';
+    } else {
+      invoiceContent +=
+          'Thanh toán: ${(_totalPrice - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)).toStringAsFixed(2)} VNĐ\n';
+    }
     invoiceContent += '***** CẢM ƠN QUÝ KHÁCH *****\n';
 
     // Hiển thị nội dung hóa đơn trong một dialog
@@ -991,9 +1090,25 @@ class _POSScreenState extends State<POSScreen> {
     });
   }
 
+  // Hàm tính toán tổng giá trị đơn hàng
   void _calculateTotal() {
     _totalPrice = _cartItems.fold(
         0, (sum, item) => sum + (item['price'] * item['quantity']));
+
+    // Áp dụng mã giảm giá nếu có
+    if (_selectedPromotionCode != null) {
+      // Kiểm tra giá trị đơn hàng tối thiểu
+      if (_totalPrice >= _promotionMinValue!) {
+        if (_promotionType == 'percentage') {
+          // Giảm giá theo phần trăm
+          _totalPrice -= _totalPrice * (_promotionValue! / 100);
+        } else if (_promotionType == 'fixed_amount') {
+          // Giảm giá theo số tiền cố định
+          _totalPrice -= _promotionValue!;
+        }
+      }
+    }
+
     _tax = _totalPrice * 0.1;
     _totalPrice += _surcharge; // Cộng thêm phụ thu vào tổng tiền
   }
@@ -1264,7 +1379,7 @@ class _POSScreenState extends State<POSScreen> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                    'Giá: ${topping['price']} đ'),
+                                                    'Giá: ${topping['price']} VNĐ'),
                                                 Text(
                                                     'Description: ${topping['description']}'),
                                               ],
