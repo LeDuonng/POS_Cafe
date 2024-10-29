@@ -9,6 +9,7 @@ import 'package:coffeeapp/views/screens/curd/order_items_screen.dart';
 import 'package:coffeeapp/views/screens/curd/bills_screen.dart';
 import 'package:coffeeapp/views/screens/curd/inventory_screen.dart';
 import 'package:coffeeapp/views/screens/curd/customer_points_screen.dart';
+import 'package:coffeeapp/views/screens/curd/promotion_screen.dart';
 import 'package:coffeeapp/views/screens/signin_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -42,6 +43,7 @@ class CURDScreen extends StatelessWidget {
     {'name': 'Hoá đơn', 'screen': BillsScreen()},
     {'name': 'Tồn kho', 'screen': InventoryScreen()},
     {'name': 'Điểm khách hàng', 'screen': CustomerPointsScreen()},
+    {'name': 'Khuyến mãi', 'screen': PromotionScreen()},
   ];
 
   final String? id;
@@ -69,6 +71,7 @@ class CURDScreen extends StatelessWidget {
             'Chi tiết đơn',
             'Hoá đơn',
             'Tồn kho',
+            'Khuyến mãi',
           ].contains(screen['name']);
         }).toList();
       case 'customer':

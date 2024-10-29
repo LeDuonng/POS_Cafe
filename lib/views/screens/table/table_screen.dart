@@ -1,12 +1,13 @@
 import 'package:coffeeapp/controllers/tables_controller.dart';
-import 'package:coffeeapp/views/screens/pos/pos_screen.dart';
 import 'package:flutter/material.dart';
 import 'area_screen.dart';
 
 class TableScreen extends StatefulWidget {
   final String userID;
+  final Function(String) onTableSelected;
 
-  const TableScreen({super.key, required this.userID});
+  const TableScreen(
+      {super.key, required this.userID, required this.onTableSelected});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -42,17 +43,14 @@ class _TableScreenState extends State<TableScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final crossAxisCount =
-        (screenWidth / 200).floor(); // Adjust 200 to your desired item width
+        (screenWidth / 400).floor().clamp(2, double.infinity).toInt();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Table Screen'),
-      ),
-      body: Column(
-        children: [
-          AreaScreen(onAreaSelected: onAreaSelected),
-          Expanded(
-            child: FutureBuilder<List<dynamic>>(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            AreaScreen(onAreaSelected: onAreaSelected),
+            FutureBuilder<List<dynamic>>(
               future: tableList,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -64,6 +62,8 @@ class _TableScreenState extends State<TableScreen> {
                 } else {
                   final tables = snapshot.data!;
                   return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
                       crossAxisSpacing: 8.0,
@@ -75,36 +75,32 @@ class _TableScreenState extends State<TableScreen> {
                       final table = tables[index];
                       return GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => POSScreen(
-                                  tableId: table['id'].toString(),
-                                  userID: widget.userID.toString()),
-                            ),
-                          );
+                          widget.onTableSelected('Bàn: ${table['name']}');
+                          Navigator.pop(context);
                         },
                         child: Card(
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Expanded(
                                 child: Icon(
-                                  Icons.table_chart,
-                                  size: 100,
+                                  Icons.table_bar,
+                                  size: 48.0,
+                                  color: Colors.orange,
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(1.0),
                                 child: Text(table['name']),
                               ),
                               Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(1.0),
                                 child: Text('Tầng: ${table['floor']}'),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  'Trạng thái: ${table['status'] == 'occupied' ? 'đang bận' : table['status'] == 'available' ? 'sẵn sàng' : table['status']}',
+                                  '${table['status'] == 'occupied' ? 'đang bận' : table['status'] == 'available' ? 'sẵn sàng' : table['status']}',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -118,8 +114,8 @@ class _TableScreenState extends State<TableScreen> {
                 }
               },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

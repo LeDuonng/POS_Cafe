@@ -636,6 +636,173 @@ def search_users(search_term):
     users = [{'id': row[0], 'username': row[1], 'name': row[2], 'email': row[3], 'phone': row[4], 'address': row[5]} for row in rows]
     return jsonify(users)
 
+# Promotions
+@app.route('/promotions', methods=['GET'])
+def get_promotions():
+    query = "SELECT id, name, description, start_date, end_date, discount_type, discount_value, min_order_value, code_limit, usage_limit, active FROM promotions WHERE del = 0"
+    rows = fetch_data(query)
+    promotions = [{'id': row[0], 'name': row[1], 'description': row[2], 'start_date': row[3].strftime('%Y-%m-%d') if row[3] else None, 'end_date': row[4].strftime('%Y-%m-%d') if row[4] else None, 'discount_type': row[5], 'discount_value': row[6], 'min_order_value': row[7], 'code_limit': row[8], 'usage_limit': row[9], 'active': row[10]} for row in rows]
+    return jsonify(promotions)
+
+@app.route('/promotionscustomer', methods=['GET'])
+def get_promotions_customer():
+    query = """
+        SELECT id, name, description, start_date, end_date, discount_type, discount_value, min_order_value, code_limit, usage_limit, active
+        FROM promotions
+        WHERE del = 0
+        AND active = 1
+        AND usage_limit != 0
+        AND code_limit != 0
+        AND CURDATE() BETWEEN start_date AND end_date
+    """
+    rows = fetch_data(query)
+    promotions = [
+        {
+            'id': row[0],
+            'name': row[1],
+            'description': row[2],
+            'start_date': row[3].strftime('%Y-%m-%d') if row[3] else None,
+            'end_date': row[4].strftime('%Y-%m-%d') if row[4] else None,
+            'discount_type': row[5],
+            'discount_value': row[6],
+            'min_order_value': row[7],
+            'code_limit': row[8],
+            'usage_limit': row[9],
+            'active': row[10],
+        }
+        for row in rows
+    ]
+    return jsonify(promotions)
+
+
+@app.route('/promotions/<int:id>', methods=['GET'])
+def get_promotion(id):
+    query = "SELECT id, name, description, start_date, end_date, discount_type, discount_value, min_order_value, code_limit, usage_limit, active FROM promotions WHERE id=%s AND del = 0"
+    rows = fetch_data(query, (id,))
+    if rows:
+        promotion = {'id': rows[0][0], 'name': rows[0][1], 'description': rows[0][2], 'start_date': rows[0][3].strftime('%Y-%m-%d') if rows[0][3] else None, 'end_date': rows[0][4].strftime('%Y-%m-%d') if rows[0][4] else None, 'discount_type': rows[0][5], 'discount_value': rows[0][6], 'min_order_value': rows[0][7], 'code_limit': rows[0][8], 'usage_limit': rows[0][9], 'active': rows[0][10]}
+        return jsonify(promotion)
+    else:
+        return jsonify({'message': 'Promotion not found'}), 404
+
+@app.route('/promotions', methods=['POST'])
+def add_promotion():
+    data = request.json
+    query = "INSERT INTO promotions (name, description, start_date, end_date, discount_type, discount_value, min_order_value, code_limit, usage_limit, active) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    promotion_id = execute_query(query, (data['name'], data['description'], data['start_date'], data['end_date'], data['discount_type'], data['discount_value'], data['min_order_value'], data['code_limit'], data['usage_limit'], data['active']))
+    return jsonify({'id': promotion_id}), 201
+
+@app.route('/promotions/<int:id>', methods=['PUT'])
+def update_promotion(id):
+    data = request.json
+    query = "UPDATE promotions SET name=%s, description=%s, start_date=%s, end_date=%s, discount_type=%s, discount_value=%s, min_order_value=%s, code_limit=%s, usage_limit=%s, active=%s WHERE id=%s"
+    rowcount = update_query(query, (data['name'], data['description'], data['start_date'], data['end_date'], data['discount_type'], data['discount_value'], data['min_order_value'], data['code_limit'], data['usage_limit'], data['active'], id))
+    return jsonify({'rows_affected': rowcount}), 200
+
+@app.route('/promotions/<int:id>', methods=['DELETE'])
+def delete_promotion(id):
+    query = "UPDATE promotions SET del = 1 WHERE id=%s"
+    rowcount = update_query(query, (id,))
+    return jsonify({'rows_affected': rowcount}), 200
+
+@app.route('/promotions/search/<string:search_term>', methods=['GET'])
+def search_promotions(search_term):
+    like_term = f"%{search_term}%"
+    query = f"""
+        SELECT id, name, description, start_date, end_date, discount_type, discount_value, min_order_value, code_limit, usage_limit, active
+        FROM promotions
+        WHERE (name LIKE '{like_term}' 
+        OR description LIKE '{like_term}')
+        AND del = 0
+    """
+    rows = fetch_data(query)
+    promotions = [{'id': row[0], 'name': row[1], 'description': row[2], 'start_date': row[3].strftime('%Y-%m-%d') if row[3] else None, 'end_date': row[4].strftime('%Y-%m-%d') if row[4] else None, 'discount_type': row[5], 'discount_value': row[6], 'min_order_value': row[7], 'code_limit': row[8], 'usage_limit': row[9], 'active': row[10]} for row in rows]
+    return jsonify(promotions)
+
+@app.route('/promotionscustomer/search/<string:search_term>', methods=['GET'])
+def search_promotions_customer(search_term):
+    like_term = f"%{search_term}%"
+    query = """
+        SELECT id, name, description, start_date, end_date, discount_type, discount_value, min_order_value, code_limit, usage_limit, active
+        FROM promotions
+        WHERE (name LIKE %s OR description LIKE %s)
+        AND del = 0
+        AND active = 1
+        AND usage_limit != 0
+        AND code_limit != 0
+        AND CURDATE() BETWEEN start_date AND end_date
+    """
+    rows = fetch_data(query, (like_term, like_term))
+    promotions = [
+        {
+            'id': row[0],
+            'name': row[1],
+            'description': row[2],
+            'start_date': row[3].strftime('%Y-%m-%d') if row[3] else None,
+            'end_date': row[4].strftime('%Y-%m-%d') if row[4] else None,
+            'discount_type': row[5],
+            'discount_value': row[6],
+            'min_order_value': row[7],
+            'code_limit': row[8],
+            'usage_limit': row[9],
+            'active': row[10],
+        }
+        for row in rows
+    ]
+    return jsonify(promotions)
+
+
+# Promotion Codes
+@app.route('/promotion_codes', methods=['GET'])
+def get_promotion_codes():
+    query = "SELECT id, promotion_id, code, is_used, used_by, used_at FROM promotion_codes WHERE del = 0"
+    rows = fetch_data(query)
+    promotion_codes = [{'id': row[0], 'promotion_id': row[1], 'code': row[2], 'is_used': row[3], 'used_by': row[4], 'used_at': row[5].strftime('%Y-%m-%d %H:%M:%S') if row[5] else None} for row in rows]
+    return jsonify(promotion_codes)
+
+@app.route('/promotion_codes/<int:id>', methods=['GET'])
+def get_promotion_code(id):
+    query = "SELECT id, promotion_id, code, is_used, used_by, used_at FROM promotion_codes WHERE id=%s AND del = 0"
+    rows = fetch_data(query, (id,))
+    if rows:
+        promotion_code = {'id': rows[0][0], 'promotion_id': rows[0][1], 'code': rows[0][2], 'is_used': rows[0][3], 'used_by': rows[0][4], 'used_at': rows[0][5].strftime('%Y-%m-%d %H:%M:%S') if rows[0][5] else None}
+        return jsonify(promotion_code)
+    else:
+        return jsonify({'message': 'Promotion code not found'}), 404
+
+@app.route('/promotion_codes', methods=['POST'])
+def add_promotion_code():
+    data = request.json
+    query = "INSERT INTO promotion_codes (promotion_id, code, is_used, used_by, used_at) VALUES (%s, %s, %s, %s, %s)"
+    promotion_code_id = execute_query(query, (data['promotion_id'], data['code'], data['is_used'], data['used_by'], data['used_at']))
+    return jsonify({'id': promotion_code_id}), 201
+
+@app.route('/promotion_codes/<int:id>', methods=['PUT'])
+def update_promotion_code(id):
+    data = request.json
+    query = "UPDATE promotion_codes SET promotion_id=%s, code=%s, is_used=%s, used_by=%s, used_at=%s WHERE id=%s"
+    rowcount = update_query(query, (data['promotion_id'], data['code'], data['is_used'], data['used_by'], data['used_at'], id))
+    return jsonify({'rows_affected': rowcount}), 200
+
+@app.route('/promotion_codes/<int:id>', methods=['DELETE'])
+def delete_promotion_code(id):
+    query = "UPDATE promotion_codes SET del = 1 WHERE id=%s"
+    rowcount = update_query(query, (id,))
+    return jsonify({'rows_affected': rowcount}), 200
+
+@app.route('/promotion_codes/search/<string:search_term>', methods=['GET'])
+def search_promotion_codes(search_term):
+    like_term = f"%{search_term}%"
+    query = f"""
+        SELECT id, promotion_id, code, is_used, used_by, used_at
+        FROM promotion_codes
+        WHERE code LIKE '{like_term}'
+        AND del = 0
+    """
+    rows = fetch_data(query)
+    promotion_codes = [{'id': row[0], 'promotion_id': row[1], 'code': row[2], 'is_used': row[3], 'used_by': row[4], 'used_at': row[5].strftime('%Y-%m-%d %H:%M:%S') if row[5] else None} for row in rows]
+    return jsonify(promotion_codes)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

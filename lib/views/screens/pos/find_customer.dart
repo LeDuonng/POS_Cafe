@@ -60,7 +60,7 @@ class _FindCustomerScreenState extends State<FindCustomerScreen> {
             TextField(
               controller: _searchController,
               decoration: const InputDecoration(
-                labelText: 'Search',
+                labelText: 'Nhập tên hoặc số điện thoại khách hàng',
                 border: OutlineInputBorder(),
               ),
               onChanged: _filterCustomers,

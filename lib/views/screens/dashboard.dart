@@ -60,7 +60,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           role: widget.role.toString(),
         ),
         if (hasTableMode && (widget.role == 'admin' || widget.role == 'staff'))
-          TableScreen(userID: widget.id.toString()),
+          TableScreen(
+            userID: widget.id.toString(),
+            onTableSelected: (String tableId) {},
+          ),
         UserInfoScreen(userId: int.parse(widget.id!)),
         const LoginScreen(),
       ];

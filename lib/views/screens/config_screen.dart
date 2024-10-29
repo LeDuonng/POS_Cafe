@@ -206,6 +206,16 @@ class _ConfigScreenState extends State<ConfigScreen> {
                 ),
               ],
             ),
+            // SwitchListTile(
+            //   title: const Text('Thiết lập thông tin chuyển khoản'),
+            //   value: false, // You can replace this with a variable if needed
+            //   onChanged: (bool value) {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(builder: (context) => const PaymentForm()),
+            //     );
+            //   },
+            // ),
           ],
         ),
       ),

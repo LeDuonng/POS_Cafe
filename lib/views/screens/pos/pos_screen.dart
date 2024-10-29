@@ -3,6 +3,9 @@ import 'package:coffeeapp/controllers/menu_controller.dart';
 import 'package:coffeeapp/models/payment_model.dart';
 import 'package:coffeeapp/views/screens/pos/classification.dart';
 import 'package:coffeeapp/views/screens/pos/find_customer.dart';
+import 'package:coffeeapp/views/screens/pos/promotion.dart';
+import 'package:coffeeapp/views/screens/qr_code/qr_code.dart';
+import 'package:coffeeapp/views/screens/table/table_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -47,6 +50,8 @@ class _POSScreenState extends State<POSScreen> {
   String? customerName;
   String _selectedPaymentMethod = 'cash';
   bool hasTaxMode = false;
+  String selectedOrderType = 'Mang đi';
+  String? _selectedPromotionCode;
 
   @override
   void initState() {
@@ -181,31 +186,45 @@ class _POSScreenState extends State<POSScreen> {
                 ),
                 Row(
                   children: [
-                    Radio<String>(
-                      value: 'cash',
-                      groupValue: _selectedPaymentMethod,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedPaymentMethod =
-                              value!; // Sửa lỗi tại đây: thêm dấu !
-                        });
-                      },
+                    Expanded(
+                      child: RadioListTile<String>(
+                        title: const Text('Tiền mặt'),
+                        value: 'cash',
+                        groupValue: _selectedPaymentMethod,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedPaymentMethod = value!;
+                          });
+                        },
+                      ),
                     ),
-                    const Text('Tiền mặt'),
-                    Radio<String>(
-                      value: 'card',
-                      groupValue: _selectedPaymentMethod,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedPaymentMethod =
-                              value!; // Sửa lỗi tại đây: thêm dấu !
-                        });
-                      },
+                    Expanded(
+                      child: RadioListTile<String>(
+                        title: const Text('Thẻ'),
+                        value: 'card',
+                        groupValue: _selectedPaymentMethod,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedPaymentMethod = value!;
+                          });
+                        },
+                      ),
                     ),
-                    const Text('Thẻ'),
                   ],
                 ),
                 // Lời cảm ơn
+                FutureBuilder<Widget>(
+                  future: qr_code(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else {
+                      return snapshot.data ?? const SizedBox();
+                    }
+                  },
+                ),
                 const Center(
                   child: Column(
                     children: [
@@ -300,6 +319,24 @@ class _POSScreenState extends State<POSScreen> {
         );
       },
     );
+  }
+
+// ignore: non_constant_identifier_names
+  Future<Widget> qr_code() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    PaymentService paymentService = PaymentService(
+        amount: int.parse((_totalPrice + _tax).toStringAsFixed(0)),
+        // ignore: unnecessary_string_interpolations
+        addInfo: "${DateFormat('yyyyMMddhhmmss').format(DateTime.now())}");
+    try {
+      await paymentService.initialize();
+      Image qrImage = await paymentService.generatePaymentQR();
+      return Center(child: qrImage);
+    } catch (e) {
+      // ignore: avoid_print
+      print('An error occurred: $e');
+      return const Center(child: Text('Failed to load QR code'));
+    }
   }
 
   @override
@@ -441,6 +478,119 @@ class _POSScreenState extends State<POSScreen> {
                         fontSize: 18.0,
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          String selectedOrderType = 'Mang đi';
+                          bool isTableSelected = false;
+
+                          return StatefulBuilder(
+                            builder: (context, setState) {
+                              return AlertDialog(
+                                title: const Text('Chọn loại đơn hàng'),
+                                content: SingleChildScrollView(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: RadioListTile<String>(
+                                              title: const Text('Mang đi'),
+                                              value: 'Mang đi',
+                                              groupValue: selectedOrderType,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  selectedOrderType = value!;
+                                                  isTableSelected = false;
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: RadioListTile<String>(
+                                              title: const Text('Giao hàng'),
+                                              value: 'Giao hàng',
+                                              groupValue: selectedOrderType,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  selectedOrderType = value!;
+                                                  isTableSelected = false;
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: RadioListTile<String>(
+                                              title: const Text('Tại bàn'),
+                                              value: 'Tại bàn',
+                                              groupValue: selectedOrderType,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  selectedOrderType = value!;
+                                                  isTableSelected = true;
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (isTableSelected) ...[
+                                        SizedBox(
+                                          height:
+                                              500, // Adjust height as needed
+                                          child: SingleChildScrollView(
+                                            child: SizedBox(
+                                              height:
+                                                  300, // Ensure the height is fixed
+                                              child: TableScreen(
+                                                  userID:
+                                                      widget.userID.toString(),
+                                                  onTableSelected:
+                                                      (selectedTable) {
+                                                    setState(() {
+                                                      selectedOrderType =
+                                                          selectedTable;
+                                                    });
+                                                  }),
+                                            ),
+                                          ),
+                                        ),
+                                      ]
+                                    ],
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Hủy'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      setState(() {
+                                        this.selectedOrderType =
+                                            selectedOrderType;
+                                      });
+                                    },
+                                    child: const Text('Chọn'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                    child: Text(selectedOrderType),
                   ),
 
                   // Cart Items List
@@ -641,13 +791,46 @@ class _POSScreenState extends State<POSScreen> {
                                   50.0, // Chiều cao cố định cho tất cả các nút
                               child: ElevatedButton(
                                 onPressed: () {
-                                  // Xử lý nhập mã khuyến mãi
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text('Chọn mã khuyến mãi'),
+                                        content: SizedBox(
+                                          width: 300,
+                                          height: 400,
+                                          child: PromotionScreen(
+                                            onPromotionSelected: (code) {
+                                              setState(() {
+                                                _selectedPromotionCode = code;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: const Text('Đóng'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ).then((value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        _selectedPromotionCode =
+                                            value.toString();
+                                      });
+                                    }
+                                  });
                                 },
-                                style: ElevatedButton.styleFrom(
-                                  textStyle: const TextStyle(fontSize: 18.0),
+                                child: Text(
+                                  _selectedPromotionCode != null
+                                      ? 'Mã giảm giá: $_selectedPromotionCode'
+                                      : 'Khuyến mãi',
                                 ),
-                                child: const Text('Khuyến mãi',
-                                    textAlign: TextAlign.center),
                               ),
                             ),
                           ),

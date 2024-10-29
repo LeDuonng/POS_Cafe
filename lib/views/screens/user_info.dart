@@ -303,7 +303,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                     ),
                     const SizedBox(height: 10),
                     ListTile(
-                      leading: Icon(Icons.star, color: Colors.orange),
+                      leading: const Icon(Icons.star, color: Colors.orange),
                       title: const Text('Điểm'),
                       subtitle: Text(customerPoints['points'].toString(),
                           style: const TextStyle(fontSize: 16)),
