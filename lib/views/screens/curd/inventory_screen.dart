@@ -1,6 +1,6 @@
-import 'package:coffeeapp/controllers/inventory_controller.dart';
+import 'package:coffeeapp/models/inventory_model.dart';
 import 'package:flutter/material.dart';
-import '../../../models/inventory_model.dart';
+import '../../../controllers/inventory_controller.dart';
 
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});

@@ -1,4 +1,4 @@
-import 'package:coffeeapp/controllers/promotion_controller.dart';
+import 'package:coffeeapp/models/promotion_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

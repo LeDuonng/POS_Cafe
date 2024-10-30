@@ -1,6 +1,6 @@
-import 'package:coffeeapp/controllers/staff_controller.dart';
+import 'package:coffeeapp/models/staff_model.dart';
 import 'package:flutter/material.dart';
-import '../../../models/staff_model.dart';
+import '../../../controllers/staff_controller.dart';
 
 class StaffScreen extends StatefulWidget {
   const StaffScreen({super.key});

@@ -1,4 +1,4 @@
-import 'package:coffeeapp/models/users_model.dart';
+import 'package:coffeeapp/controllers/users_controller.dart';
 import 'package:flutter/material.dart';
 
 class SignupScreen extends StatefulWidget {

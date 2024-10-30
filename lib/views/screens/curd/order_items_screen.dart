@@ -1,6 +1,6 @@
-import 'package:coffeeapp/controllers/order_items_controller.dart';
+import 'package:coffeeapp/models/order_items_model.dart';
 import 'package:flutter/material.dart';
-import '../../../models/order_items_model.dart';
+import '../../../controllers/order_items_controller.dart';
 
 class OrderItemsScreen extends StatefulWidget {
   const OrderItemsScreen({super.key});

@@ -1,6 +1,6 @@
 import 'package:coffeeapp/views/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:coffeeapp/models/users_model.dart';
+import 'package:coffeeapp/controllers/users_controller.dart';
 import 'package:rive/rive.dart';
 import 'package:coffeeapp/views/screens/dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';

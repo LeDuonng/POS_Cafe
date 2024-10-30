@@ -1,226 +1,139 @@
-import 'package:coffeeapp/controllers/auth_controller.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../models/menu_model.dart';
 
-class Menu {
-  int id;
-  String name;
-  String description;
-  double price;
-  String image;
-  String category;
+//select * from menu
+Future<List<dynamic>> menuList = fetchMenu();
+//select * from menu where id = 1
+Future<List<dynamic>> menuSearch(int id) {
+  return fetchItemById(id);
+}
 
-  Menu({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.price,
-    required this.image,
-    required this.category,
-  });
-
-  factory Menu.fromJson(Map<String, dynamic> json) {
-    return Menu(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      price: double.parse(json['price']),
-      image: json['image'],
-      category: json['category'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'description': description,
-      'price': price,
-      'image': image,
-      'category': category,
-    };
+//insert into menu
+Future<void> addMenu(
+    {required String name,
+    required String description,
+    required String price,
+    required String image,
+    required String category}) async {
+  Map<String, dynamic> newItem = {
+    'name': name,
+    'description': description,
+    'price': price,
+    'image': image,
+    'category': category,
+  };
+  try {
+    await addItem(newItem);
+    // ignore: avoid_print
+    print('Item added successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to add item: $e');
   }
 }
 
-Future<List<dynamic>> fetchMenu() async {
-  final response = await http.get(Uri.parse('${getPlatformBaseUrl()}/menu'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load menu');
+//update menu set name = 'new name' where id = 1
+Future<void> updateMenu(
+    {required int id,
+    required String name,
+    required String description,
+    required String price,
+    required String image,
+    required String category}) async {
+  Map<String, dynamic> updatedItem = {
+    'name': name,
+    'description': description,
+    'price': price,
+    'image': image,
+    'category': category,
+  };
+  try {
+    await updateItem(id, updatedItem);
+    // ignore: avoid_print
+    print('Item updated successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to update item: $e');
   }
 }
 
-Future<List<dynamic>> fetchMenus() async {
-  final response = await http.get(Uri.parse('${getPlatformBaseUrl()}/menu'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load menu');
+//delete from menu where id = 1
+Future<void> deleteMenu(int id) async {
+  try {
+    await deleteItem(id);
+    // ignore: avoid_print
+    print('Item deleted successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to delete item: $e');
   }
 }
 
-Future<List<dynamic>> fetchToppings() async {
-  final response = await http.get(Uri.parse('${getPlatformBaseUrl()}/topping'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load menu');
+Future<void> addTopping(
+    {required String name,
+    required String description,
+    required String price,
+    required String image,
+    required String category}) async {
+  Map<String, dynamic> newTopping = {
+    'name': name,
+    'description': description,
+    'price': price,
+    'image': image,
+    'category': category,
+    'topping': 1,
+  };
+  try {
+    await addToppingg(newTopping);
+    // ignore: avoid_print
+    print('Topping added successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to add topping: $e');
   }
 }
 
-Future<List<dynamic>> fetchTopping() async {
-  final response = await http.get(Uri.parse('${getPlatformBaseUrl()}/topping'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load menu');
+Future<void> updateTopping(
+    {required int id,
+    required String name,
+    required String description,
+    required String price,
+    required String image,
+    required String category}) async {
+  Map<String, dynamic> updatedTopping = {
+    'name': name,
+    'description': description,
+    'price': price,
+    'image': image,
+    'category': category,
+    'topping': 1,
+  };
+  try {
+    await updateToppingg(id, updatedTopping);
+    // ignore: avoid_print
+    print('Topping updated successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to update topping: $e');
   }
 }
 
-Future<void> addItem(Map<String, dynamic> item) async {
-  final response = await http.post(
-    Uri.parse('${getPlatformBaseUrl()}/menu'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(item),
-  );
-
-  if (response.statusCode != 201) {
-    throw Exception('Failed to add item');
+Future<void> deleteTopping(int id) async {
+  try {
+    await deleteToppingg(id);
+    // ignore: avoid_print
+    print('Topping deleted successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to delete topping: $e');
   }
 }
 
-Future<void> updateItem(int id, Map<String, dynamic> item) async {
-  final response = await http.put(
-    Uri.parse('${getPlatformBaseUrl()}/menu/$id'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(item),
-  );
-
-  if (response.statusCode == 200) {
-    final responseBody = json.decode(response.body);
-    if (responseBody['rows_affected'] == null ||
-        responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to update Item');
-    } else {
-      // ignore: avoid_print
-      print('Item update successfully');
-    }
-  }
-}
-
-Future<void> deleteItem(int id) async {
-  final response = await http.delete(
-    Uri.parse('${getPlatformBaseUrl()}/menu/$id'),
-  );
-
-  if (response.statusCode == 200) {
-    final responseBody = json.decode(response.body);
-    if (responseBody['rows_affected'] == null ||
-        responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to delete Item');
-    } else {
-      // ignore: avoid_print
-      print('Item deleted successfully');
-    }
-  }
-}
-
-Future<List<dynamic>> fetchItemById(int id) async {
-  final response =
-      await http.get(Uri.parse('${getPlatformBaseUrl()}/menu/$id'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load item');
-  }
-}
-
-Future<void> addToppingg(Map<String, dynamic> topping) async {
-  final response = await http.post(
-    Uri.parse('${getPlatformBaseUrl()}/topping'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(topping),
-  );
-
-  if (response.statusCode != 201) {
-    throw Exception('Failed to add topping');
-  }
-}
-
-Future<void> updateToppingg(int id, Map<String, dynamic> topping) async {
-  final response = await http.put(
-    Uri.parse('${getPlatformBaseUrl()}/topping/$id'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(topping),
-  );
-
-  if (response.statusCode == 200) {
-    final responseBody = json.decode(response.body);
-    if (responseBody['rows_affected'] == null ||
-        responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to update topping');
-    } else {
-      // ignore: avoid_print
-      print('Topping updated successfully');
-    }
-  }
-}
-
-Future<void> deleteToppingg(int id) async {
-  final response = await http.delete(
-    Uri.parse('${getPlatformBaseUrl()}/topping/$id'),
-  );
-
-  if (response.statusCode == 200) {
-    final responseBody = json.decode(response.body);
-    if (responseBody['rows_affected'] == null ||
-        responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to delete topping');
-    } else {
-      // ignore: avoid_print
-      print('Topping deleted successfully');
-    }
-  }
-}
-
-Future<List<dynamic>> fetchToppingById(int query) async {
-  final response = await http
-      .get(Uri.parse('${getPlatformBaseUrl()}/topping/search?q=$query'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load item');
-  }
-}
-
-Future<List<dynamic>> fetchToppingDistinct() async {
-  final response =
-      await http.get(Uri.parse('${getPlatformBaseUrl()}/topping/distinct'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load item');
-  }
-}
-
-Future<List<dynamic>> fetchMenuCategory([String? category]) async {
-  final uri = category != null
-      ? Uri.parse('${getPlatformBaseUrl()}/menu/category?category=$category')
-      : Uri.parse('${getPlatformBaseUrl()}/menu/category');
-
-  final response = await http.get(uri);
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load menu category');
+Future<List<dynamic>> searchTopping(int id) async {
+  try {
+    return await fetchToppingById(id);
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to fetch topping: $e');
+    return [];
   }
 }

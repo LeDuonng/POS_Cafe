@@ -1,68 +1,114 @@
-import '../controllers/staff_controller.dart';
+import 'package:coffeeapp/models/auth_model.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-// select * from staff
-Future<List<dynamic>> staffList = fetchStaff();
+class Staff {
+  int id;
+  int userId;
+  double salary;
+  DateTime startDate;
+  String position;
+  int del;
 
-// select * from staff where id = 1
-Future<List<dynamic>> staffSearch(int id) {
-  return fetchStaffById(id);
-}
+  Staff({
+    required this.id,
+    required this.userId,
+    required this.salary,
+    required this.startDate,
+    required this.position,
+    this.del = 0,
+  });
 
-// insert into staff
-Future<void> addStaff({
-  required int userId,
-  required double salary,
-  required DateTime startDate,
-  required String position,
-}) async {
-  Map<String, dynamic> newStaff = {
-    'user_id': userId,
-    'salary': salary,
-    'start_date': startDate.toIso8601String(),
-    'position': position,
-  };
-  try {
-    await addStaffItem(newStaff);
-    // ignore: avoid_print
-    print('Staff added successfully');
-  } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add staff: $e');
+  factory Staff.fromJson(Map<String, dynamic> json) {
+    return Staff(
+      id: json['id'],
+      userId: json['user_id'],
+      salary: json['salary'],
+      startDate: DateTime.parse(json['start_date']),
+      position: json['position'],
+      del: json['del'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'salary': salary,
+      'start_date': startDate.toIso8601String(),
+      'position': position,
+      'del': del,
+    };
   }
 }
 
-// update staff set user_id = 'new user_id' where id = 1
-Future<void> updateStaff({
-  required int id,
-  required int userId,
-  required double salary,
-  required DateTime startDate,
-  required String position,
-}) async {
-  Map<String, dynamic> updatedStaff = {
-    'user_id': userId,
-    'salary': salary,
-    'start_date': startDate.toIso8601String(),
-    'position': position,
-  };
-  try {
-    await updateStaffItem(id, updatedStaff);
-    // ignore: avoid_print
-    print('Staff updated successfully');
-  } catch (e) {
-    // ignore: avoid_print
-    print('Failed to update staff: $e');
+Future<List<dynamic>> fetchStaff() async {
+  final response = await http.get(Uri.parse('${getPlatformBaseUrl()}/staff'));
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load staff');
   }
 }
 
-// delete from staff where id = 1
-Future<void> deleteStaff(int id) async {
-  try {
-    await deleteStaffItem(id);
-    // ignore: avoid_print
-    print('Staff deleted successfully');
-  } catch (e) {
-    // ignore: avoid_print
-    print('Failed to delete staff: $e');
+Future<void> addStaffItem(Map<String, dynamic> staff) async {
+  final response = await http.post(
+    Uri.parse('${getPlatformBaseUrl()}/staff'),
+    headers: {'Content-Type': 'application/json'},
+    body: json.encode(staff),
+  );
+
+  if (response.statusCode != 201) {
+    throw Exception('Failed to add staff');
+  }
+}
+
+Future<void> updateStaffItem(int id, Map<String, dynamic> staff) async {
+  final response = await http.put(
+    Uri.parse('${getPlatformBaseUrl()}/staff/$id'),
+    headers: {'Content-Type': 'application/json'},
+    body: json.encode(staff),
+  );
+
+  if (response.statusCode == 200) {
+    final responseBody = json.decode(response.body);
+    if (responseBody['rows_affected'] == null ||
+        responseBody['rows_affected'] == 0) {
+      throw Exception('Failed to update staff');
+    } else {
+      // ignore: avoid_print
+      print('Staff updated successfully');
+    }
+  }
+}
+
+Future<void> deleteStaffItem(int id) async {
+  final response = await http.delete(
+    Uri.parse('${getPlatformBaseUrl()}/staff/$id'),
+  );
+
+  if (response.statusCode == 200) {
+    final responseBody = json.decode(response.body);
+    if (responseBody['rows_affected'] == null ||
+        responseBody['rows_affected'] == 0) {
+      throw Exception('Failed to delete staff');
+    } else {
+      // ignore: avoid_print
+      print('Staff deleted successfully');
+    }
+  }
+}
+
+Future<List<dynamic>> fetchStaffById(int id) async {
+  final response =
+      await http.get(Uri.parse('${getPlatformBaseUrl()}/staff/$id'));
+
+  if (response.statusCode == 200) {
+    Map<String, dynamic> staffData =
+        json.decode(response.body) as Map<String, dynamic>;
+    return [staffData]; // Đưa đối tượng staff vào trong một danh sách
+  } else {
+    throw Exception('Failed to load staff');
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:coffeeapp/controllers/users_controller.dart';
-import 'package:coffeeapp/controllers/staff_controller.dart';
-import 'package:coffeeapp/controllers/customer_points_controller.dart';
+import 'package:coffeeapp/models/users_model.dart';
+import 'package:coffeeapp/models/staff_model.dart';
+import 'package:coffeeapp/models/customer_points_model.dart';
 
 class UserInfoScreen extends StatefulWidget {
   final int userId;

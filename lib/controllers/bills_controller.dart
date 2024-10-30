@@ -1,108 +1,68 @@
-import 'package:coffeeapp/controllers/auth_controller.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../models/bills_model.dart';
 
-class Bill {
-  int id;
-  int orderId;
-  double totalAmount;
-  String paymentMethod;
-  DateTime paymentDate;
+//select * from bills
+Future<List<dynamic>> billsList = fetchBills();
 
-  Bill({
-    required this.id,
-    required this.orderId,
-    required this.totalAmount,
-    required this.paymentMethod,
-    required this.paymentDate,
-  });
+//select * from bills where id = 1
+Future<List<dynamic>> billsSearch(int id) {
+  return fetchBillById(id);
+}
 
-  factory Bill.fromJson(Map<String, dynamic> json) {
-    return Bill(
-      id: json['id'],
-      orderId: json['order_id'],
-      totalAmount: json['total_amount'],
-      paymentMethod: json['payment_method'],
-      paymentDate: DateTime.parse(json['payment_date']),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'order_id': orderId,
-      'total_amount': totalAmount,
-      'payment_method': paymentMethod,
-      'payment_date': paymentDate.toIso8601String(),
-    };
+//insert into bills
+Future<void> addBill({
+  required int orderId,
+  required double totalAmount,
+  required String paymentMethod,
+  required String paymentDate,
+}) async {
+  Map<String, dynamic> newBill = {
+    'order_id': orderId,
+    'total_amount': totalAmount,
+    'payment_method': paymentMethod,
+    'payment_date': paymentDate,
+  };
+  try {
+    await addBillItem(newBill);
+    // ignore: avoid_print
+    print('Bill added successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to add bill: $e');
   }
 }
 
-Future<List<dynamic>> fetchBills() async {
-  final response = await http.get(Uri.parse('${getPlatformBaseUrl()}/bills'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load bills');
+//update bills set total_amount = 'new amount' where id = 1
+Future<void> updateBill({
+  required int id,
+  required int orderId,
+  required double totalAmount,
+  required String paymentMethod,
+  required String paymentDate,
+}) async {
+  Map<String, dynamic> updatedBill = {
+    'order_id': orderId,
+    'total_amount': totalAmount,
+    'payment_method': paymentMethod,
+    'payment_date': paymentDate,
+  };
+  try {
+    await updateBillItem(id, updatedBill);
+    // ignore: avoid_print
+    print('Bill updated successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to update bill: $e');
   }
 }
 
-Future<void> addBillItem(Map<String, dynamic> bill) async {
-  final response = await http.post(
-    Uri.parse('${getPlatformBaseUrl()}/bills'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(bill),
-  );
-
-  if (response.statusCode != 201) {
-    throw Exception('Failed to add bill');
-  }
-}
-
-Future<void> updateBillItem(int id, Map<String, dynamic> bill) async {
-  final response = await http.put(
-    Uri.parse('${getPlatformBaseUrl()}/bills/$id'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(bill),
-  );
-
-  if (response.statusCode == 200) {
-    final responseBody = json.decode(response.body);
-    if (responseBody['rows_affected'] == null ||
-        responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to update bill');
-    } else {
-      // ignore: avoid_print
-      print('Bill updated successfully');
-    }
-  }
-}
-
-Future<void> deleteBillItem(int id) async {
-  final response = await http.delete(
-    Uri.parse('${getPlatformBaseUrl()}/bills/$id'),
-  );
-
-  if (response.statusCode == 200) {
-    final responseBody = json.decode(response.body);
-    if (responseBody['rows_affected'] == null ||
-        responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to delete bill');
-    } else {
-      // ignore: avoid_print
-      print('Bill deleted successfully');
-    }
-  }
-}
-
-Future<List<dynamic>> fetchBillById(int id) async {
-  final response =
-      await http.get(Uri.parse('${getPlatformBaseUrl()}/bills/$id'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load bill');
+//delete from bills where id = 1
+Future<void> deleteBill(int id) async {
+  try {
+    await deleteBillItem(id);
+    // ignore: avoid_print
+    print('Bill deleted successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to delete bill: $e');
   }
 }

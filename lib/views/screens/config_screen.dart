@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:coffeeapp/controllers/config_controller.dart';
+import 'package:coffeeapp/models/config_model.dart';
 
 class ConfigScreen extends StatefulWidget {
   const ConfigScreen({super.key});

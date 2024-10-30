@@ -1,167 +1,115 @@
-import 'package:coffeeapp/controllers/auth_controller.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:coffeeapp/models/users_model.dart';
 
-class Users {
-  int id;
-  String username;
-  String password;
-  String role;
-  String name;
-  String email;
-  String phone;
-  String address;
+Future<List<dynamic>> userList = fetchUsers();
 
-  Users({
-    required this.id,
-    required this.username,
-    required this.password,
-    required this.role,
-    required this.name,
-    required this.email,
-    required this.phone,
-    required this.address,
-  });
-
-  factory Users.fromJson(Map<String, dynamic> json) {
-    return Users(
-      id: json['id'],
-      username: json['username'],
-      password: json['password'],
-      role: json['role'],
-      name: json['name'],
-      email: json['email'],
-      phone: json['phone'],
-      address: json['address'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'username': username,
-      'password': password,
-      'role': role,
-      'name': name,
-      'email': email,
-      'phone': phone,
-      'address': address,
-    };
-  }
+Future<List<dynamic>> userSearch(int id) {
+  return fetchUserById(id);
 }
 
-Future<List<dynamic>> fetchUsers() async {
-  final response = await http.get(Uri.parse('${getPlatformBaseUrl()}/users'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load users');
-  }
-}
-
-Future<void> addUserr(Map<String, dynamic> user) async {
-  final response = await http.post(
-    Uri.parse('${getPlatformBaseUrl()}/users'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(user),
-  );
-
-  if (response.statusCode != 201) {
-    throw Exception('Failed to add user');
-  }
-}
-
-Future<void> updateUserr(int id, Map<String, dynamic> user) async {
-  final response = await http.put(
-    Uri.parse('${getPlatformBaseUrl()}/users/$id'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(user),
-  );
-
-  if (response.statusCode == 200) {
-    final responseBody = json.decode(response.body);
-    if (responseBody['rows_affected'] == null ||
-        responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to update user in controller');
-    } else {
-      // ignore: avoid_print
-      print('User update successfully');
-    }
-  }
-}
-
-Future<void> deleteUserr(int id) async {
-  final response = await http.delete(
-    Uri.parse('${getPlatformBaseUrl()}/users/$id'),
-  );
-
-  if (response.statusCode == 200) {
-    final responseBody = json.decode(response.body);
-    if (responseBody['rows_affected'] == null ||
-        responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to delete user');
-    } else {
-      // ignore: avoid_print
-      print('User deleted successfully');
-    }
-  } else {
-    throw Exception('Failed to delete user');
-  }
-}
-
-Future<List<dynamic>> fetchUserById(int id) async {
+Future<void> addUser({
+  required String username,
+  required String password,
+  required String role,
+  required String name,
+  required String email,
+  required String phone,
+  required String address,
+}) async {
+  Map<String, dynamic> newUser = {
+    'username': username,
+    'password': password,
+    'role': role,
+    'name': name,
+    'email': email,
+    'phone': phone,
+    'address': address,
+  };
   try {
-    final response =
-        await http.get(Uri.parse('${getPlatformBaseUrl()}/users/$id'));
-    if (response.statusCode == 200) {
-      // Ép kiểu từ Map thành List
-      Map<String, dynamic> userData =
-          json.decode(response.body) as Map<String, dynamic>;
-      return [userData]; // Đưa đối tượng vào trong một danh sách
-    } else {
-      throw Exception('Failed to load user');
-    }
+    await addUserr(newUser);
+    // ignore: avoid_print
+    print('User added successfully');
   } catch (e) {
-    throw Exception('Failed to load user: $e');
+    // ignore: avoid_print
+    print('Failed to add user: $e');
   }
 }
 
-Future<List<dynamic>> authenticateUser(String username, String password) async {
-  final response = await http.post(
-    Uri.parse('${getPlatformBaseUrl()}/authenticate'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode({'username': username, 'password': password}),
-  );
-
-  if (response.statusCode == 200) {
-    // Parse response body as List<dynamic>
-    return json.decode(response.body); // Return as List<dynamic>
-  } else {
-    throw Exception('Failed to authenticate user: ${response.body}');
+Future<void> updateUser({
+  required int id,
+  required String username,
+  required String password,
+  required String role,
+  required String name,
+  required String email,
+  required String phone,
+  required String address,
+}) async {
+  Map<String, dynamic> updatedUser = {
+    'username': username,
+    'password': password,
+    'role': role,
+    'name': name,
+    'email': email,
+    'phone': phone,
+    'address': address,
+  };
+  try {
+    await updateUserr(id, updatedUser);
+    // ignore: avoid_print
+    print('User updated successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to update user in model: $e');
   }
 }
 
-Future<void> registerNewUser(Map<String, dynamic> user) async {
-  final response = await http.post(
-    Uri.parse('${getPlatformBaseUrl()}/register'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(user),
-  );
-
-  if (response.statusCode != 201) {
-    throw Exception('Failed to register user');
+Future<void> deleteUser(int id) async {
+  try {
+    await deleteUserr(id);
+    // ignore: avoid_print
+    print('User deleted successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to delete user: $e');
   }
 }
 
-Future<List<dynamic>> findUser(String searchTerm) async {
-  final response = await http.get(
-    Uri.parse('${getPlatformBaseUrl()}/users/search/$searchTerm'),
-  );
+Future<List<dynamic>> signin(String username, String password) async {
+  try {
+    return await authenticateUser(username, password);
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to login: $e');
+    return []; // Trả về một Map rỗng thay vì List rỗng
+  }
+}
 
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to search users');
+Future<bool> registerUser({
+  required String username,
+  required String password,
+  required String role,
+  required String name,
+  required String email,
+  required String phone,
+  required String address,
+}) async {
+  Map<String, dynamic> newUser = {
+    'username': username,
+    'password': password,
+    'role': role,
+    'name': name,
+    'email': email,
+    'phone': phone,
+    'address': address,
+  };
+  try {
+    await registerNewUser(newUser);
+    // ignore: avoid_print
+    print('User registered successfully');
+    return true;
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to register user: $e');
+    return false;
   }
 }

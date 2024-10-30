@@ -1,6 +1,6 @@
-import 'package:coffeeapp/controllers/customer_points_controller.dart';
+import 'package:coffeeapp/models/customer_points_model.dart';
 import 'package:flutter/material.dart';
-import '../../../models/customer_points_model.dart';
+import '../../../controllers/customer_points_controller.dart';
 
 class CustomerPointsScreen extends StatefulWidget {
   const CustomerPointsScreen({super.key});

@@ -1,6 +1,6 @@
-import 'package:coffeeapp/controllers/ingredients_controller.dart';
+import 'package:coffeeapp/models/ingredients_model.dart';
 import 'package:flutter/material.dart';
-import '../../../models/ingredients_model.dart';
+import '../../../controllers/ingredients_controller.dart';
 
 class IngredientsScreen extends StatefulWidget {
   const IngredientsScreen({super.key});

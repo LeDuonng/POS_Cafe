@@ -1,133 +1,68 @@
-import 'package:coffeeapp/controllers/auth_controller.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../models/tables_model.dart';
 
-class Table {
-  int id;
-  String name;
-  int floor;
-  String area;
-  String status;
+// select * from tables
+Future<List<dynamic>> tableList = fetchTables();
 
-  Table({
-    required this.id,
-    required this.name,
-    required this.floor,
-    required this.area,
-    required this.status,
-  });
+// select * from tables where id = 1
+Future<List<dynamic>> tableSearch(int id) {
+  return fetchTableById(id);
+}
 
-  factory Table.fromJson(Map<String, dynamic> json) {
-    return Table(
-      id: json['id'],
-      name: json['name'],
-      floor: json['floor'],
-      area: json['area'],
-      status: json['status'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'floor': floor,
-      'area': area,
-      'status': status,
-    };
+// insert into tables
+Future<void> addTable({
+  required String name,
+  required int floor,
+  required String area,
+  required String status,
+}) async {
+  Map<String, dynamic> newTable = {
+    'name': name,
+    'floor': floor,
+    'area': area,
+    'status': status,
+  };
+  try {
+    await addTableItem(newTable);
+    // ignore: avoid_print
+    print('Table added successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to add table: $e');
   }
 }
 
-Future<List<dynamic>> fetchTables() async {
-  final response = await http.get(Uri.parse('${getPlatformBaseUrl()}/tables'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load tables');
+// update tables set name = 'new name' where id = 1
+Future<void> updateTable({
+  required int id,
+  required String name,
+  required int floor,
+  required String area,
+  required String status,
+}) async {
+  Map<String, dynamic> updatedTable = {
+    'name': name,
+    'floor': floor,
+    'area': area,
+    'status': status,
+  };
+  try {
+    await updateTableItem(id, updatedTable);
+    // ignore: avoid_print
+    print('Table updated successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to update table: $e');
   }
 }
 
-Future<void> addTableItem(Map<String, dynamic> table) async {
-  final response = await http.post(
-    Uri.parse('${getPlatformBaseUrl()}/tables'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(table),
-  );
-
-  if (response.statusCode != 201) {
-    throw Exception('Failed to add table');
-  }
-}
-
-Future<void> updateTableItem(int id, Map<String, dynamic> table) async {
-  final response = await http.put(
-    Uri.parse('${getPlatformBaseUrl()}/tables/$id'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(table),
-  );
-
-  if (response.statusCode == 200) {
-    final responseBody = json.decode(response.body);
-    if (responseBody['rows_affected'] == null ||
-        responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to update table');
-    } else {
-      // ignore: avoid_print
-      print('Table updated successfully');
-    }
-  }
-}
-
-Future<void> deleteTableItem(int id) async {
-  final response = await http.delete(
-    Uri.parse('${getPlatformBaseUrl()}/tables/$id'),
-  );
-
-  if (response.statusCode == 200) {
-    final responseBody = json.decode(response.body);
-    if (responseBody['rows_affected'] == null ||
-        responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to delete table');
-    } else {
-      // ignore: avoid_print
-      print('Table deleted successfully');
-    }
-  }
-}
-
-Future<List<dynamic>> fetchTableById(int id) async {
-  final response =
-      await http.get(Uri.parse('${getPlatformBaseUrl()}/tables/$id'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load table');
-  }
-}
-
-Future<List<dynamic>> fetchTableDistinct() async {
-  final response =
-      await http.get(Uri.parse('${getPlatformBaseUrl()}/table/distinct'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load tables');
-  }
-}
-
-Future<List<dynamic>> fetchTableArea([String? area]) async {
-  final uri = area != null
-      ? Uri.parse('${getPlatformBaseUrl()}/table/area?area=$area')
-      : Uri.parse('${getPlatformBaseUrl()}/table/area');
-
-  final response = await http.get(uri);
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load table area');
+// delete from tables where id = 1
+Future<void> deleteTable(int id) async {
+  try {
+    await deleteTableItem(id);
+    // ignore: avoid_print
+    print('Table deleted successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to delete table: $e');
   }
 }

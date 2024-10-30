@@ -288,7 +288,7 @@
 
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:coffeeapp/controllers/config_controller.dart';
+import 'package:coffeeapp/models/config_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 

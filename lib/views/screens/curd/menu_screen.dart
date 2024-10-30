@@ -1,6 +1,6 @@
-import 'package:coffeeapp/controllers/menu_controller.dart';
+import 'package:coffeeapp/models/menu_model.dart';
 import 'package:flutter/material.dart';
-import '../../../models/menu_model.dart';
+import '../../../controllers/menu_controller.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});

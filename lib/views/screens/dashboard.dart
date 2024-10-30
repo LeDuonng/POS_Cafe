@@ -1,4 +1,4 @@
-import 'package:coffeeapp/controllers/config_controller.dart';
+import 'package:coffeeapp/models/config_model.dart';
 import 'package:coffeeapp/views/screens/managerment_screen.dart';
 import 'package:coffeeapp/views/screens/pos/pos_screen.dart';
 import 'package:coffeeapp/views/screens/signin_screen.dart';

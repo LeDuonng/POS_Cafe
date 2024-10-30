@@ -1,4 +1,4 @@
-import 'package:coffeeapp/controllers/menu_controller.dart';
+import 'package:coffeeapp/models/menu_model.dart';
 import 'package:flutter/material.dart';
 
 class ClassificationScreen extends StatefulWidget {

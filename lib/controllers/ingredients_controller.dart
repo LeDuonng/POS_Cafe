@@ -1,106 +1,64 @@
-import 'package:coffeeapp/controllers/auth_controller.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../models/ingredients_model.dart';
 
-class Ingredient {
-  int id;
-  String name;
-  String unit;
-  int quantity;
+// select * from ingredients
+Future<List<dynamic>> ingredientsList = fetchIngredients();
 
-  Ingredient({
-    required this.id,
-    required this.name,
-    required this.unit,
-    required this.quantity,
-  });
+// select * from ingredients where id = 1
+Future<List<dynamic>> ingredientsSearch(int id) {
+  return fetchIngredientById(id);
+}
 
-  factory Ingredient.fromJson(Map<String, dynamic> json) {
-    return Ingredient(
-      id: json['id'],
-      name: json['name'],
-      unit: json['unit'],
-      quantity: json['quantity'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'unit': unit,
-      'quantity': quantity,
-    };
+// insert into ingredients
+Future<void> addIngredient({
+  required String name,
+  required String unit,
+  required int quantity,
+}) async {
+  Map<String, dynamic> newIngredient = {
+    'name': name,
+    'unit': unit,
+    'quantity': quantity,
+  };
+  try {
+    await addIngredientItem(newIngredient);
+    // ignore: avoid_print
+    print('Ingredient added successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to add ingredient: $e');
   }
 }
 
-Future<List<dynamic>> fetchIngredients() async {
-  final response =
-      await http.get(Uri.parse('${getPlatformBaseUrl()}/ingredients'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load ingredients');
+// update ingredients set name = 'new name' where id = 1
+Future<void> updateIngredient({
+  required int id,
+  required String name,
+  required String unit,
+  required int quantity,
+}) async {
+  Map<String, dynamic> updatedIngredient = {
+    'name': name,
+    'unit': unit,
+    'quantity': quantity,
+  };
+  try {
+    await updateIngredientItem(id, updatedIngredient);
+    // ignore: avoid_print
+    print('Ingredient updated successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to update ingredient: $e');
   }
 }
 
-Future<void> addIngredientItem(Map<String, dynamic> ingredient) async {
-  final response = await http.post(
-    Uri.parse('${getPlatformBaseUrl()}/ingredients'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(ingredient),
-  );
-
-  if (response.statusCode != 201) {
-    throw Exception('Failed to add ingredient');
-  }
-}
-
-Future<void> updateIngredientItem(
-    int id, Map<String, dynamic> ingredient) async {
-  final response = await http.put(
-    Uri.parse('${getPlatformBaseUrl()}/ingredients/$id'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(ingredient),
-  );
-
-  if (response.statusCode == 200) {
-    final responseBody = json.decode(response.body);
-    if (responseBody['rows_affected'] == null ||
-        responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to update ingredient');
-    } else {
-      // ignore: avoid_print
-      print('Ingredient updated successfully');
-    }
-  }
-}
-
-Future<void> deleteIngredientItem(int id) async {
-  final response = await http.delete(
-    Uri.parse('${getPlatformBaseUrl()}/ingredients/$id'),
-  );
-
-  if (response.statusCode == 200) {
-    final responseBody = json.decode(response.body);
-    if (responseBody['rows_affected'] == null ||
-        responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to delete ingredient');
-    } else {
-      // ignore: avoid_print
-      print('Ingredient deleted successfully');
-    }
-  }
-}
-
-Future<List<dynamic>> fetchIngredientById(int id) async {
-  final response =
-      await http.get(Uri.parse('${getPlatformBaseUrl()}/ingredients/$id'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load ingredient');
+// delete from ingredients where id = 1
+Future<void> deleteIngredient(int id) async {
+  try {
+    await deleteIngredientItem(id);
+    // ignore: avoid_print
+    print('Ingredient deleted successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to delete ingredient: $e');
   }
 }

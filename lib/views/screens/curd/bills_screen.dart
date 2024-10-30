@@ -1,6 +1,6 @@
-import 'package:coffeeapp/controllers/bills_controller.dart';
+import 'package:coffeeapp/models/bills_model.dart';
 import 'package:flutter/material.dart';
-import '../../../models/bills_model.dart';
+import '../../../controllers/bills_controller.dart';
 
 class BillsScreen extends StatefulWidget {
   const BillsScreen({super.key});

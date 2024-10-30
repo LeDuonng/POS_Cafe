@@ -1,5 +1,5 @@
-import 'package:coffeeapp/controllers/orders_controller.dart' as controller;
-import 'package:coffeeapp/models/orders_model.dart';
+import 'package:coffeeapp/models/orders_model.dart' as controller;
+import 'package:coffeeapp/controllers/orders_controller.dart';
 import 'package:flutter/material.dart';
 
 class OrdersScreen extends StatefulWidget {

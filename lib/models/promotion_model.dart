@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:coffeeapp/controllers/auth_controller.dart';
+import 'package:coffeeapp/models/auth_model.dart';
 import 'package:http/http.dart' as http;
 
 class Promotion {

@@ -1,4 +1,4 @@
-import 'package:coffeeapp/controllers/tables_controller.dart';
+import 'package:coffeeapp/models/tables_model.dart';
 import 'package:flutter/material.dart';
 
 class AreaScreen extends StatefulWidget {

@@ -1,6 +1,6 @@
-import 'package:coffeeapp/controllers/users_controller.dart';
+import 'package:coffeeapp/models/users_model.dart';
 import 'package:flutter/material.dart';
-import '../../../models/users_model.dart';
+import '../../../controllers/users_controller.dart';
 
 class UserScreen extends StatefulWidget {
   const UserScreen({super.key});

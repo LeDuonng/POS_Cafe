@@ -76,9 +76,3 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-
-// import 'package:coffeeapp/views/screens/qr_code/qr_code.dart' as qr;
-
-// void main() {
-//   qr.main();
-// }

@@ -1,109 +1,68 @@
-import 'package:coffeeapp/controllers/auth_controller.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../models/order_items_model.dart';
 
-class OrderItem {
-  int id;
-  int orderId;
-  int menuId;
-  int quantity;
-  double price;
+// select * from order_items
+Future<List<dynamic>> orderItemsList = fetchOrderItems();
 
-  OrderItem({
-    required this.id,
-    required this.orderId,
-    required this.menuId,
-    required this.quantity,
-    required this.price,
-  });
+// select * from order_items where id = 1
+Future<List<dynamic>> orderItemsSearch(int id) {
+  return fetchOrderItemById(id);
+}
 
-  factory OrderItem.fromJson(Map<String, dynamic> json) {
-    return OrderItem(
-      id: json['id'],
-      orderId: json['order_id'],
-      menuId: json['menu_id'],
-      quantity: json['quantity'],
-      price: json['price'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'order_id': orderId,
-      'menu_id': menuId,
-      'quantity': quantity,
-      'price': price,
-    };
+// insert into order_items
+Future<void> addOrderItem({
+  required int orderId,
+  required int menuId,
+  required int quantity,
+  required double price,
+}) async {
+  Map<String, dynamic> newItem = {
+    'order_id': orderId,
+    'menu_id': menuId,
+    'quantity': quantity,
+    'price': price,
+  };
+  try {
+    await addOrderItemToDb(newItem);
+    // ignore: avoid_print
+    print('Order item added successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to add order item: $e');
   }
 }
 
-Future<List<dynamic>> fetchOrderItems() async {
-  final response =
-      await http.get(Uri.parse('${getPlatformBaseUrl()}/order_items'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load order items');
+// update order_items set quantity = 'new quantity' where id = 1
+Future<void> updateOrderItem({
+  required int id,
+  required int orderId,
+  required int menuId,
+  required int quantity,
+  required double price,
+}) async {
+  Map<String, dynamic> updatedItem = {
+    'order_id': orderId,
+    'menu_id': menuId,
+    'quantity': quantity,
+    'price': price,
+  };
+  try {
+    await updateOrderItemInDb(id, updatedItem);
+    // ignore: avoid_print
+    print('Order item updated successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to update order item: $e');
   }
 }
 
-Future<void> addOrderItemToDb(Map<String, dynamic> item) async {
-  final response = await http.post(
-    Uri.parse('${getPlatformBaseUrl()}/order_items'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(item),
-  );
-
-  if (response.statusCode != 201) {
-    throw Exception('Failed to add order item');
-  }
-}
-
-Future<void> updateOrderItemInDb(int id, Map<String, dynamic> item) async {
-  final response = await http.put(
-    Uri.parse('${getPlatformBaseUrl()}/order_items/$id'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(item),
-  );
-
-  if (response.statusCode == 200) {
-    final responseBody = json.decode(response.body);
-    if (responseBody['rows_affected'] == null ||
-        responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to update order item');
-    } else {
-      // ignore: avoid_print
-      print('Order item updated successfully');
-    }
-  }
-}
-
-Future<void> deleteOrderItemFromDb(int id) async {
-  final response = await http.delete(
-    Uri.parse('${getPlatformBaseUrl()}/order_items/$id'),
-  );
-
-  if (response.statusCode == 200) {
-    final responseBody = json.decode(response.body);
-    if (responseBody['rows_affected'] == null ||
-        responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to delete order item');
-    } else {
-      // ignore: avoid_print
-      print('Order item deleted successfully');
-    }
-  }
-}
-
-Future<List<dynamic>> fetchOrderItemById(int id) async {
-  final response =
-      await http.get(Uri.parse('${getPlatformBaseUrl()}/order_items/$id'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load order item');
+// delete from order_items where id = 1
+Future<void> deleteOrderItem(int id) async {
+  try {
+    await deleteOrderItemFromDb(id);
+    // ignore: avoid_print
+    print('Order item deleted successfully');
+  } catch (e) {
+    // ignore: avoid_print
+    print('Failed to delete order item: $e');
   }
 }

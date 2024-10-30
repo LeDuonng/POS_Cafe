@@ -1,6 +1,6 @@
-import '../controllers/bills_controller.dart';
-import '../controllers/orders_controller.dart';
-import '../controllers/order_items_controller.dart';
+import '../models/bills_model.dart';
+import '../models/orders_model.dart';
+import '../models/order_items_model.dart';
 
 // Add a new order
 Future<void> addOrder({
