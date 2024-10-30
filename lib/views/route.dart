@@ -1,4 +1,4 @@
-import 'package:coffeeapp/views/screens/curd_screen.dart';
+import 'package:coffeeapp/views/screens/admin/curd_screen.dart';
 import 'package:coffeeapp/views/screens/signin_screen.dart';
 import 'package:go_router/go_router.dart';
 

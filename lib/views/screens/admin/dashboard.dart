@@ -1,5 +1,5 @@
 import 'package:coffeeapp/models/config_model.dart';
-import 'package:coffeeapp/views/screens/managerment_screen.dart';
+import 'package:coffeeapp/views/screens/admin/managerment_screen.dart';
 import 'package:coffeeapp/views/screens/pos/pos_screen.dart';
 import 'package:coffeeapp/views/screens/signin_screen.dart';
 import 'package:coffeeapp/views/screens/table/table_screen.dart';
@@ -127,7 +127,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           title: Row(
         children: [
           // Text + Image bên trái
-          Text('Xin chào ${widget.username}'),
+          Flexible(
+            child: Text(
+              'Xin chào ${widget.username}',
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
 
           const Spacer(), // Đẩy các phần tử còn lại sang bên phải
 

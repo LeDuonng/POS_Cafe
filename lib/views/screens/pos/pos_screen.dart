@@ -1,16 +1,16 @@
 import 'package:coffeeapp/models/config_model.dart';
 import 'package:coffeeapp/models/menu_model.dart';
 import 'package:coffeeapp/models/promotion_model.dart';
-import 'package:coffeeapp/controllers/payment_controller.dart';
-import 'package:coffeeapp/views/screens/pos/classification.dart';
-import 'package:coffeeapp/views/screens/pos/find_customer.dart';
-import 'package:coffeeapp/views/screens/pos/promotion.dart';
-import 'package:coffeeapp/views/screens/qr_code/qr_code.dart';
-import 'package:coffeeapp/views/screens/table/table_screen.dart';
+import 'package:coffeeapp/views/screens/pos/customization_item_dialog.dart';
+import 'package:coffeeapp/views/screens/pos/find_customer_dialog.dart';
+import 'package:coffeeapp/views/screens/pos/menu_list_widget.dart';
+import 'package:coffeeapp/views/screens/pos/order_type_dialog.dart';
+import 'package:coffeeapp/views/screens/pos/payment_confirmation_dialog.dart';
+import 'package:coffeeapp/views/screens/pos/promotion_dialog.dart';
+import 'package:coffeeapp/views/screens/pos/cart_widget.dart';
+import 'package:coffeeapp/views/screens/pos/surcharge_dialog.dart';
 import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 
 class POSScreen extends StatefulWidget {
   const POSScreen({super.key, required this.tableId, required this.userID});
@@ -27,13 +27,18 @@ class _POSScreenState extends State<POSScreen> {
   String selectedCategory = 'Tất cả';
   String? customerID;
   String? customerName;
-  String _selectedPaymentMethod = 'cash';
+  final String _selectedPaymentMethod = 'cash';
   bool hasTaxMode = false;
   String selectedOrderType = 'Mang đi';
   String? _selectedPromotionCode;
   double? _promotionValue;
   String? _promotionType;
   double? _promotionMinValue;
+  final List<Map<String, dynamic>> _cartItems = [];
+  double _totalPrice = 0.0;
+  double _tax = 0.0;
+  double _surcharge = 0.0; // Thêm biến phụ thu
+  String _surchargeReason = ""; // Biến để lưu lý do phụ thu
 
   @override
   void initState() {
@@ -51,6 +56,13 @@ class _POSScreenState extends State<POSScreen> {
     });
   }
 
+  void _addToCart(Map<String, dynamic> item) {
+    setState(() {
+      _cartItems.add(item);
+      _calculateTotal();
+    });
+  }
+
   void updateMenuList(String category) {
     setState(() {
       selectedCategory = category;
@@ -58,313 +70,110 @@ class _POSScreenState extends State<POSScreen> {
     });
   }
 
-  void _showPaymentConfirmationDialog() {
+// Hàm tính toán tổng giá trị đơn hàng
+  void _calculateTotal() {
+    _totalPrice = _cartItems.fold(
+        0, (sum, item) => sum + (item['price'] * item['quantity']));
+
+    // Áp dụng mã giảm giá nếu có
+    if (_selectedPromotionCode != null) {
+      // Kiểm tra giá trị đơn hàng tối thiểu
+      if (_totalPrice >= _promotionMinValue!) {
+        if (_promotionType == 'percentage') {
+          // Giảm giá theo phần trăm
+          _totalPrice -= _totalPrice * (_promotionValue! / 100);
+        } else if (_promotionType == 'fixed_amount') {
+          // Giảm giá theo số tiền cố định
+          _totalPrice -= _promotionValue!;
+        }
+      } else {
+        _selectedPromotionCode = null; // Xóa mã giảm giá
+        _promotionValue = null;
+        _promotionType = null;
+        _promotionMinValue = null;
+      }
+    }
+
+    _tax = _totalPrice * 0.1;
+    _totalPrice += _surcharge; // Cộng thêm phụ thu vào tổng tiền
+  }
+
+  void _showSurchargeDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-            'HÓA ĐƠN THANH TOÁN',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Thông tin quán
-                const Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        'LeeDuong Coffee',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18.0,
-                        ),
-                      ),
-                      Text('Số ĐT: 0971533147'),
-                      Text('ĐC: Hóc Môn, Hồ Chí Minh'),
-                    ],
-                  ),
-                ),
-                const Divider(),
-
-                // Thông tin hóa đơn
-                Text('Mã HĐ: #${DateTime.now().millisecondsSinceEpoch}'),
-                Text(
-                    'Ngày: ${DateFormat('yyyy-MM-dd').format(DateTime.now())}'),
-                Text(
-                    'Giờ vào: ${DateFormat('HH:mm:ss').format(DateTime.now())}'),
-                Text('Bàn: ${widget.tableId ?? '1'}'),
-                Text('Nhân viên: ${widget.userID ?? 'admin'}'),
-                const Divider(),
-
-                // Danh sách món hàng
-                const Text(
-                  'Danh sách món',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
-                ),
-                const SizedBox(height: 8.0),
-                ..._cartItems.map((item) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${item['name']} - ${item['quantity']} x ${item['price'].toStringAsFixed(0)} VNĐ',
-                        style: const TextStyle(fontSize: 14.0),
-                      ),
-                      if (item.containsKey('size'))
-                        Text('Size: ${item['size']}'),
-                      if (item.containsKey('sugar'))
-                        Text('Đường: ${item['sugar']}%'),
-                      if (item.containsKey('toppings') &&
-                          item['toppings'].isNotEmpty)
-                        Text(
-                            'Topping: ${item['toppings'].map((topping) => '$topping').join(', ')}'),
-                      const SizedBox(height: 4.0),
-                      const Divider(),
-                    ],
-                  );
-                  // ignore: unnecessary_to_list_in_spreads
-                }).toList(),
-                const Divider(),
-
-                // Tổng cộng
-
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      //khuyến mãi
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Khuyến mãi:',
-                            style: TextStyle(fontSize: 18.0)),
-                        Text(
-                          _selectedPromotionCode != null
-                              ? '$_promotionValue ${_promotionType == 'percentage' ? '%' : 'VNĐ'}'
-                              : 'Không',
-                          style: const TextStyle(fontSize: 18.0),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Phụ thu:',
-                            style: TextStyle(fontSize: 18.0)),
-                        Text('${_surcharge.toStringAsFixed(2)} VNĐ',
-                            style: const TextStyle(fontSize: 18.0)),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Tổng cộng:',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16.0),
-                        ),
-                        Text(
-                          '${(hasTaxMode ? (_totalPrice + _tax - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)) : _totalPrice - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)).toStringAsFixed(0)} VNĐ',
-                          style: const TextStyle(fontSize: 16.0),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const Divider(),
-                // Chọn phương thức thanh toán
-                const Text(
-                  'Phương thức thanh toán:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: RadioListTile<String>(
-                        title: const Text('Tiền mặt'),
-                        value: 'cash',
-                        groupValue: _selectedPaymentMethod,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedPaymentMethod = value!;
-                          });
-                        },
-                      ),
-                    ),
-                    Expanded(
-                      child: RadioListTile<String>(
-                        title: const Text('Thẻ'),
-                        value: 'card',
-                        groupValue: _selectedPaymentMethod,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedPaymentMethod = value!;
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                // Lời cảm ơn
-                FutureBuilder<Widget>(
-                  future: qr_code(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else {
-                      return snapshot.data ?? const SizedBox();
-                    }
-                  },
-                ),
-                const Center(
-                  child: Column(
-                    children: [
-                      SizedBox(height: 8.0),
-                      Text(
-                        'Cảm ơn quý khách!',
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          fontSize: 14.0,
-                        ),
-                      ),
-                      Text('Hẹn gặp lại!'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Huỷ'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                _printInvoice(); // Gọi hàm hiển thị xác nhận thanh toán
-              },
-              child: const Text('in hoá đơn'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                try {
-                  addOrder(
-                    tableId:
-                        widget.tableId != null ? int.parse(widget.tableId!) : 1,
-                    customerId: int.parse(customerID ?? widget.userID!),
-                    staffId: int.parse(widget.userID!),
-                    orderDate: DateTime.now(),
-                    status: 'Paid',
-                    description:
-                        'Order from POS${_surcharge > 0 ? ', Phụ thu: $_surcharge VNĐ, Lý do: $_surchargeReason' : ''}',
-                  );
-
-                  addBill(
-                    totalAmount: hasTaxMode
-                        ? (_totalPrice +
-                            _tax -
-                            (_promotionValue != null
-                                ? _promotionType == 'percentage'
-                                    ? _totalPrice * (_promotionValue! / 100)
-                                    : _promotionValue!
-                                : 0))
-                        : _totalPrice -
-                            (_promotionValue != null
-                                ? _promotionType == 'percentage'
-                                    ? _totalPrice * (_promotionValue! / 100)
-                                    : _promotionValue!
-                                : 0),
-                    paymentMethod: _selectedPaymentMethod,
-                    paymentDate: DateTime.now(),
-                  );
-
-                  for (var item in _cartItems) {
-                    addOrderItem(
-                      menuId: item['id'],
-                      quantity: item['quantity'],
-                      price: item['price'],
-                      description:
-                          'Giá: ${item['price'].toString()} VNĐ, Số lượng: ${item['quantity']}, ${item.containsKey('size') ? 'Size: ${item['size']}, ' : 'Size: M, '}${item.containsKey('toppings') && item['toppings'].isNotEmpty ? 'Topping: ${item['toppings'].map((topping) => '$topping').join(', ')}, ' : 'Toppings: Không, '}${item.containsKey('sugar') ? 'Đường: ${item['sugar']}%' : 'Đường: 100%'}',
-                    );
-                  }
-                } catch (e) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Lỗi'),
-                        content: Text(
-                            'Có lỗi xảy ra trong quá trình thanh toán: $e'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
-
-                setState(() {
-                  _cartItems.clear();
-                  _calculateTotal();
-                  _selectedPromotionCode =
-                      null; // Xóa mã giảm giá sau khi thanh toán
-                  _promotionValue = null;
-                  _promotionType = null;
-                  _promotionMinValue = null;
-                });
-
-                Navigator.of(context).pop();
-              },
-              child: const Text('Thanh toán'),
-            ),
-          ],
+        return SurchargeDialog(
+          // Truyền các giá trị hiện tại của _surcharge và _surchargeReason
+          initialSurcharge: _surcharge,
+          initialSurchargeReason: _surchargeReason,
+          // Hàm callback để cập nhật state sau khi người dùng xác nhận
+          onConfirm: (double newSurcharge, String newSurchargeReason) {
+            setState(() {
+              _surcharge = newSurcharge;
+              _surchargeReason = newSurchargeReason;
+              _calculateTotal(); // Tính lại tổng tiền
+            });
+          },
         );
       },
     );
   }
 
-// ignore: non_constant_identifier_names
-  Future<Widget> qr_code() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    PaymentService paymentService = PaymentService(
-        amount: int.parse((hasTaxMode
-                ? (_totalPrice +
-                    _tax -
-                    (_promotionValue != null
-                        ? _promotionType == 'percentage'
-                            ? _totalPrice * (_promotionValue! / 100)
-                            : _promotionValue!
-                        : 0))
-                : _totalPrice -
-                    (_promotionValue != null
-                        ? _promotionType == 'percentage'
-                            ? _totalPrice * (_promotionValue! / 100)
-                            : _promotionValue!
-                        : 0))
-            .toStringAsFixed(0)),
-        // ignore: unnecessary_string_interpolations
-        addInfo: "${DateFormat('yyyyMMddhhmmss').format(DateTime.now())}");
-    try {
-      await paymentService.initialize();
-      Image qrImage = await paymentService.generatePaymentQR();
-      return Center(child: qrImage);
-    } catch (e) {
-      // ignore: avoid_print
-      print('An error occurred: $e');
-      return const Center(child: Text('Failed to load QR code'));
-    }
+//
+  void _showCustomizationDialog(Map<String, dynamic> product) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomizationDialog(
+          product: product,
+          onConfirm: (updatedProduct) {
+            setState(() {
+              final existingItemIndex = _cartItems
+                  .indexWhere((item) => item['name'] == updatedProduct['name']);
+              if (existingItemIndex != -1) {
+                _cartItems[existingItemIndex] = updatedProduct;
+              } else {
+                _addToCart(updatedProduct);
+              }
+              _calculateTotal();
+            });
+          },
+        );
+      },
+    );
+  }
+
+  void _showPaymentConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return PaymentConfirmationDialog(
+          tableId: widget.tableId,
+          userID: widget.userID,
+          cartItems: _cartItems,
+          totalPrice: _totalPrice,
+          tax: _tax,
+          surcharge: _surcharge,
+          surchargeReason: _surchargeReason,
+          selectedPaymentMethod: _selectedPaymentMethod,
+          selectedPromotionCode: _selectedPromotionCode,
+          promotionValue: _promotionValue,
+          promotionType: _promotionType,
+          hasTaxMode: hasTaxMode,
+          onPaymentSuccess: () {
+            setState(() {
+              _cartItems.clear();
+              _calculateTotal();
+              _selectedPromotionCode = null;
+              _promotionValue = null;
+              _promotionType = null;
+              _surcharge = 0.0;
+              _surchargeReason = '';
+            });
+          },
+        );
+      },
+    );
   }
 
   void takeDiscountValue(String query) async {
@@ -409,109 +218,11 @@ class _POSScreenState extends State<POSScreen> {
           // Menu
           Expanded(
             flex: 2,
-            child: Container(
-              color: const Color.fromARGB(255, 233, 229, 229),
-              child: Column(
-                children: [
-                  // Classification (Milk Tea, Iced Coffee, ...)
-                  ClassificationScreen(onCategorySelected: updateMenuList),
-                  Expanded(
-                    child: FutureBuilder<List<dynamic>>(
-                      future: menuList,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        } else if (snapshot.hasError) {
-                          return Center(
-                              child: Text('Error: ${snapshot.error}'));
-                        } else if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty) {
-                          return const Center(child: Text('Không có sản phẩm'));
-                        } else {
-                          final items = snapshot.data!;
-                          return LayoutBuilder(
-                            builder: (context, constraints) {
-                              int crossAxisCount = 2; // Default to 2 columns
-                              if (constraints.maxWidth > 1200) {
-                                crossAxisCount =
-                                    4; // 4 columns for large screens
-                              } else if (constraints.maxWidth > 800) {
-                                crossAxisCount =
-                                    3; // 3 columns for medium screens
-                              }
-                              return GridView.builder(
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: crossAxisCount,
-                                  crossAxisSpacing: 8.0,
-                                  mainAxisSpacing: 8.0,
-                                  childAspectRatio: 0.75,
-                                ),
-                                itemCount: items.length,
-                                itemBuilder: (context, index) {
-                                  final item = items[index];
-                                  return GestureDetector(
-                                    onTap: () {
-                                      _addToCart({
-                                        'id': item['id'],
-                                        'name': item['name'],
-                                        'price': double.parse(
-                                            item['price'].toString()),
-                                        'image': item['image'],
-                                        'quantity': 1,
-                                      });
-                                    },
-                                    child: Card(
-                                      child: Column(
-                                        children: [
-                                          Expanded(
-                                            child: Image.asset(
-                                              'assets/menu/${item['name']}.png',
-                                              height: double.infinity,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                return Image.asset(
-                                                  'assets/menu/${item['image']}',
-                                                  height: double.infinity,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder: (context, error,
-                                                      stackTrace) {
-                                                    return const Icon(
-                                                        Icons.error);
-                                                  },
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(item['name']),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              'Giá: ${double.parse(item['price'].toString())} VNĐ',
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
+            child: MenuListWidget(
+              onAddToCart: _addToCart, // Pass the _addToCart function
+              menuList: menuList,
+              selectedCategory: selectedCategory,
+              updateMenuList: updateMenuList,
             ),
           ),
 
@@ -522,209 +233,59 @@ class _POSScreenState extends State<POSScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // Order Summary Title
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.orange[100],
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: const Text(
-                      'ĐƠN HÀNG',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18.0,
-                      ),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        //Loại đơn hàng
+                        OrderTypeDialog(
+                          initialOrderType: selectedOrderType,
+                          onOrderTypeSelected: (newType) {
+                            setState(() {
+                              selectedOrderType = newType;
+                            });
+                          },
+                          userID: widget.userID,
+                        ),
+                        // const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            color: Colors.orange[100],
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: const Text(
+                            'ĐƠN HÀNG',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          String selectedOrderType = 'Mang đi';
-                          bool isTableSelected = false;
 
-                          return StatefulBuilder(
-                            builder: (context, setState) {
-                              return AlertDialog(
-                                title: const Text('Chọn loại đơn hàng'),
-                                content: SingleChildScrollView(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: RadioListTile<String>(
-                                              title: const Text('Mang đi'),
-                                              value: 'Mang đi',
-                                              groupValue: selectedOrderType,
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  selectedOrderType = value!;
-                                                  isTableSelected = false;
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: RadioListTile<String>(
-                                              title: const Text('Giao hàng'),
-                                              value: 'Giao hàng',
-                                              groupValue: selectedOrderType,
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  selectedOrderType = value!;
-                                                  isTableSelected = false;
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: RadioListTile<String>(
-                                              title: const Text('Tại bàn'),
-                                              value: 'Tại bàn',
-                                              groupValue: selectedOrderType,
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  selectedOrderType = value!;
-                                                  isTableSelected = true;
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      if (isTableSelected) ...[
-                                        SizedBox(
-                                          height:
-                                              500, // Adjust height as needed
-                                          child: SingleChildScrollView(
-                                            child: SizedBox(
-                                              height:
-                                                  300, // Ensure the height is fixed
-                                              child: TableScreen(
-                                                  userID:
-                                                      widget.userID.toString(),
-                                                  onTableSelected:
-                                                      (selectedTable) {
-                                                    setState(() {
-                                                      selectedOrderType =
-                                                          selectedTable;
-                                                    });
-                                                  }),
-                                            ),
-                                          ),
-                                        ),
-                                      ]
-                                    ],
-                                  ),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Hủy'),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      setState(() {
-                                        this.selectedOrderType =
-                                            selectedOrderType;
-                                      });
-                                    },
-                                    child: const Text('Chọn'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      );
+                  // Cart
+
+                  // Giỏ hàng
+                  CartWidget(
+                    cartItems: _cartItems,
+                    onEdit: (item) {
+                      _showCustomizationDialog(item);
                     },
-                    child: Text(selectedOrderType),
+                    onDelete: (index) {
+                      setState(() {
+                        _cartItems.removeAt(index);
+                        _calculateTotal();
+                      });
+                    },
                   ),
 
-                  // Cart Items List
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _cartItems.length,
-                      itemBuilder: (context, index) {
-                        final item = _cartItems[index];
-                        return Column(
-                          children: [
-                            Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              elevation: 5,
-                              child: ListTile(
-                                title: Text(
-                                  item['name'],
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                        'Giá: ${item['price'].toString()} VNĐ'),
-                                    Text('Số lượng: ${item['quantity']}'),
-                                    if (item.containsKey('size'))
-                                      Text('Size: ${item['size']}')
-                                    else
-                                      const Text('Size: M'),
-                                    if (item.containsKey('toppings') &&
-                                        item['toppings'].isNotEmpty)
-                                      Text(
-                                          'Topping: ${item['toppings'].map((topping) => '$topping').join(', ')}')
-                                    else
-                                      const Text('Toppings: Không'),
-                                    if (item.containsKey('sugar'))
-                                      Text('Đường: ${item['sugar']}%')
-                                    else
-                                      const Text('Đường: 100%'),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.edit),
-                                          onPressed: () {
-                                            _showCustomizationDialog(item);
-                                          },
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.delete),
-                                          onPressed: () {
-                                            setState(() {
-                                              _cartItems.removeAt(index);
-                                              _calculateTotal();
-                                            });
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            // const Divider(), // Ngăn cách giữa các loại đồ uống
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-
-                  // Summary and Actions
+                  // Khuyến mãi, phụ thu, tổng cộng
                   Column(
                     children: [
-                      // Subtotal, VAT, Total
                       Container(
                         padding: const EdgeInsets.all(8.0),
                         decoration: BoxDecoration(
@@ -733,6 +294,15 @@ class _POSScreenState extends State<POSScreen> {
                         ),
                         child: Column(
                           children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Tổng cộng:',
+                                    style: TextStyle(fontSize: 18.0)),
+                                Text('${_totalPrice.toStringAsFixed(2)} VNĐ',
+                                    style: const TextStyle(fontSize: 18.0)),
+                              ],
+                            ),
                             if (_selectedPromotionCode != null) ...[
                               Row(
                                 mainAxisAlignment:
@@ -747,15 +317,6 @@ class _POSScreenState extends State<POSScreen> {
                                 ],
                               ),
                             ],
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('Tổng cộng:',
-                                    style: TextStyle(fontSize: 18.0)),
-                                Text('${_totalPrice.toStringAsFixed(2)} VNĐ',
-                                    style: const TextStyle(fontSize: 18.0)),
-                              ],
-                            ),
                             if (_surcharge > 0) ...[
                               Row(
                                 mainAxisAlignment:
@@ -791,7 +352,8 @@ class _POSScreenState extends State<POSScreen> {
                                       fontSize: 20.0),
                                 ),
                                 Text(
-                                  '${(hasTaxMode ? (_totalPrice + _tax - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)) : _totalPrice - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)).toStringAsFixed(2)} VNĐ',
+                                  // ignore: unnecessary_null_comparison
+                                  '${(hasTaxMode ? (_totalPrice - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) + _tax - _surcharge != null ? _surcharge : 0 : _promotionValue! : 0)) : _totalPrice - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0 - _surcharge != null ? _surcharge : 0)).toStringAsFixed(2)} VNĐ',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 20.0),
@@ -995,488 +557,6 @@ class _POSScreenState extends State<POSScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  final List<Map<String, dynamic>> _cartItems = [];
-  double _totalPrice = 0.0;
-  double _tax = 0.0;
-  double _surcharge = 0.0; // Thêm biến phụ thu
-  String _surchargeReason = ""; // Biến để lưu lý do phụ thu
-
-  void _printInvoice() {
-    // In hóa đơn
-    // Tạo nội dung hóa đơn
-    String invoiceContent = '***** HÓA ĐƠN *****\n\n';
-    invoiceContent += 'Khách hàng: ${customerName ?? 'Không có'}\n';
-    invoiceContent +=
-        'Ngày: ${DateTime.now().toLocal().toString().split(' ')[0]}\n'; // Ngày hiện tại
-    invoiceContent += '--------------------------------\n';
-    invoiceContent += 'STT | Tên sản phẩm | Số lượng | Đơn giá \n';
-    invoiceContent += '--------------------------------\n';
-
-    for (int i = 0; i < _cartItems.length; i++) {
-      final item = _cartItems[i];
-      invoiceContent +=
-          '${i + 1}   | ${item['name']} | ${item['quantity']} | ${item['price']} VNĐ | ';
-
-      // Thêm thông tin tùy chọn
-      // ignore: unused_local_variable
-      String additionalInfo = '';
-      if (item.containsKey('size')) {
-        additionalInfo += 'Size: ${item['size']}; ';
-      }
-      if (item.containsKey('toppings') && item['toppings'].isNotEmpty) {
-        additionalInfo +=
-            'Topping: ${item['toppings'].map((topping) => '$topping').join(', ')}; ';
-      }
-      if (item.containsKey('sugar')) {
-        additionalInfo += 'Đường: ${item['sugar']}%; ';
-      }
-
-      invoiceContent += '\n--------------------------------\n';
-    }
-
-    invoiceContent +=
-        'Khuyến mãi: ${(_promotionValue ?? 0).toString()} ${_promotionType == 'percentage' ? '%' : 'VNĐ'}\n';
-    invoiceContent += 'Phụ thu: ${_surcharge.toStringAsFixed(2)} VNĐ\n';
-    if (_surchargeReason.isNotEmpty) {
-      invoiceContent += 'Lý do phụ thu: $_surchargeReason\n';
-    }
-    invoiceContent +=
-        'Tổng cộng: ${(_totalPrice - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)).toStringAsFixed(2)} VNĐ\n';
-    if (hasTaxMode) {
-      invoiceContent += 'VAT (10%): ${_tax.toStringAsFixed(2)} VNĐ\n';
-    }
-    invoiceContent += '--------------------------------\n';
-    if (hasTaxMode) {
-      invoiceContent +=
-          'Thanh toán (đã bao gồm VAT): ${(_totalPrice + _tax - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)).toStringAsFixed(2)} VNĐ\n';
-    } else {
-      invoiceContent +=
-          'Thanh toán: ${(_totalPrice - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)).toStringAsFixed(2)} VNĐ\n';
-    }
-    invoiceContent += '***** CẢM ƠN QUÝ KHÁCH *****\n';
-
-    // Hiển thị nội dung hóa đơn trong một dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: SingleChildScrollView(
-            child: Text(
-              invoiceContent,
-              style: const TextStyle(
-                  fontFamily: 'Courier New'), // Font monospace cho dễ đọc
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Đóng'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _addToCart(Map<String, dynamic> item) {
-    setState(() {
-      _cartItems.add(item);
-      _calculateTotal();
-    });
-  }
-
-  // Hàm tính toán tổng giá trị đơn hàng
-  void _calculateTotal() {
-    _totalPrice = _cartItems.fold(
-        0, (sum, item) => sum + (item['price'] * item['quantity']));
-
-    // Áp dụng mã giảm giá nếu có
-    if (_selectedPromotionCode != null) {
-      // Kiểm tra giá trị đơn hàng tối thiểu
-      if (_totalPrice >= _promotionMinValue!) {
-        if (_promotionType == 'percentage') {
-          // Giảm giá theo phần trăm
-          _totalPrice -= _totalPrice * (_promotionValue! / 100);
-        } else if (_promotionType == 'fixed_amount') {
-          // Giảm giá theo số tiền cố định
-          _totalPrice -= _promotionValue!;
-        }
-      } else {
-        // Hiển thị thông báo nếu không đủ điều kiện áp dụng mã giảm giá
-        ToastNotification.showToast(
-            message:
-                'Mã giảm giá chỉ áp dụng với đơn hàng trên $_promotionMinValue VNĐ');
-
-        _selectedPromotionCode = null; // Xóa mã giảm giá
-        _promotionValue = null;
-        _promotionType = null;
-        _promotionMinValue = null;
-      }
-    }
-
-    _tax = _totalPrice * 0.1;
-    _totalPrice += _surcharge; // Cộng thêm phụ thu vào tổng tiền
-  }
-
-  void _showSurchargeDialog() {
-    // Khởi tạo TextEditingController với giá trị đã nhập trước đó (nếu có)
-    TextEditingController surchargeController = TextEditingController(
-        text: _surcharge > 0 ? _surcharge.toString() : '');
-    TextEditingController surchargeReasonController =
-        TextEditingController(text: _surchargeReason);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Nhập phụ thu'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: surchargeController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: "Nhập số tiền phụ thu",
-                  suffixText: "VNĐ",
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
-              ),
-              const SizedBox(height: 8.0),
-              TextField(
-                controller: surchargeReasonController,
-                decoration:
-                    const InputDecoration(hintText: "Nhập lý do phụ thu"),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Huỷ'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _surcharge = double.tryParse(surchargeController.text) ?? 0.0;
-                  _surchargeReason = surchargeReasonController.text;
-                  _calculateTotal(); // Tính lại tổng tiền sau khi nhập phụ thu
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text('Xác nhận'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showCustomizationDialog(Map<String, dynamic> product) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        String selectedSize = product['size'] ?? 'M';
-        List<String> selectedToppings =
-            List<String>.from(product['toppings'] ?? []);
-        int selectedSugar = product['sugar'] ?? 100;
-        int selectedQuantity = product['quantity'] ?? 1;
-        double originalPrice = product['price'];
-        double updatedPrice = originalPrice;
-
-        return AlertDialog(
-          title: Text('Tuỳ chọn ${product['name']}'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: const Color.fromARGB(255, 192, 87, 87)),
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Column(
-                      children: [
-                        const Text('Chọn size',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        StatefulBuilder(
-                          builder:
-                              (BuildContext context, StateSetter setState) {
-                            return DropdownButton<String>(
-                              value: selectedSize,
-                              items: ['S', 'M', 'L'].map((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text('Size: $value'),
-                                );
-                              }).toList(),
-                              onChanged: (newValue) {
-                                setState(() {
-                                  selectedSize = newValue!;
-                                });
-                              },
-                            );
-                          },
-                        ),
-                      ],
-                    )),
-                const SizedBox(height: 8.0),
-                Container(
-                  // color: Colors.red[100],
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: const Color.fromARGB(255, 192, 87, 87)),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Column(
-                    children: [
-                      const Text('Chọn lượng đường',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
-                          return DropdownButton<int>(
-                            value: selectedSugar,
-                            items: [0, 20, 40, 60, 80, 100].map((int value) {
-                              return DropdownMenuItem<int>(
-                                value: value,
-                                child: Text('Lượng đường: $value%'),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedSugar = newValue!;
-                              });
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8.0),
-                Container(
-                  // color: Colors.yellow[100],
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: const Color.fromARGB(255, 192, 87, 87)),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Column(
-                    children: [
-                      const Text('Chọn số lượng',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.remove),
-                                onPressed: () {
-                                  setState(() {
-                                    if (selectedQuantity > 1) {
-                                      selectedQuantity--;
-                                    }
-                                  });
-                                },
-                              ),
-                              Text('$selectedQuantity'),
-                              IconButton(
-                                icon: const Icon(Icons.add),
-                                onPressed: () {
-                                  setState(() {
-                                    selectedQuantity++;
-                                  });
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  // color: Colors.green[100],
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      const Text('Chọn topping',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      FutureBuilder<List<dynamic>>(
-                        future: fetchToppings(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          } else if (snapshot.hasError) {
-                            return Center(
-                                child: Text('Error: ${snapshot.error}'));
-                          } else if (!snapshot.hasData ||
-                              snapshot.data!.isEmpty) {
-                            return const Center(
-                                child: Text('No toppings found'));
-                          } else {
-                            final toppings = snapshot.data!;
-                            return Column(
-                              children: toppings.map((topping) {
-                                return Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(vertical: 4.0),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.5),
-                                        spreadRadius: 2,
-                                        blurRadius: 5,
-                                        offset: const Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-                                  child: StatefulBuilder(
-                                    builder: (BuildContext context,
-                                        StateSetter setState) {
-                                      return Column(
-                                        children: [
-                                          const SizedBox(height: 8.0),
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(10.0),
-                                            ),
-                                            clipBehavior: Clip.hardEdge,
-                                            child: Image.asset(
-                                              'assets/menu/${topping['name']}.png',
-                                              height: 100,
-                                              width: 100,
-                                              fit: BoxFit.fitHeight,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                return Image.asset(
-                                                  'assets/menu/${topping['image']}',
-                                                  height: 100,
-                                                  width: 100,
-                                                  fit: BoxFit.fitHeight,
-                                                  errorBuilder: (context, error,
-                                                      stackTrace) {
-                                                    return const Icon(
-                                                        Icons.error);
-                                                  },
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                          ListTile(
-                                            title: Text(topping['name']),
-                                            subtitle: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                    'Giá: ${topping['price']} VNĐ'),
-                                                Text(
-                                                    'Description: ${topping['description']}'),
-                                              ],
-                                            ),
-                                            trailing: Checkbox(
-                                              value: selectedToppings
-                                                  .contains(topping['name']),
-                                              onChanged: (selected) {
-                                                setState(() {
-                                                  if (selected!) {
-                                                    selectedToppings
-                                                        .add(topping['name']);
-                                                    updatedPrice +=
-                                                        double.parse(
-                                                            topping['price']
-                                                                .toString());
-                                                  } else {
-                                                    selectedToppings.remove(
-                                                        topping['name']);
-                                                    updatedPrice -=
-                                                        double.parse(
-                                                            topping['price']
-                                                                .toString());
-                                                  }
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                );
-                              }).toList(),
-                            );
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8.0),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Huỷ'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  final existingItemIndex = _cartItems
-                      .indexWhere((item) => item['name'] == product['name']);
-                  if (existingItemIndex != -1) {
-                    _cartItems[existingItemIndex] = {
-                      'id': product['id'],
-                      'name': product['name'],
-                      'size': selectedSize,
-                      'toppings': selectedToppings,
-                      'sugar': selectedSugar,
-                      'quantity': selectedQuantity,
-                      'price': updatedPrice,
-                    };
-                  } else {
-                    _addToCart({
-                      'id': product['id'],
-                      'name': product['name'],
-                      'size': selectedSize,
-                      'toppings': selectedToppings,
-                      'sugar': selectedSugar,
-                      'quantity': selectedQuantity,
-                      'price': updatedPrice,
-                    });
-                  }
-                  _calculateTotal();
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text('Xác nhận'),
-            ),
-          ],
-        );
-      },
     );
   }
 }

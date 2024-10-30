@@ -3,7 +3,7 @@ import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
 import 'package:coffeeapp/controllers/users_controller.dart';
 import 'package:rive/rive.dart';
-import 'package:coffeeapp/views/screens/dashboard.dart';
+import 'package:coffeeapp/views/screens/admin/dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 

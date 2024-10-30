@@ -1,20 +1,11 @@
-import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:coffeeapp/views/screens/dashboard.dart';
+import 'package:coffeeapp/views/screens/admin/dashboard.dart';
 import 'package:coffeeapp/views/screens/signin_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
-
-  // Display a toast notification upon app start-up
-  ToastNotification.showToast(
-    message: "Chào mừng đến với CoffeeApp!",
-    gravity: ToastGravity.TOP,
-    backgroundColor: Colors.orange,
-  );
 }
 
 class MyApp extends StatefulWidget {

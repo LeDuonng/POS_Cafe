@@ -1,5 +1,5 @@
-import 'package:coffeeapp/views/screens/config_screen.dart';
-import 'package:coffeeapp/views/screens/curd_screen.dart';
+import 'package:coffeeapp/views/screens/admin/config_screen.dart';
+import 'package:coffeeapp/views/screens/admin/curd_screen.dart';
 import 'package:coffeeapp/views/screens/pos/pos_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
