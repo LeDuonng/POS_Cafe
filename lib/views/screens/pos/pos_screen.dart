@@ -7,6 +7,7 @@ import 'package:coffeeapp/views/screens/pos/find_customer.dart';
 import 'package:coffeeapp/views/screens/pos/promotion.dart';
 import 'package:coffeeapp/views/screens/qr_code/qr_code.dart';
 import 'package:coffeeapp/views/screens/table/table_screen.dart';
+import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -373,9 +374,19 @@ class _POSScreenState extends State<POSScreen> {
       if (promotions.isNotEmpty) {
         // Gán giá trị giảm giá cho _selectedPromotionCode và trả về discount_value
         setState(() {
-          _promotionValue = double.parse(promotions[0]['discount_value']);
-          _promotionType = promotions[0]['discount_type'];
-          _promotionMinValue = double.parse(promotions[0]['min_order_value']);
+          if (_totalPrice >= double.parse(promotions[0]['min_order_value'])) {
+            _promotionValue = double.parse(promotions[0]['discount_value']);
+            _promotionType = promotions[0]['discount_type'];
+            _promotionMinValue = double.parse(promotions[0]['min_order_value']);
+          } else {
+            ToastNotification.showToast(
+                message:
+                    'Mã giảm giá chỉ áp dụng với đơn hàng trên ${promotions[0]['min_order_value']} VNĐ');
+            _selectedPromotionCode = null;
+            _promotionValue = null;
+            _promotionType = null;
+            _promotionMinValue = null;
+          }
         });
       }
     } catch (e) {
@@ -853,42 +864,49 @@ class _POSScreenState extends State<POSScreen> {
                                   50.0, // Chiều cao cố định cho tất cả các nút
                               child: ElevatedButton(
                                 onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Text('Chọn mã khuyến mãi'),
-                                        content: SizedBox(
-                                          width: 300,
-                                          height: 400,
-                                          child: PromotionScreen(
-                                            onPromotionSelected: (code) {
-                                              setState(() {
-                                                _selectedPromotionCode = code;
-                                                takeDiscountValue(
-                                                    _selectedPromotionCode!);
-                                              });
-                                            },
+                                  if (_cartItems.isEmpty) {
+                                    ToastNotification.showToast(
+                                        message:
+                                            'Vui lòng thêm sản phẩm vào giỏ hàng trước khi áp mã giảm giá.');
+                                  } else {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title:
+                                              const Text('Chọn mã khuyến mãi'),
+                                          content: SizedBox(
+                                            width: 300,
+                                            height: 400,
+                                            child: PromotionScreen(
+                                              onPromotionSelected: (code) {
+                                                setState(() {
+                                                  _selectedPromotionCode = code;
+                                                  takeDiscountValue(
+                                                      _selectedPromotionCode!);
+                                                });
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: const Text('Đóng'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ).then((value) {
-                                    if (value != null) {
-                                      setState(() {
-                                        _selectedPromotionCode =
-                                            value.toString();
-                                      });
-                                    }
-                                  });
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('Đóng'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ).then((value) {
+                                      if (value != null) {
+                                        setState(() {
+                                          _selectedPromotionCode =
+                                              value.toString();
+                                        });
+                                      }
+                                    });
+                                  }
                                 },
                                 child: Text(
                                   _selectedPromotionCode != null
@@ -936,6 +954,11 @@ class _POSScreenState extends State<POSScreen> {
                                   setState(() {
                                     _cartItems.clear();
                                     _calculateTotal();
+                                    _selectedPromotionCode = null;
+                                    _promotionValue = null;
+                                    _promotionType = null;
+                                    _surcharge = 0.0;
+                                    _surchargeReason = '';
                                   });
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -1083,6 +1106,16 @@ class _POSScreenState extends State<POSScreen> {
           // Giảm giá theo số tiền cố định
           _totalPrice -= _promotionValue!;
         }
+      } else {
+        // Hiển thị thông báo nếu không đủ điều kiện áp dụng mã giảm giá
+        ToastNotification.showToast(
+            message:
+                'Mã giảm giá chỉ áp dụng với đơn hàng trên $_promotionMinValue VNĐ');
+
+        _selectedPromotionCode = null; // Xóa mã giảm giá
+        _promotionValue = null;
+        _promotionType = null;
+        _promotionMinValue = null;
       }
     }
 

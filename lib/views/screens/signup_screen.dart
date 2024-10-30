@@ -1,4 +1,5 @@
 import 'package:coffeeapp/controllers/users_controller.dart';
+import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -33,14 +34,10 @@ class _SignupScreenState extends State<SignupScreen> {
           address: _addressController.text,
         )) {
           // ignore: use_build_context_synchronously
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registration successful')),
-          );
+          ToastNotification.showToast(message: 'Registration successful');
         } else {
           // ignore: use_build_context_synchronously
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registration failed')),
-          );
+          ToastNotification.showToast(message: 'Registration failed');
         }
       } catch (e) {
         // ignore: avoid_print

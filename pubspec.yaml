@@ -52,6 +52,8 @@ dependencies:
   rive: ^0.13.14
   font_awesome_flutter: ^10.7.0
   http_parser: ^4.0.2
+  overlay_support: ^2.1.0
+  fluttertoast: ^8.2.8
 
 dev_dependencies:
   flutter_test:

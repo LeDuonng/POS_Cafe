@@ -1,3 +1,4 @@
+import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
 import 'package:coffeeapp/models/config_model.dart';
 
@@ -83,12 +84,8 @@ class _ConfigScreenState extends State<ConfigScreen> {
                   _tableMode = value;
                 });
                 _updateConfig('use_table_mode', value.toString());
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Chế độ này sẽ có hiệu lực sau khi đăng nhập lại'),
-                  ),
-                );
+                ToastNotification.showToast(
+                    message: 'Chế độ này sẽ có hiệu lực sau khi đăng nhập lại');
               },
             ),
             SwitchListTile(
@@ -99,12 +96,8 @@ class _ConfigScreenState extends State<ConfigScreen> {
                   _onlinePayment = value;
                 });
                 _updateConfig('online_payment', value.toString());
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Chế độ này sẽ có hiệu lực sau khi đăng nhập lại'),
-                  ),
-                );
+                ToastNotification.showToast(
+                    message: 'Chế độ này sẽ có hiệu lực sau khi đăng nhập lại');
               },
             ),
             SwitchListTile(
@@ -115,12 +108,8 @@ class _ConfigScreenState extends State<ConfigScreen> {
                   _allowTakeaway = value;
                 });
                 _updateConfig('allow_takeaway', value.toString());
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Chế độ này sẽ có hiệu lực sau khi đăng nhập lại'),
-                  ),
-                );
+                ToastNotification.showToast(
+                    message: 'Chế độ này sẽ có hiệu lực sau khi đăng nhập lại');
               },
             ),
             SwitchListTile(
@@ -131,12 +120,8 @@ class _ConfigScreenState extends State<ConfigScreen> {
                   _tax = value;
                 });
                 _updateConfig('tax', value.toString());
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Chế độ này sẽ có hiệu lực sau khi đăng nhập lại'),
-                  ),
-                );
+                ToastNotification.showToast(
+                    message: 'Chế độ này sẽ có hiệu lực sau khi đăng nhập lại');
               },
             ),
             Row(
@@ -193,12 +178,9 @@ class _ConfigScreenState extends State<ConfigScreen> {
                           });
                           _updateConfig('percent_points', _percent_points);
                           // ignore: use_build_context_synchronously
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Chế độ này sẽ có hiệu lực sau khi đăng nhập lại'),
-                            ),
-                          );
+                          ToastNotification.showToast(
+                              message:
+                                  'Chế độ này sẽ có hiệu lực sau khi đăng nhập lại');
                         }
                       },
                     ),

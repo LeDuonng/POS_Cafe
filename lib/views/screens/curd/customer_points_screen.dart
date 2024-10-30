@@ -1,4 +1,5 @@
 import 'package:coffeeapp/models/customer_points_model.dart';
+import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
 import '../../../controllers/customer_points_controller.dart';
 
@@ -141,9 +142,7 @@ class _AddCustomerPointsScreenState extends State<AddCustomerPointsScreen> {
                   try {
                     userId = int.parse(value!);
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Invalid User ID: $e')),
-                    );
+                    ToastNotification.showToast(message: 'Invalid User ID: $e');
                   }
                 },
               ),
@@ -159,9 +158,7 @@ class _AddCustomerPointsScreenState extends State<AddCustomerPointsScreen> {
                   try {
                     points = int.parse(value!);
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Invalid Points: $e')),
-                    );
+                    ToastNotification.showToast(message: 'Invalid Points: $e');
                   }
                 },
               ),

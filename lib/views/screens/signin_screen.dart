@@ -1,4 +1,5 @@
 import 'package:coffeeapp/views/screens/signup_screen.dart';
+import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
 import 'package:coffeeapp/controllers/users_controller.dart';
 import 'package:rive/rive.dart';
@@ -88,17 +89,14 @@ class _LoginScreenState extends State<LoginScreen> {
           _riveArtboard!.removeController(_handsUpController);
           _riveArtboard!.addController(_failController);
           // ignore: use_build_context_synchronously
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Login failed. No user data.')),
-          );
+          ToastNotification.showToast(
+              message: 'Lỗi đăng nhập, vui lòng thử lại.');
         }
       } catch (e) {
         if (mounted) {
           _riveArtboard!.removeController(_handsUpController);
           _riveArtboard!.addController(_failController);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('An error occurred: $e')),
-          );
+          ToastNotification.showToast(message: 'Đã có lỗi xảy ra: $e');
         }
       }
     }

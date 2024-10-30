@@ -1,4 +1,5 @@
 import 'package:coffeeapp/models/promotion_model.dart';
+import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -157,9 +158,7 @@ class _PromotionScreenState extends State<PromotionScreen> {
               Navigator.pop(context); // Close the dialog
             } catch (e) {
               // ignore: use_build_context_synchronously
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error: $e')),
-              );
+              ToastNotification.showToast(message: 'Error: $e');
             }
           },
         );
@@ -183,9 +182,7 @@ class _PromotionScreenState extends State<PromotionScreen> {
             } catch (e) {
               // Handle error
               // ignore: use_build_context_synchronously
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error: $e')),
-              );
+              ToastNotification.showToast(message: 'Error: $e');
             }
           },
         );
