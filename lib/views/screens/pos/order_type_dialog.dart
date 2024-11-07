@@ -1,4 +1,5 @@
 // order_type_dialog.dart
+import 'package:coffeeapp/responsive.dart';
 import 'package:coffeeapp/views/screens/table/table_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -36,9 +37,9 @@ class _OrderTypeDialogState extends State<OrderTypeDialog> {
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
         textStyle: const TextStyle(fontSize: 18),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        // shape: RoundedRectangleBorder(
+        //   borderRadius: BorderRadius.circular(10),
+        // ),
       ),
       onPressed: () {
         showDialog(
@@ -55,50 +56,102 @@ class _OrderTypeDialogState extends State<OrderTypeDialog> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: RadioListTile<String>(
-                                title: const Text('Mang đi'),
-                                value: 'Mang đi',
-                                groupValue: selectedOrderType,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedOrderType = value!;
-                                    isTableSelected = false;
-                                  });
-                                },
+                        if (Responsive.isMobile(context)) ...[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: RadioListTile<String>(
+                                  title: const Text('Mang đi'),
+                                  value: 'Mang đi',
+                                  groupValue: selectedOrderType,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedOrderType = value!;
+                                      isTableSelected = false;
+                                    });
+                                  },
+                                ),
                               ),
-                            ),
-                            Expanded(
-                              child: RadioListTile<String>(
-                                title: const Text('Giao hàng'),
-                                value: 'Giao hàng',
-                                groupValue: selectedOrderType,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedOrderType = value!;
-                                    isTableSelected = false;
-                                  });
-                                },
+                              Expanded(
+                                child: RadioListTile<String>(
+                                  title: const Text('Giao hàng'),
+                                  value: 'Giao hàng',
+                                  groupValue: selectedOrderType,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedOrderType = value!;
+                                      isTableSelected = false;
+                                    });
+                                  },
+                                ),
                               ),
-                            ),
-                            Expanded(
-                              child: RadioListTile<String>(
-                                title: const Text('Tại bàn'),
-                                value: 'Tại bàn',
-                                groupValue: selectedOrderType,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedOrderType = value!;
-                                    isTableSelected = true;
-                                  });
-                                },
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: RadioListTile<String>(
+                                  title: const Text('Tại bàn'),
+                                  value: 'Tại bàn',
+                                  groupValue: selectedOrderType,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedOrderType = value!;
+                                      isTableSelected = true;
+                                    });
+                                  },
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+                        ] else ...[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: RadioListTile<String>(
+                                  title: const Text('Mang đi'),
+                                  value: 'Mang đi',
+                                  groupValue: selectedOrderType,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedOrderType = value!;
+                                      isTableSelected = false;
+                                    });
+                                  },
+                                ),
+                              ),
+                              Expanded(
+                                child: RadioListTile<String>(
+                                  title: const Text('Giao hàng'),
+                                  value: 'Giao hàng',
+                                  groupValue: selectedOrderType,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedOrderType = value!;
+                                      isTableSelected = false;
+                                    });
+                                  },
+                                ),
+                              ),
+                              Expanded(
+                                child: RadioListTile<String>(
+                                  title: const Text('Tại bàn'),
+                                  value: 'Tại bàn',
+                                  groupValue: selectedOrderType,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedOrderType = value!;
+                                      isTableSelected = true;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                         if (isTableSelected) ...[
                           SizedBox(
                             height: 500, // Adjust height as needed

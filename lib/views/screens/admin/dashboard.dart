@@ -4,7 +4,7 @@ import 'package:coffeeapp/views/screens/pos/pos_screen.dart';
 import 'package:coffeeapp/views/screens/signin_screen.dart';
 import 'package:coffeeapp/views/screens/table/table_screen.dart';
 import 'package:coffeeapp/views/screens/user_info.dart';
-import 'package:coffeeapp/responsive.dart'; // Import Responsive
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -53,30 +53,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       // Khởi tạo các trang dựa trên configs và role của người dùng
       _pages = [
-        Responsive(
-          mobile: POSScreen(tableId: null, userID: widget.id.toString()),
-          tablet: POSScreen(tableId: null, userID: widget.id.toString()),
-          desktop: POSScreen(tableId: null, userID: widget.id.toString()),
-        ),
+        POSScreen(tableId: null, userID: widget.id.toString()),
         Management(
           userID: widget.id.toString(),
           username: widget.username.toString(),
           role: widget.role.toString(),
         ),
         if (hasTableMode && (widget.role == 'admin' || widget.role == 'staff'))
-          Responsive(
-            mobile: TableScreen(
-              userID: widget.id.toString(),
-              onTableSelected: (String tableId) {},
-            ),
-            tablet: TableScreen(
-              userID: widget.id.toString(),
-              onTableSelected: (String tableId) {},
-            ),
-            desktop: TableScreen(
-              userID: widget.id.toString(),
-              onTableSelected: (String tableId) {},
-            ),
+          TableScreen(
+            userID: widget.id.toString(),
+            onTableSelected: (String tableId) {},
           ),
         UserInfoScreen(userId: int.parse(widget.id!)),
         const LoginScreen(),
@@ -141,12 +127,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           title: Row(
         children: [
           // Text + Image bên trái
-          Flexible(
-            child: Text(
-              'Xin chào ${widget.username}',
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
+          Text('Xin chào ${widget.username}'),
 
           const Spacer(), // Đẩy các phần tử còn lại sang bên phải
 
@@ -279,23 +260,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
-      body: Responsive(
-        mobile: _pages.isNotEmpty
-            ? _pages[
-                _selectedIndex] // Hiển thị trang dựa trên chỉ mục được chọn
-            : const Center(
-                child: CircularProgressIndicator()), // Hiển thị khi chờ dữ liệu
-        tablet: _pages.isNotEmpty
-            ? _pages[
-                _selectedIndex] // Hiển thị trang dựa trên chỉ mục được chọn
-            : const Center(
-                child: CircularProgressIndicator()), // Hiển thị khi chờ dữ liệu
-        desktop: _pages.isNotEmpty
-            ? _pages[
-                _selectedIndex] // Hiển thị trang dựa trên chỉ mục được chọn
-            : const Center(
-                child: CircularProgressIndicator()), // Hiển thị khi chờ dữ liệu
-      ),
+      body: _pages.isNotEmpty
+          ? _pages[_selectedIndex] // Hiển thị trang dựa trên chỉ mục được chọn
+          : const Center(
+              child: CircularProgressIndicator()), // Hiển thị khi chờ dữ liệu
     );
   }
 

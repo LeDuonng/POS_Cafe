@@ -180,6 +180,33 @@ class _POSScreenState extends State<POSScreen> {
     );
   }
 
+  void _showConfirmationDialog(Map<String, dynamic> item) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Xác nhận'),
+          content: Text('Bạn có muốn thêm ${item['name']} vào giỏ hàng?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Đóng popup
+              },
+              child: const Text('Huỷ'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _addToCart(item); // Thêm vào giỏ hàng
+                Navigator.of(context).pop(); // Đóng popup
+              },
+              child: const Text('Xác nhận'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void takeDiscountValue(String query) async {
     try {
       List<dynamic> promotions =
@@ -247,11 +274,7 @@ class _POSScreenState extends State<POSScreen> {
                 _fabKey.currentContext!.findRenderObject() as RenderBox;
             // ignore: unused_local_variable
             final Offset offset = renderBox.localToGlobal(Offset.zero);
-            setState(() {
-              // Update the position of the FloatingActionButton
-              // You can use offset.dx and offset.dy to set the new position
-              // For example:
-            });
+            setState(() {});
           },
         ),
         tablet: const SizedBox.shrink(), // Hide on tablet
@@ -268,7 +291,14 @@ class _POSScreenState extends State<POSScreen> {
           Expanded(
             flex: 2,
             child: MenuListWidget(
-              onAddToCart: _addToCart,
+              onAddToCart: (item) {
+                if (Responsive.isMobile(context)) {
+                  // Kiểm tra xem đang ở chế độ mobile
+                  _showConfirmationDialog(item); // Hiển thị popup xác nhận
+                } else {
+                  _addToCart(item); // Thêm trực tiếp vào giỏ hàng
+                }
+              },
               menuList: menuList,
               selectedCategory: selectedCategory,
               updateMenuList: updateMenuList,
@@ -342,15 +372,7 @@ class _POSScreenState extends State<POSScreen> {
               child: Row(
                 children: [
                   //Loại đơn hàng
-                  OrderTypeDialog(
-                    initialOrderType: selectedOrderType,
-                    onOrderTypeSelected: (newType) {
-                      setState(() {
-                        selectedOrderType = newType;
-                      });
-                    },
-                    userID: widget.userID,
-                  ),
+
                   // const Spacer(),
                   Container(
                     padding: const EdgeInsets.all(8.0),
@@ -465,85 +487,203 @@ class _POSScreenState extends State<POSScreen> {
 
                 // Customer Loyalty, Discount Code
                 const SizedBox(height: 16.0),
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 50.0, // Chiều cao cố định cho tất cả các nút
-                        child: ElevatedButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Tìm kiếm khách hàng'),
-                                  content: const SizedBox(
-                                    width: 300,
-                                    height: 400,
-                                    child: FindCustomerScreen(),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('Đóng'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ).then((value) {
-                              if (value != null) {
-                                setState(() {
-                                  customerID = value['id'].toString();
-                                  customerName = value['name'].toString();
-                                });
-                              }
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            textStyle: const TextStyle(fontSize: 18.0),
+                if (Responsive.isMobile(context))
+                  Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height:
+                                  50.0, // Fixed height for uniform appearance
+                              child: OrderTypeDialog(
+                                initialOrderType: selectedOrderType,
+                                onOrderTypeSelected: (newType) {
+                                  setState(() {
+                                    selectedOrderType = newType;
+                                  });
+                                },
+                                userID: widget.userID,
+                              ),
+                            ),
                           ),
-                          child: customerName != null
-                              ? Column(
-                                  children: [
-                                    const Text('Khách hàng:'),
-                                    Text(customerName.toString()),
-                                  ],
-                                )
-                              : const Text('Tích điểm',
-                                  textAlign: TextAlign.center),
+                          const SizedBox(
+                              width: 16.0), // Add spacing for consistent layout
+                          Expanded(
+                            child: SizedBox(
+                              height:
+                                  50.0, // Fixed height for uniform appearance
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title:
+                                            const Text('Tìm kiếm khách hàng'),
+                                        content: const SizedBox(
+                                          width: 300,
+                                          height: 400,
+                                          child: FindCustomerScreen(),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: const Text('Đóng'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ).then((value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        customerID = value['id'].toString();
+                                        customerName = value['name'].toString();
+                                      });
+                                    }
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  textStyle: const TextStyle(fontSize: 18.0),
+                                ),
+                                child: customerName != null
+                                    ? Column(
+                                        children: [
+                                          const Text('Khách hàng:'),
+                                          Text(customerName.toString()),
+                                        ],
+                                      )
+                                    : const Text('Tích điểm',
+                                        textAlign: TextAlign.center),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16.0), // Add spacing between rows
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height:
+                                  50.0, // Fixed height for uniform appearance
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  if (_cartItems.isEmpty) {
+                                    ToastNotification.showToast(
+                                        message:
+                                            'Vui lòng thêm sản phẩm vào giỏ hàng trước khi áp mã giảm giá.');
+                                  } else {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title:
+                                              const Text('Chọn mã khuyến mãi'),
+                                          content: SizedBox(
+                                            width: 300,
+                                            height: 400,
+                                            child: PromotionScreen(
+                                              onPromotionSelected: (code) {
+                                                setState(() {
+                                                  _selectedPromotionCode = code;
+                                                  takeDiscountValue(
+                                                      _selectedPromotionCode!);
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('Đóng'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ).then((value) {
+                                      if (value != null) {
+                                        setState(() {
+                                          _selectedPromotionCode =
+                                              value.toString();
+                                        });
+                                      }
+                                    });
+                                  }
+                                },
+                                child: Text(
+                                  _selectedPromotionCode != null
+                                      ? 'Mã giảm giá: $_selectedPromotionCode'
+                                      : 'Khuyến mãi',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 18.0),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                              width: 16.0), // Add spacing for consistent layout
+                          Expanded(
+                            child: SizedBox(
+                              height:
+                                  50.0, // Fixed height for uniform appearance
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  _showSurchargeDialog(); // Gọi hàm hiển thị dialog nhập phụ thu
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  textStyle: const TextStyle(fontSize: 18.0),
+                                ),
+                                child: Text(
+                                  _surcharge > 0
+                                      ? 'Phụ thu: ${_surcharge.toStringAsFixed(2)} VNĐ'
+                                      : 'Phụ thu',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                else
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 50.0, // Fixed height for uniform appearance
+                          child: OrderTypeDialog(
+                            initialOrderType: selectedOrderType,
+                            onOrderTypeSelected: (newType) {
+                              setState(() {
+                                selectedOrderType = newType;
+                              });
+                            },
+                            userID: widget.userID,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 16.0),
-                    Expanded(
-                      child: SizedBox(
-                        height: 50.0, // Chiều cao cố định cho tất cả các nút
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (_cartItems.isEmpty) {
-                              ToastNotification.showToast(
-                                  message:
-                                      'Vui lòng thêm sản phẩm vào giỏ hàng trước khi áp mã giảm giá.');
-                            } else {
+                      const SizedBox(
+                          width: 16.0), // Add spacing for consistent layout
+                      Expanded(
+                        child: SizedBox(
+                          height: 50.0, // Fixed height for uniform appearance
+                          child: ElevatedButton(
+                            onPressed: () {
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title: const Text('Chọn mã khuyến mãi'),
-                                    content: SizedBox(
+                                    title: const Text('Tìm kiếm khách hàng'),
+                                    content: const SizedBox(
                                       width: 300,
                                       height: 400,
-                                      child: PromotionScreen(
-                                        onPromotionSelected: (code) {
-                                          setState(() {
-                                            _selectedPromotionCode = code;
-                                            takeDiscountValue(
-                                                _selectedPromotionCode!);
-                                          });
-                                        },
-                                      ),
+                                      child: FindCustomerScreen(),
                                     ),
                                     actions: [
                                       TextButton(
@@ -558,44 +698,109 @@ class _POSScreenState extends State<POSScreen> {
                               ).then((value) {
                                 if (value != null) {
                                   setState(() {
-                                    _selectedPromotionCode = value.toString();
+                                    customerID = value['id'].toString();
+                                    customerName = value['name'].toString();
                                   });
                                 }
                               });
-                            }
-                          },
-                          child: Text(
-                            _selectedPromotionCode != null
-                                ? 'Mã giảm giá: $_selectedPromotionCode'
-                                : 'Khuyến mãi',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 18.0),
+                            },
+                            style: ElevatedButton.styleFrom(
+                              textStyle: const TextStyle(fontSize: 18.0),
+                            ),
+                            child: customerName != null
+                                ? Column(
+                                    children: [
+                                      const Text('Khách hàng:'),
+                                      Text(customerName.toString()),
+                                    ],
+                                  )
+                                : const Text('Tích điểm',
+                                    textAlign: TextAlign.center),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 16.0),
-                    Expanded(
-                      child: SizedBox(
-                        height: 50.0, // Chiều cao cố định cho tất cả các nút
-                        child: ElevatedButton(
-                          onPressed: () {
-                            _showSurchargeDialog(); // Gọi hàm hiển thị dialog nhập phụ thu
-                          },
-                          style: ElevatedButton.styleFrom(
-                            textStyle: const TextStyle(fontSize: 18.0),
-                          ),
-                          child: Text(
-                            _surcharge > 0
-                                ? 'Phụ thu: ${_surcharge.toStringAsFixed(2)} VNĐ'
-                                : 'Phụ thu',
-                            textAlign: TextAlign.center,
+                      const SizedBox(
+                          width: 16.0), // Add spacing for consistent layout
+                      Expanded(
+                        child: SizedBox(
+                          height: 50.0, // Fixed height for uniform appearance
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (_cartItems.isEmpty) {
+                                ToastNotification.showToast(
+                                    message:
+                                        'Vui lòng thêm sản phẩm vào giỏ hàng trước khi áp mã giảm giá.');
+                              } else {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text('Chọn mã khuyến mãi'),
+                                      content: SizedBox(
+                                        width: 300,
+                                        height: 400,
+                                        child: PromotionScreen(
+                                          onPromotionSelected: (code) {
+                                            setState(() {
+                                              _selectedPromotionCode = code;
+                                              takeDiscountValue(
+                                                  _selectedPromotionCode!);
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('Đóng'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ).then((value) {
+                                  if (value != null) {
+                                    setState(() {
+                                      _selectedPromotionCode = value.toString();
+                                    });
+                                  }
+                                });
+                              }
+                            },
+                            child: Text(
+                              _selectedPromotionCode != null
+                                  ? 'Mã giảm giá: $_selectedPromotionCode'
+                                  : 'Khuyến mãi',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 18.0),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(
+                          width: 16.0), // Add spacing for consistent layout
+                      Expanded(
+                        child: SizedBox(
+                          height: 50.0, // Fixed height for uniform appearance
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _showSurchargeDialog(); // Gọi hàm hiển thị dialog nhập phụ thu
+                            },
+                            style: ElevatedButton.styleFrom(
+                              textStyle: const TextStyle(fontSize: 18.0),
+                            ),
+                            child: Text(
+                              _surcharge > 0
+                                  ? 'Phụ thu: ${_surcharge.toStringAsFixed(2)} VNĐ'
+                                  : 'Phụ thu',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
 
                 // Cancel and Payment Buttons
                 const SizedBox(height: 16.0),

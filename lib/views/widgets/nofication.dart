@@ -21,7 +21,7 @@ class ToastNotification {
       msg: message,
       toastLength: toastLength,
       gravity: gravity,
-      timeInSecForIosWeb: 5,
+      timeInSecForIosWeb: 3,
       backgroundColor: backgroundColor,
       textColor: textColor,
       fontSize: fontSize,

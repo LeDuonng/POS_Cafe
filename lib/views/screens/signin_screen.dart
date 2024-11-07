@@ -25,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late RiveAnimationController _handsDownController;
   late RiveAnimationController _successController;
   late RiveAnimationController _failController;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -105,119 +106,148 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlue[50],
-      appBar: AppBar(
-        backgroundColor: Colors.lightBlue,
-        title: const Text('Login', style: TextStyle(color: Colors.white)),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                const SizedBox(height: 40.0),
-                SizedBox(
-                  height: 220,
-                  child: _riveArtboard == null
-                      ? const SizedBox.shrink()
-                      : Rive(artboard: _riveArtboard!),
-                ),
-                const SizedBox(height: 40.0),
-                TextFormField(
-                  controller: _usernameController,
-                  decoration: InputDecoration(
-                    labelText: 'Username',
-                    labelStyle: const TextStyle(color: Colors.lightBlue),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.lightBlue),
-                      borderRadius: BorderRadius.circular(12.0),
+      backgroundColor: Colors.grey[200], // Đổi màu nền sáng hơn và hiện đại hơn
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Container(
+                width: 500,
+                height: 650,
+                padding: const EdgeInsets.all(75),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 8,
+                      offset: const Offset(0, 4), // Shadow ở dưới khung
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.lightBlue, width: 2.0),
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    prefixIcon:
-                        const Icon(Icons.person, color: Colors.lightBlue),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your username';
-                    }
-                    return null;
-                  },
+                  ],
                 ),
-                const SizedBox(height: 16.0),
-                FocusScope(
-                  child: Focus(
-                    onFocusChange: _togglePasswordFieldFocus,
-                    child: TextFormField(
-                      controller: _passwordController,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    // const SizedBox(height: 20.0),
+                    SizedBox(
+                      height: 200,
+                      child: _riveArtboard == null
+                          ? const SizedBox.shrink()
+                          : Rive(artboard: _riveArtboard!),
+                    ),
+                    const SizedBox(height: 20.0),
+                    TextFormField(
+                      controller: _usernameController,
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: 'Tên đăng nhập',
                         labelStyle: const TextStyle(color: Colors.lightBlue),
                         enabledBorder: OutlineInputBorder(
                           borderSide: const BorderSide(color: Colors.lightBlue),
-                          borderRadius: BorderRadius.circular(12.0),
+                          borderRadius: BorderRadius.circular(16.0),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderSide: const BorderSide(
                               color: Colors.lightBlue, width: 2.0),
-                          borderRadius: BorderRadius.circular(12.0),
+                          borderRadius: BorderRadius.circular(16.0),
                         ),
                         prefixIcon:
-                            const Icon(Icons.lock, color: Colors.lightBlue),
+                            const Icon(Icons.person, color: Colors.lightBlue),
                       ),
-                      obscureText: true,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
+                          return 'Tên đăng nhập';
                         }
                         return null;
                       },
                     ),
-                  ),
-                ),
-                const SizedBox(height: 32.0),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.lightBlue,
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                    const SizedBox(height: 16.0),
+                    FocusScope(
+                      child: Focus(
+                        onFocusChange: _togglePasswordFieldFocus,
+                        child: TextFormField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: 'Mật khẩu',
+                            labelStyle:
+                                const TextStyle(color: Colors.lightBlue),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  const BorderSide(color: Colors.lightBlue),
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  color: Colors.lightBlue, width: 2.0),
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
+                            prefixIcon:
+                                const Icon(Icons.lock, color: Colors.lightBlue),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.lightBlue,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                          ),
+                          obscureText: _obscurePassword,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Mật khẩu';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
                     ),
-                  ),
-                  onPressed: _login,
-                  child: const Text('Login',
-                      style: TextStyle(fontSize: 18.0, color: Colors.white)),
-                ),
-                const SizedBox(height: 16.0),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const SignupScreen()),
-                    );
-                  },
-                  child: const Text(
-                    'Don\'t have an account? Sign up here',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.lightBlue,
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
+                    const SizedBox(height: 32.0),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.lightBlue,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 20.0, horizontal: 15.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.0),
+                        ),
+                      ),
+                      onPressed: _login,
+                      child: const Text('Đăng nhập',
+                          style:
+                              TextStyle(fontSize: 18.0, color: Colors.white)),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
+                    const SizedBox(height: 16.0),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SignupScreen()),
+                        );
+                      },
+                      child: const Text(
+                        'Đăng kí nếu chưa có tài khoản',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          color: Colors.lightBlue,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 40.0),
-              ],
+              ),
             ),
           ),
         ),

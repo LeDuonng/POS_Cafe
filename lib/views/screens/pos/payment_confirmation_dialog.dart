@@ -1,5 +1,6 @@
 import 'package:coffeeapp/controllers/payment_controller.dart';
 import 'package:coffeeapp/views/screens/qr_code/qr_code.dart';
+import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -278,6 +279,9 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
                       'Giá: ${item['price'].toString()} VNĐ, Số lượng: ${item['quantity']}, ${item.containsKey('size') ? 'Size: ${item['size']}, ' : 'Size: M, '}${item.containsKey('toppings') && item['toppings'].isNotEmpty ? 'Topping: ${item['toppings'].map((topping) => '$topping').join(', ')}, ' : 'Toppings: Không, '}${item.containsKey('sugar') ? 'Đường: ${item['sugar']}%' : 'Đường: 100%'}',
                 );
               }
+              ToastNotification.showToast(message: 'Thanh toán thành công!');
+
+              widget.onPaymentSuccess();
             } catch (e) {
               showDialog(
                 context: context,
@@ -298,8 +302,6 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
                 },
               );
             }
-
-            widget.onPaymentSuccess();
 
             Navigator.of(context).pop();
           },
