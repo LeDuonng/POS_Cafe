@@ -4,6 +4,7 @@ import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+// ignore: must_be_immutable
 class PaymentConfirmationDialog extends StatefulWidget {
   final String? tableId;
   final String? userID;
@@ -12,14 +13,14 @@ class PaymentConfirmationDialog extends StatefulWidget {
   final double tax;
   final double surcharge;
   final String surchargeReason;
-  final String selectedPaymentMethod;
+  String selectedPaymentMethod;
   final String? selectedPromotionCode;
   final double? promotionValue;
   final String? promotionType;
   final bool hasTaxMode;
   final Function() onPaymentSuccess;
 
-  const PaymentConfirmationDialog({
+  PaymentConfirmationDialog({
     super.key,
     this.tableId,
     this.userID,
@@ -171,39 +172,62 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
               'Phương thức thanh toán:',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
+
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Expanded(
-                  child: RadioListTile<String>(
-                    title: const Text('Tiền mặt'),
-                    value: 'cash',
-                    groupValue: widget.selectedPaymentMethod,
-                    onChanged: (value) {},
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: widget.selectedPaymentMethod == 'cash'
+                        ? Colors.green
+                        : Colors.grey,
+                    minimumSize: const Size(150, 50), // Increase button size
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(8.0), // Rectangle shape
+                    ),
                   ),
+                  onPressed: () {
+                    setState(() {
+                      widget.selectedPaymentMethod = 'cash';
+                    });
+                  },
+                  child: const Text('Tiền mặt'),
                 ),
-                Expanded(
-                  child: RadioListTile<String>(
-                    title: const Text('Thẻ'),
-                    value: 'card',
-                    groupValue: widget.selectedPaymentMethod,
-                    onChanged: (value) {},
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: widget.selectedPaymentMethod == 'card'
+                        ? Colors.green
+                        : Colors.grey,
+                    minimumSize: const Size(150, 50), // Increase button size
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(8.0), // Rectangle shape
+                    ),
                   ),
+                  onPressed: () {
+                    setState(() {
+                      widget.selectedPaymentMethod = 'card';
+                    });
+                  },
+                  child: const Text('Thẻ'),
                 ),
               ],
             ),
-            // Lời cảm ơn
-            FutureBuilder<Widget>(
-              future: qr_code(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  return snapshot.data ?? const SizedBox();
-                }
-              },
-            ),
+
+            if (widget.selectedPaymentMethod == 'card')
+              FutureBuilder<Widget>(
+                future: qr_code(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    return snapshot.data ?? const SizedBox();
+                  }
+                },
+              ),
             const Center(
               child: Column(
                 children: [
@@ -394,6 +418,7 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
       invoiceContent +=
           'Thanh toán: ${((widget.totalPrice) - (widget.promotionValue != null ? widget.promotionType == 'percentage' ? widget.totalPrice * (widget.promotionValue! / 100) : widget.promotionValue! : 0)).toStringAsFixed(2)} VNĐ\n';
     }
+
     invoiceContent += '***** CẢM ƠN QUÝ KHÁCH *****\n';
 
     // Hiển thị nội dung hóa đơn trong một dialog
@@ -402,12 +427,36 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
       builder: (BuildContext context) {
         return AlertDialog(
           content: SingleChildScrollView(
-            child: Text(
-              invoiceContent,
-              style: const TextStyle(
-                  fontFamily: 'Courier New'), // Font monospace cho dễ đọc
-            ),
-          ),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                Center(
+                  child: Text(
+                    invoiceContent,
+                    style: const TextStyle(
+                        fontFamily: 'Courier New'), // Font monospace cho dễ đọc
+                  ),
+                ),
+                // hình QR code
+                FutureBuilder<Widget>(
+                  future: qr_code(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else {
+                      return snapshot.data != null
+                          ? SizedBox(
+                              width: 300, // Adjust the width as needed
+                              height: 300, // Adjust the height as needed
+                              child: snapshot.data,
+                            )
+                          : const SizedBox();
+                    }
+                  },
+                ),
+              ])),
           actions: [
             TextButton(
               onPressed: () {

@@ -861,8 +861,7 @@ def get_daily_revenue():
     query = """
         SELECT 
             SUM(CASE WHEN payment_method = 'cash' THEN total_amount ELSE 0 END) as total_cash,
-            SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as total_card,
-            SUM(total_amount) as total_revenue
+            SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as total_card
         FROM bills
         WHERE DATE(payment_date) = %s AND del = 0
     """
@@ -871,7 +870,6 @@ def get_daily_revenue():
         daily_revenue = {
             'total_cash': rows[0][0],
             'total_card': rows[0][1],
-            'total_revenue': rows[0][2]
         }
         return jsonify(daily_revenue)
     else:

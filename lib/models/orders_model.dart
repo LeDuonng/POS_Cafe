@@ -72,7 +72,6 @@ Future<void> addNewOrder(Map<String, dynamic> order) async {
     headers: {'Content-Type': 'application/json'},
     body: json.encode(order),
   );
-  print(order['order_date']);
 
   if (response.statusCode != 201) {
     throw Exception('Failed to add order');
@@ -109,7 +108,7 @@ Future<void> deleteExistingOrder(int id) async {
         responseBody['rows_affected'] == 0) {
       throw Exception('Failed to delete order');
     } else {
-      // ignore: avoid_print
+      // ignore: avoid_Print
       print('Order deleted successfully');
     }
   }

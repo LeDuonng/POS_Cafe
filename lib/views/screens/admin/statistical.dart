@@ -33,8 +33,8 @@ class _StatisticalScreenState extends State<StatisticalScreen>
           controller: _tabController,
           tabs: const [
             Tab(text: 'Doanh thu'),
-            // Tab(text: 'Đơn hàng'),
-            // Tab(text: 'Sản phẩm'),
+            Tab(text: 'Đơn hàng'),
+            Tab(text: 'Sản phẩm'),
           ],
         ),
       ),

@@ -89,7 +89,7 @@ class _TableScreenState extends State<TableScreen> {
           return LayoutBuilder(
             builder: (context, constraints) {
               double totalWidth = constraints.maxWidth;
-              double columnWidth = totalWidth / 7; // 7 là tổng số cột hiện có
+              double columnWidth = totalWidth / 6; // 7 là tổng số cột hiện có
 
               return SingleChildScrollView(
                 scrollDirection: Axis.vertical,

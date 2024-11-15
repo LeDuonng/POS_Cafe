@@ -1,4 +1,5 @@
 import 'package:coffeeapp/models/statistical_model.dart';
+import 'package:coffeeapp/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:intl/intl.dart';
@@ -20,6 +21,8 @@ class _RevenueReportPageState extends State<RevenueReportPage>
 
   DateTime? _startDate;
   DateTime? _endDate;
+  double totalCash = 0.0;
+  double totalCard = 0.0;
 
   @override
   void initState() {
@@ -39,16 +42,14 @@ class _RevenueReportPageState extends State<RevenueReportPage>
 
   Future<void> _fetchDailyRevenue() async {
     try {
-      final data = await fetchDailyRevenue(
-          DateTime.now().toIso8601String().split('T').first);
-
-      setState(() {
-        dailyRevenueData = data
-            .map((item) => RevenueDataDaily(
-                totalCash: double.parse(item['total_cash']),
-                totalCard: double.parse(item['total_card'])))
-            .toList();
-      });
+      final data = await fetchDailyRevenue();
+      // Giải nén giá trị total_cash và total_card từ dữ liệu trả về
+      if (data.isNotEmpty) {
+        setState(() {
+          totalCash = data[0]['total_cash'] ?? 0.0;
+          totalCard = data[0]['total_card'] ?? 0.0;
+        });
+      }
     } catch (e) {
       debugPrint('Error fetching daily revenue: $e');
     }
@@ -154,29 +155,90 @@ class _RevenueReportPageState extends State<RevenueReportPage>
   Widget _buildDailyRevenueTab() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: dailyRevenueData.isNotEmpty
-          ? SfCircularChart(
-              title: ChartTitle(text: 'Doanh thu theo phương thức'),
-              series: <CircularSeries>[
-                PieSeries<RevenueDataDaily, String>(
-                  dataSource: dailyRevenueData,
-                  xValueMapper: (RevenueDataDaily data, _) =>
-                      data.totalCard > data.totalCash ? 'Thẻ' : 'Tiền mặt',
-                  yValueMapper: (RevenueDataDaily data, _) =>
-                      data.totalCard > data.totalCash
-                          ? data.totalCard
-                          : data.totalCash,
-                  dataLabelSettings: const DataLabelSettings(
-                    isVisible: true,
-                    labelPosition: ChartDataLabelPosition.outside,
-                  ),
-                  enableTooltip: true,
-                  dataLabelMapper: (RevenueDataDaily data, _) =>
-                      '${NumberFormat.currency(locale: "vi_VN", symbol: "").format(data.totalCard > data.totalCash ? data.totalCard : data.totalCash)} VNĐ\n(${_getReadableAmount(data.totalCard > data.totalCash ? data.totalCard : data.totalCash)})',
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
-              ],
-            )
-          : _buildEmptyDataWidget(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 16,
+                          height: 16,
+                          color: Colors.blue,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Tiền mặt'),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Container(
+                          width: 16,
+                          height: 16,
+                          color: Colors.green,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Thẻ'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16.0),
+          totalCash > 0 || totalCard > 0
+              ? Expanded(
+                  child: SfCircularChart(
+                    title: ChartTitle(
+                      text:
+                          'Doanh thu theo phương thức\nTổng: ${NumberFormat.currency(locale: "vi_VN", symbol: "").format(totalCash + totalCard)} VNĐ',
+                    ),
+                    series: <CircularSeries>[
+                      PieSeries<Map<String, dynamic>, String>(
+                        dataSource: [
+                          {'category': 'Tiền mặt', 'value': totalCash},
+                          {'category': 'Thẻ', 'value': totalCard}
+                        ],
+                        xValueMapper: (Map<String, dynamic> data, _) =>
+                            data['category'] as String,
+                        yValueMapper: (Map<String, dynamic> data, _) =>
+                            data['value'] as double,
+                        dataLabelSettings: const DataLabelSettings(
+                          isVisible: true,
+                          labelPosition: ChartDataLabelPosition.outside,
+                        ),
+                        dataLabelMapper: (Map<String, dynamic> data, _) {
+                          if (Responsive.isDesktop(context)) {
+                            return '${NumberFormat.currency(locale: "vi_VN", symbol: "").format(data['value'])} VNĐ\n(${_getReadableAmount(data['value'])})';
+                          } else {
+                            return '${NumberFormat.currency(locale: "vi_VN", symbol: "").format(data['value'])} VNĐ';
+                          }
+                        },
+                        enableTooltip: true,
+                        pointColorMapper: (Map<String, dynamic> data, _) =>
+                            data['category'] == 'Tiền mặt'
+                                ? Colors.blue
+                                : Colors.green,
+                      ),
+                    ],
+                  ),
+                )
+              : _buildEmptyDataWidget(),
+        ],
+      ),
     );
   }
 
@@ -185,93 +247,99 @@ class _RevenueReportPageState extends State<RevenueReportPage>
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: _startDate ?? DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime.now(),
-                      );
-                      if (picked != null && picked != _startDate) {
-                        setState(() {
-                          _startDate = picked;
-                        });
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: _startDate ?? DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null && picked != _startDate) {
+                          setState(() {
+                            _startDate = picked;
+                          });
+                          _fetchRevenueByRange();
+                        }
+                      },
+                      child: Text(_startDate == null
+                          ? 'Chọn ngày bắt đầu'
+                          : DateFormat('dd/MM/yyyy').format(_startDate!)),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () async {
+                        DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: _endDate ?? DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null && picked != _endDate) {
+                          setState(() {
+                            _endDate = picked;
+                          });
+                          _fetchRevenueByRange();
+                        }
+                      },
+                      child: Text(_endDate == null
+                          ? 'Chọn ngày kết thúc'
+                          : DateFormat('dd/MM/yyyy').format(_endDate!)),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
                         _fetchRevenueByRange();
-                      }
-                    },
-                    child: Text(_startDate == null
-                        ? 'Chọn ngày bắt đầu'
-                        : DateFormat('dd/MM/yyyy').format(_startDate!)),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () async {
-                      DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: _endDate ?? DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime.now(),
-                      );
-                      if (picked != null && picked != _endDate) {
-                        setState(() {
-                          _endDate = picked;
-                        });
-                        _fetchRevenueByRange();
-                      }
-                    },
-                    child: Text(_endDate == null
-                        ? 'Chọn ngày kết thúc'
-                        : DateFormat('dd/MM/yyyy').format(_endDate!)),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      _fetchRevenueByRange();
-                    },
-                    child: const Text('Xem'),
-                  ),
-                ],
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _startDate =
-                        DateTime.now().subtract(const Duration(days: 7));
-                    _endDate = DateTime.now();
-                  });
-                  _fetchRevenueByRange();
-                },
-                child: const Text('7 ngày qua'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _startDate = DateTime(
-                        DateTime.now().year, DateTime.now().month - 1, 1);
-                    _endDate = DateTime.now();
-                  });
-                  _fetchRevenueByRange();
-                },
-                child: const Text('Tháng trước đến nay'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _startDate =
-                        DateTime(DateTime.now().year - 1, DateTime.now().month);
-                    _endDate = DateTime.now();
-                  });
-                  _fetchRevenueByRange();
-                },
-                child: const Text('Năm qua'),
-              ),
-            ],
+                      },
+                      child: const Text('Xem'),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _startDate =
+                          DateTime.now().subtract(const Duration(days: 7));
+                      _endDate = DateTime.now();
+                    });
+                    _fetchRevenueByRange();
+                  },
+                  child: const Text('7 ngày qua'),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _startDate = DateTime(
+                          DateTime.now().year, DateTime.now().month - 1, 1);
+                      _endDate = DateTime.now();
+                    });
+                    _fetchRevenueByRange();
+                  },
+                  child: const Text('Tháng trước đến nay'),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _startDate = DateTime(
+                          DateTime.now().year - 1, DateTime.now().month);
+                      _endDate = DateTime.now();
+                    });
+                    _fetchRevenueByRange();
+                  },
+                  child: const Text('Năm qua'),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16.0),
           rangeRevenueData.isNotEmpty
@@ -292,8 +360,13 @@ class _RevenueReportPageState extends State<RevenueReportPage>
                           labelPosition: ChartDataLabelPosition.outside,
                         ),
                         enableTooltip: true,
-                        dataLabelMapper: (RevenueData data, _) =>
-                            '${NumberFormat.currency(locale: "vi_VN", symbol: "").format(data.value)} VNĐ\n(${_getReadableAmount(data.value)})',
+                        dataLabelMapper: (RevenueData data, _) {
+                          if (Responsive.isDesktop(context)) {
+                            return '${NumberFormat.currency(locale: "vi_VN", symbol: "").format(data.value)} VNĐ\n(${_getReadableAmount(data.value)})';
+                          } else {
+                            return '${NumberFormat.currency(locale: "vi_VN", symbol: "").format(data.value)} VNĐ';
+                          }
+                        },
                         pointColorMapper: (RevenueData data, _) =>
                             Colors.primaries[rangeRevenueData.indexOf(data) %
                                 Colors.primaries.length],
@@ -322,93 +395,99 @@ class _RevenueReportPageState extends State<RevenueReportPage>
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: _startDate ?? DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime.now(),
-                      );
-                      if (picked != null && picked != _startDate) {
-                        setState(() {
-                          _startDate = picked;
-                        });
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: _startDate ?? DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null && picked != _startDate) {
+                          setState(() {
+                            _startDate = picked;
+                          });
+                          _fetchRevenueByCategoryRange();
+                        }
+                      },
+                      child: Text(_startDate == null
+                          ? 'Chọn ngày bắt đầu'
+                          : DateFormat('dd/MM/yyyy').format(_startDate!)),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () async {
+                        DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: _endDate ?? DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null && picked != _endDate) {
+                          setState(() {
+                            _endDate = picked;
+                          });
+                          _fetchRevenueByCategoryRange();
+                        }
+                      },
+                      child: Text(_endDate == null
+                          ? 'Chọn ngày kết thúc'
+                          : DateFormat('dd/MM/yyyy').format(_endDate!)),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
                         _fetchRevenueByCategoryRange();
-                      }
-                    },
-                    child: Text(_startDate == null
-                        ? 'Chọn ngày bắt đầu'
-                        : DateFormat('dd/MM/yyyy').format(_startDate!)),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () async {
-                      DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: _endDate ?? DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime.now(),
-                      );
-                      if (picked != null && picked != _endDate) {
-                        setState(() {
-                          _endDate = picked;
-                        });
-                        _fetchRevenueByCategoryRange();
-                      }
-                    },
-                    child: Text(_endDate == null
-                        ? 'Chọn ngày kết thúc'
-                        : DateFormat('dd/MM/yyyy').format(_endDate!)),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      _fetchRevenueByCategoryRange();
-                    },
-                    child: const Text('Xem'),
-                  ),
-                ],
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _startDate =
-                        DateTime.now().subtract(const Duration(days: 7));
-                    _endDate = DateTime.now();
-                  });
-                  _fetchRevenueByCategoryRange();
-                },
-                child: const Text('7 ngày qua'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _startDate = DateTime(
-                        DateTime.now().year, DateTime.now().month - 1, 1);
-                    _endDate = DateTime.now();
-                  });
-                  _fetchRevenueByCategoryRange();
-                },
-                child: const Text('Tháng trước đến nay'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _startDate =
-                        DateTime(DateTime.now().year - 1, DateTime.now().month);
-                    _endDate = DateTime.now();
-                  });
-                  _fetchRevenueByCategoryRange();
-                },
-                child: const Text('Năm qua'),
-              ),
-            ],
+                      },
+                      child: const Text('Xem'),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _startDate =
+                          DateTime.now().subtract(const Duration(days: 7));
+                      _endDate = DateTime.now();
+                    });
+                    _fetchRevenueByCategoryRange();
+                  },
+                  child: const Text('7 ngày qua'),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _startDate = DateTime(
+                          DateTime.now().year, DateTime.now().month - 1, 1);
+                      _endDate = DateTime.now();
+                    });
+                    _fetchRevenueByCategoryRange();
+                  },
+                  child: const Text('Tháng trước đến nay'),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _startDate = DateTime(
+                          DateTime.now().year - 1, DateTime.now().month);
+                      _endDate = DateTime.now();
+                    });
+                    _fetchRevenueByCategoryRange();
+                  },
+                  child: const Text('Năm qua'),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16.0),
           categoryRevenueData.isNotEmpty
@@ -429,8 +508,13 @@ class _RevenueReportPageState extends State<RevenueReportPage>
                           labelPosition: ChartDataLabelPosition.outside,
                         ),
                         enableTooltip: true,
-                        dataLabelMapper: (RevenueData data, _) =>
-                            '${NumberFormat.currency(locale: "vi_VN", symbol: "").format(data.value)} VNĐ\n(${_getReadableAmount(data.value)})',
+                        dataLabelMapper: (RevenueData data, _) {
+                          if (Responsive.isDesktop(context)) {
+                            return '${NumberFormat.currency(locale: "vi_VN", symbol: "").format(data.value)} VNĐ\n(${_getReadableAmount(data.value)})';
+                          } else {
+                            return '${NumberFormat.currency(locale: "vi_VN", symbol: "").format(data.value)} VNĐ';
+                          }
+                        },
                         pointColorMapper: (RevenueData data, _) =>
                             Colors.primaries[categoryRevenueData.indexOf(data) %
                                 Colors.primaries.length],
@@ -459,93 +543,99 @@ class _RevenueReportPageState extends State<RevenueReportPage>
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: _startDate ?? DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime.now(),
-                      );
-                      if (picked != null && picked != _startDate) {
-                        setState(() {
-                          _startDate = picked;
-                        });
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: _startDate ?? DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null && picked != _startDate) {
+                          setState(() {
+                            _startDate = picked;
+                          });
+                          _fetchRevenueByStaffRange();
+                        }
+                      },
+                      child: Text(_startDate == null
+                          ? 'Chọn ngày bắt đầu'
+                          : DateFormat('dd/MM/yyyy').format(_startDate!)),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () async {
+                        DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: _endDate ?? DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null && picked != _endDate) {
+                          setState(() {
+                            _endDate = picked;
+                          });
+                          _fetchRevenueByStaffRange();
+                        }
+                      },
+                      child: Text(_endDate == null
+                          ? 'Chọn ngày kết thúc'
+                          : DateFormat('dd/MM/yyyy').format(_endDate!)),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
                         _fetchRevenueByStaffRange();
-                      }
-                    },
-                    child: Text(_startDate == null
-                        ? 'Chọn ngày bắt đầu'
-                        : DateFormat('dd/MM/yyyy').format(_startDate!)),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () async {
-                      DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: _endDate ?? DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime.now(),
-                      );
-                      if (picked != null && picked != _endDate) {
-                        setState(() {
-                          _endDate = picked;
-                        });
-                        _fetchRevenueByStaffRange();
-                      }
-                    },
-                    child: Text(_endDate == null
-                        ? 'Chọn ngày kết thúc'
-                        : DateFormat('dd/MM/yyyy').format(_endDate!)),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      _fetchRevenueByStaffRange();
-                    },
-                    child: const Text('Xem'),
-                  ),
-                ],
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _startDate =
-                        DateTime.now().subtract(const Duration(days: 7));
-                    _endDate = DateTime.now();
-                  });
-                  _fetchRevenueByStaffRange();
-                },
-                child: const Text('7 ngày qua'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _startDate = DateTime(
-                        DateTime.now().year, DateTime.now().month - 1, 1);
-                    _endDate = DateTime.now();
-                  });
-                  _fetchRevenueByStaffRange();
-                },
-                child: const Text('Tháng trước đến nay'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _startDate =
-                        DateTime(DateTime.now().year - 1, DateTime.now().month);
-                    _endDate = DateTime.now();
-                  });
-                  _fetchRevenueByStaffRange();
-                },
-                child: const Text('Năm qua'),
-              ),
-            ],
+                      },
+                      child: const Text('Xem'),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _startDate =
+                          DateTime.now().subtract(const Duration(days: 7));
+                      _endDate = DateTime.now();
+                    });
+                    _fetchRevenueByStaffRange();
+                  },
+                  child: const Text('7 ngày qua'),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _startDate = DateTime(
+                          DateTime.now().year, DateTime.now().month - 1, 1);
+                      _endDate = DateTime.now();
+                    });
+                    _fetchRevenueByStaffRange();
+                  },
+                  child: const Text('Tháng trước đến nay'),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _startDate = DateTime(
+                          DateTime.now().year - 1, DateTime.now().month);
+                      _endDate = DateTime.now();
+                    });
+                    _fetchRevenueByStaffRange();
+                  },
+                  child: const Text('Năm qua'),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16.0),
           staffRevenueData.isNotEmpty
@@ -566,8 +656,13 @@ class _RevenueReportPageState extends State<RevenueReportPage>
                           labelPosition: ChartDataLabelPosition.outside,
                         ),
                         enableTooltip: true,
-                        dataLabelMapper: (RevenueData data, _) =>
-                            '${NumberFormat.currency(locale: "vi_VN", symbol: "").format(data.value)} VNĐ\n(${_getReadableAmount(data.value)})',
+                        dataLabelMapper: (RevenueData data, _) {
+                          if (Responsive.isDesktop(context)) {
+                            return '${NumberFormat.currency(locale: "vi_VN", symbol: "").format(data.value)} VNĐ\n(${_getReadableAmount(data.value)})';
+                          } else {
+                            return '${NumberFormat.currency(locale: "vi_VN", symbol: "").format(data.value)} VNĐ';
+                          }
+                        },
                         pointColorMapper: (RevenueData data, _) =>
                             Colors.primaries[staffRevenueData.indexOf(data) %
                                 Colors.primaries.length],
@@ -668,7 +763,7 @@ class RevenueDataDaily {
   final double totalCash;
   final double totalCard;
 
-  RevenueDataDaily({required this.totalCash, required this.totalCard});
+  RevenueDataDaily(this.totalCash, this.totalCard);
 }
 
 Widget _buildEmptyDataWidget() {

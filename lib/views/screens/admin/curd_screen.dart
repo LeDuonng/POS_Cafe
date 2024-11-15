@@ -23,14 +23,33 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Dashboard',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ));
+      title: 'Dashboard',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const CURDScreen(id: '1', username: 'user', role: 'admin'),
+    );
   }
 }
 
-class CURDScreen extends StatelessWidget {
+class CURDScreen extends StatefulWidget {
+  final String? id;
+  final String? username;
+  final String? role;
+
+  const CURDScreen({
+    super.key,
+    required this.id,
+    required this.username,
+    required this.role,
+  });
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _CURDScreenState createState() => _CURDScreenState();
+}
+
+class _CURDScreenState extends State<CURDScreen> {
   final List<Map<String, dynamic>> screens = const [
     {'name': 'Menu Món', 'screen': MenuScreen()},
     {'name': 'Topping', 'screen': ToppingScreen()},
@@ -46,16 +65,7 @@ class CURDScreen extends StatelessWidget {
     {'name': 'Khuyến mãi', 'screen': PromotionScreen()},
   ];
 
-  final String? id;
-  final String? username;
-  final String? role;
-
-  const CURDScreen({
-    super.key,
-    required this.id,
-    required this.username,
-    required this.role,
-  });
+  int _selectedIndex = 0;
 
   List<Map<String, dynamic>> getAccessibleScreens(String role) {
     switch (role.toLowerCase().toString()) {
@@ -66,8 +76,8 @@ class CURDScreen extends StatelessWidget {
           return [
             'Bàn',
             'Menu Món',
-            'Topping'
-                'Đơn',
+            'Topping',
+            'Đơn',
             'Chi tiết đơn',
             'Hoá đơn',
             'Tồn kho',
@@ -92,7 +102,7 @@ class CURDScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Kiểm tra nếu `role` là null, điều hướng về màn hình đăng nhập
-    if (role == null || role!.isEmpty) {
+    if (widget.role == null || widget.role!.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacement(
           context,
@@ -104,7 +114,7 @@ class CURDScreen extends StatelessWidget {
       );
     }
 
-    final accessibleScreens = getAccessibleScreens(role!);
+    final accessibleScreens = getAccessibleScreens(widget.role!);
 
     // Kiểm tra nếu danh sách các màn hình truy cập được là rỗng
     if (accessibleScreens.isEmpty) {
@@ -120,21 +130,71 @@ class CURDScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Dashboard'),
       ),
-      body: ListView.builder(
-        itemCount: accessibleScreens.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(accessibleScreens[index]['name']),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => accessibleScreens[index]['screen'],
-                ),
-              );
+      body: Row(
+        children: [
+          NavigationRail(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: (int index) {
+              setState(() {
+                _selectedIndex = index;
+              });
             },
-          );
-        },
+            labelType: NavigationRailLabelType.all,
+            destinations: accessibleScreens.map((screen) {
+              IconData iconData;
+              switch (screen['name']) {
+                case 'Menu Món':
+                  iconData = Icons.restaurant_menu;
+                  break;
+                case 'Topping':
+                  iconData = Icons.local_pizza;
+                  break;
+                case 'Người dùng':
+                  iconData = Icons.person;
+                  break;
+                case 'Bàn':
+                  iconData = Icons.table_chart;
+                  break;
+                case 'Nhân viên':
+                  iconData = Icons.people;
+                  break;
+                case 'Nguyên liệu':
+                  iconData = Icons.kitchen;
+                  break;
+                case 'Đơn':
+                  iconData = Icons.receipt;
+                  break;
+                case 'Chi tiết đơn':
+                  iconData = Icons.list_alt;
+                  break;
+                case 'Hoá đơn':
+                  iconData = Icons.attach_money;
+                  break;
+                case 'Tồn kho':
+                  iconData = Icons.inventory;
+                  break;
+                case 'Điểm khách hàng':
+                  iconData = Icons.star;
+                  break;
+                case 'Khuyến mãi':
+                  iconData = Icons.local_offer;
+                  break;
+                default:
+                  iconData = Icons.circle;
+              }
+              return NavigationRailDestination(
+                icon: Icon(iconData),
+                selectedIcon: Icon(iconData, color: Colors.blue),
+                label: Text(screen['name']),
+              );
+            }).toList(),
+          ),
+          const VerticalDivider(thickness: 1, width: 1),
+          // This is the main content.
+          Expanded(
+            child: accessibleScreens[_selectedIndex]['screen'],
+          )
+        ],
       ),
     );
   }
