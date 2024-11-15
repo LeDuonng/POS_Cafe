@@ -197,7 +197,7 @@ class _CustomizationDialogState extends State<CustomizationDialog> {
           const Text('Chọn topping',
               style: TextStyle(fontWeight: FontWeight.bold)),
           FutureBuilder<List<dynamic>>(
-            future: fetchToppings(),
+            future: fetchTopping(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());

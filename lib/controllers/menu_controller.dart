@@ -1,3 +1,5 @@
+import 'package:coffeeapp/views/widgets/nofication.dart';
+
 import '../models/menu_model.dart';
 
 //select * from menu
@@ -23,11 +25,9 @@ Future<void> addMenu(
   };
   try {
     await addItem(newItem);
-    // ignore: avoid_print
-    print('Item added successfully');
+    ToastNotification.showToast(message: 'Thêm món thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add item: $e');
+    ToastNotification.showToast(message: 'Thêm món không thành công: $e');
   }
 }
 
@@ -48,11 +48,9 @@ Future<void> updateMenu(
   };
   try {
     await updateItem(id, updatedItem);
-    // ignore: avoid_print
-    print('Item updated successfully');
+    ToastNotification.showToast(message: 'Cập nhật thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to update item: $e');
+    ToastNotification.showToast(message: 'Cập nhật không thành công: $e');
   }
 }
 
@@ -60,11 +58,9 @@ Future<void> updateMenu(
 Future<void> deleteMenu(int id) async {
   try {
     await deleteItem(id);
-    // ignore: avoid_print
-    print('Item deleted successfully');
+    ToastNotification.showToast(message: 'Xóa món thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to delete item: $e');
+    ToastNotification.showToast(message: 'Xóa món không thành công: $e');
   }
 }
 
@@ -84,11 +80,9 @@ Future<void> addTopping(
   };
   try {
     await addToppingg(newTopping);
-    // ignore: avoid_print
-    print('Topping added successfully');
+    ToastNotification.showToast(message: 'Thêm topping thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add topping: $e');
+    ToastNotification.showToast(message: 'Thêm topping không thành công: $e');
   }
 }
 
@@ -109,31 +103,28 @@ Future<void> updateTopping(
   };
   try {
     await updateToppingg(id, updatedTopping);
-    // ignore: avoid_print
-    print('Topping updated successfully');
+    ToastNotification.showToast(message: 'Cập nhật topping thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to update topping: $e');
+    ToastNotification.showToast(
+        message: 'Cập nhật topping không thành công: $e');
   }
 }
 
 Future<void> deleteTopping(int id) async {
   try {
     await deleteToppingg(id);
-    // ignore: avoid_print
-    print('Topping deleted successfully');
+    ToastNotification.showToast(message: 'Xóa topping thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to delete topping: $e');
+    ToastNotification.showToast(message: 'Xóa topping không thành công: $e');
   }
 }
 
-Future<List<dynamic>> searchTopping(int id) async {
+Future<List<dynamic>> searchTopping(String query) async {
   try {
-    return await fetchToppingById(id);
+    return await searchToppingItem(query);
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to fetch topping: $e');
+    ToastNotification.showToast(
+        message: 'Tìm kiếm topping không thành công: $e');
     return [];
   }
 }

@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import mysql.connector
@@ -151,13 +152,7 @@ def delete_topping(id):
     rowcount = update_query(query, (id,))
     return jsonify({'rows_affected': rowcount}), 200
 
-@app.route('/topping/search', methods=['GET'])
-def search_topping():
-    name = request.args.get('name', '')
-    query = "SELECT id, name, description, price, image, category FROM menu WHERE name LIKE %s AND topping = 1 AND del = 0"
-    rows = fetch_data(query % f"'%{name}%'")
-    toppings = [{'id': row[0], 'name': row[1], 'description': row[2], 'price': row[3], 'image': row[4], 'category': row[5]} for row in rows]
-    return jsonify(toppings)
+
 
 @app.route('/ingredients', methods=['GET'])
 def get_ingredients():
@@ -447,57 +442,54 @@ def get_staff_member(id):
 
 @app.route('/ingredients/search', methods=['GET'])
 def search_ingredients():
-    name = request.args.get('name', '')
-    query = "SELECT id, name, unit, quantity FROM ingredients WHERE name LIKE %s AND del = 0"
-    rows = fetch_data(query % f"'%{name}%'")
+    name = request.args.get('name', None)
+    if name:
+        query = "SELECT id, name, unit, quantity FROM ingredients WHERE del = 0 AND name COLLATE utf8mb4_general_ci LIKE %s"
+        rows = fetch_data(query, (f"%{name}%",))
+    else:
+        query = "SELECT id, name, unit, quantity FROM ingredients WHERE del = 0"
+        rows = fetch_data(query)
     ingredients = [{'id': row[0], 'name': row[1], 'unit': row[2], 'quantity': row[3]} for row in rows]
     return jsonify(ingredients)
 
-@app.route('/orders/search/<int:id>', methods=['GET'])
-def search_orders(id):
-    query = "SELECT id, table_id, customer_id, staff_id, order_date, status FROM orders WHERE id LIKE %s AND del = 0"
-    rows = fetch_data(query % id)
-    orders = [{'id': rows[0][0], 
-               'table_id': rows[0][1], 
-               'customer_id': rows[0][2], 
-               'staff_id': rows[0][3], 
-               'order_date': rows[0][4].strftime('%d-%m-%Y') if rows[0][4] else None,
-               'status': rows[0][5]} for row in rows]
+@app.route('/orders/search', methods=['GET'])
+def search_orders():
+    status = request.args.get('status', None)
+    if status:
+        query = "SELECT id, table_id, customer_id, staff_id, order_date, status FROM orders WHERE del = 0 AND status COLLATE utf8mb4_general_ci LIKE %s"
+        rows = fetch_data(query, (f"%{status}%",))
+    else:
+        query = "SELECT id, table_id, customer_id, staff_id, order_date, status FROM orders WHERE del = 0"
+        rows = fetch_data(query)
+    orders = [{'id': row[0], 'table_id': row[1], 'customer_id': row[2], 'staff_id': row[3], 'order_date': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None, 'status': row[5]} for row in rows]
     return jsonify(orders)
-
 
 
 @app.route('/order_items/search', methods=['GET'])
 def search_order_items():
-    order_id = request.args.get('order_id', '')
-    query = "SELECT id, order_id, menu_id, quantity, price FROM order_items WHERE order_id LIKE %s AND del = 0"
-    rows = fetch_data(query % f"'%{order_id}%'")
+    order_id = request.args.get('order_id', None)
+    if order_id:
+        query = "SELECT id, order_id, menu_id, quantity, price FROM order_items WHERE del = 0 AND order_id = %s"
+        rows = fetch_data(query, (order_id,))
+    else:
+        query = "SELECT id, order_id, menu_id, quantity, price FROM order_items WHERE del = 0"
+        rows = fetch_data(query)
     order_items = [{'id': row[0], 'order_id': row[1], 'menu_id': row[2], 'quantity': row[3], 'price': row[4]} for row in rows]
     return jsonify(order_items)
 
-@app.route('/bills/search/<int:id>', methods=['GET'])
-def search_bills(id):
-    query = "SELECT id, order_id, total_amount, payment_method, payment_date FROM bills WHERE id LIKE %s AND del = 0"
-    rows = fetch_data(query % id)
-    bills = [{'id': rows[0][0], 
-              'order_id': rows[0][1], 
-              'total_amount': rows[0][2], 
-              'payment_method': rows[0][3], 
-              'payment_date': rows[0][4].strftime('%d-%m-%Y') if rows[0][4] else None,}for row in rows]
+@app.route('/bills/search', methods=['GET'])
+def search_bills():
+    payment_method = request.args.get('payment_method', None)
+    if payment_method:
+        query = "SELECT id, order_id, total_amount, payment_method, payment_date, promotion_code FROM bills WHERE del = 0 AND payment_method COLLATE utf8mb4_general_ci LIKE %s"
+        rows = fetch_data(query, (f"%{payment_method}%",))
+    else:
+        query = "SELECT id, order_id, total_amount, payment_method, payment_date, promotion_code FROM bills WHERE del = 0"
+        rows = fetch_data(query)
+    bills = [{'id': row[0], 'order_id': row[1], 'total_amount': row[2], 'payment_method': row[3], 'payment_date': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None, 'promotion_code': row[5]} for row in rows]
     return jsonify(bills)
 
 
-
-@app.route('/inventory/search/<int:id>', methods=['GET'])
-def search_inventory(id):
-    query = "SELECT id, ingredient_id, quantity,  last_updated FROM inventory WHERE ingredient_id LIKE %s AND del = 0"
-    rows = fetch_data(query % id)
-    inventory = [{'id': rows[0][0], 
-                  'ingredient_id': rows[0][1], 
-                  'quantity': rows[0][2], 
-                  'last_updated': rows[0][3].strftime('%d-%m-%Y') if rows[0][3] else None,
-                  } for row in rows]
-    return jsonify(inventory)
 
 
 @app.route('/customer_points/<int:id>', methods=['GET'])
@@ -705,19 +697,6 @@ def delete_promotion(id):
     rowcount = update_query(query, (id,))
     return jsonify({'rows_affected': rowcount}), 200
 
-@app.route('/promotions/search/<string:search_term>', methods=['GET'])
-def search_promotions(search_term):
-    like_term = f"%{search_term}%"
-    query = f"""
-        SELECT id, name, description, start_date, end_date, discount_type, discount_value, min_order_value, code_limit, usage_limit, active
-        FROM promotions
-        WHERE (name LIKE '{like_term}' 
-        OR description LIKE '{like_term}')
-        AND del = 0
-    """
-    rows = fetch_data(query)
-    promotions = [{'id': row[0], 'name': row[1], 'description': row[2], 'start_date': row[3].strftime('%Y-%m-%d') if row[3] else None, 'end_date': row[4].strftime('%Y-%m-%d') if row[4] else None, 'discount_type': row[5], 'discount_value': row[6], 'min_order_value': row[7], 'code_limit': row[8], 'usage_limit': row[9], 'active': row[10]} for row in rows]
-    return jsonify(promotions)
 
 @app.route('/promotionscustomer/search/<string:search_term>', methods=['GET'])
 def search_promotions_customer(search_term):
@@ -802,6 +781,213 @@ def search_promotion_codes(search_term):
     rows = fetch_data(query)
     promotion_codes = [{'id': row[0], 'promotion_id': row[1], 'code': row[2], 'is_used': row[3], 'used_by': row[4], 'used_at': row[5].strftime('%Y-%m-%d %H:%M:%S') if row[5] else None} for row in rows]
     return jsonify(promotion_codes)
+
+
+@app.route('/staff/search', methods=['GET'])
+def search_staff():
+    position = request.args.get('position', None)
+    if position:
+        query = "SELECT id, user_id, salary, start_date, position FROM staff WHERE del = 0 AND position COLLATE utf8mb4_general_ci LIKE %s"
+        rows = fetch_data(query, (f"%{position}%",))
+    else:
+        query = "SELECT id, user_id, salary, start_date, position FROM staff WHERE del = 0"
+        rows = fetch_data(query)
+    staff = [{'id': row[0], 'user_id': row[1], 'salary': row[2], 'start_date': row[3].strftime('%Y-%m-%d') if row[3] else None, 'position': row[4]} for row in rows]
+    return jsonify(staff)
+
+@app.route('/tables/search', methods=['GET'])
+def search_tables():
+    area = request.args.get('area', None)
+    if area:
+        query = "SELECT id, name, floor, area, status FROM tables WHERE del = 0 AND area COLLATE utf8mb4_general_ci LIKE %s"
+        rows = fetch_data(query, (f"%{area}%",))
+    else:
+        query = "SELECT id, name, floor, area, status FROM tables WHERE del = 0"
+        rows = fetch_data(query)
+    tables = [{'id': row[0], 'name': row[1], 'floor': row[2], 'area': row[3], 'status': row[4]} for row in rows]
+    return jsonify(tables)
+
+
+
+@app.route('/inventory/search', methods=['GET'])
+def search_inventory():
+    ingredient_id = request.args.get('ingredient_id', None)
+    if ingredient_id:
+        query = "SELECT id, ingredient_id, quantity, last_updated FROM inventory WHERE del = 0 AND ingredient_id = %s"
+        rows = fetch_data(query, (ingredient_id,))
+    else:
+        query = "SELECT id, ingredient_id, quantity, last_updated FROM inventory WHERE del = 0"
+        rows = fetch_data(query)
+    inventory = [{'id': row[0], 'ingredient_id': row[1], 'quantity': row[2], 'last_updated': row[3].strftime('%Y-%m-%d %H:%M:%S') if row[3] else None} for row in rows]
+    return jsonify(inventory)
+
+
+
+@app.route('/promotions/search', methods=['GET'])
+def search_promotions():
+    name = request.args.get('name', None)
+    if name:
+        query = "SELECT id, name, description, start_date, end_date, discount_type, discount_value, min_order_value, code_limit, usage_limit, active FROM promotions WHERE del = 0 AND name COLLATE utf8mb4_general_ci LIKE %s"
+        rows = fetch_data(query, (f"%{name}%",))
+    else:
+        query = "SELECT id, name, description, start_date, end_date, discount_type, discount_value, min_order_value, code_limit, usage_limit, active FROM promotions WHERE del = 0"
+        rows = fetch_data(query)
+    promotions = [{'id': row[0], 'name': row[1], 'description': row[2], 'start_date': row[3].strftime('%Y-%m-%d') if row[3] else None, 'end_date': row[4].strftime('%Y-%m-%d') if row[4] else None, 'discount_type': row[5], 'discount_value': row[6], 'min_order_value': row[7], 'code_limit': row[8], 'usage_limit': row[9], 'active': row[10]} for row in rows]
+    return jsonify(promotions)
+
+
+
+@app.route('/topping/search', methods=['GET'])
+def search_topping():
+    name = request.args.get('name', None)
+    if name:
+        query = "SELECT id, name, description, price, image, category FROM menu WHERE name COLLATE utf8mb4_general_ci LIKE %s AND topping = 1 AND del = 0"
+        rows = fetch_data(query, (f"%{name}%",))
+    else:
+        query = "SELECT id, name, description, price, image, category FROM menu WHERE topping = 1 AND del = 0"
+        rows = fetch_data(query)
+    toppings = [{'id': row[0], 'name': row[1], 'description': row[2], 'price': row[3], 'image': row[4], 'category': row[5]} for row in rows]
+    return jsonify(toppings)
+
+
+@app.route('/reports/revenue/daily', methods=['GET'])
+def get_daily_revenue():
+    date_str = request.args.get('date')
+    try:
+        date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Invalid date format. Please use YYYY-MM-DD.'}), 400
+
+    query = """
+        SELECT 
+            SUM(CASE WHEN payment_method = 'cash' THEN total_amount ELSE 0 END) as total_cash,
+            SUM(CASE WHEN payment_method = 'card' THEN total_amount ELSE 0 END) as total_card,
+            SUM(total_amount) as total_revenue
+        FROM bills
+        WHERE DATE(payment_date) = %s AND del = 0
+    """
+    rows = fetch_data(query, (date_obj,))
+    if rows and rows[0][0] is not None: # Check if any data exists for the given date.
+        daily_revenue = {
+            'total_cash': rows[0][0],
+            'total_card': rows[0][1],
+            'total_revenue': rows[0][2]
+        }
+        return jsonify(daily_revenue)
+    else:
+        return jsonify({'message': 'No revenue data found for this date'}), 404
+
+
+@app.route('/reports/revenue/range', methods=['GET'])
+def get_revenue_by_range():
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+
+    try:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Invalid date format. Please use YYYY-MM-DD.'}), 400
+
+    query = """
+        SELECT 
+            DATE(payment_date) as payment_date,
+            SUM(total_amount) as total_revenue
+        FROM bills
+        WHERE payment_date >= %s AND payment_date <= %s AND del = 0
+        GROUP BY payment_date
+    """    
+    rows = fetch_data(query, (start_date, end_date))
+
+    revenue_data = [{'date': row[0].strftime('%Y-%m-%d'), 'total_revenue': row[1]} for row in rows]
+
+    return jsonify(revenue_data)
+
+
+
+@app.route('/reports/revenue/category', methods=['GET'])
+def get_revenue_by_category():
+    query = """
+        SELECT m.category, SUM(oi.quantity * oi.price) AS total_revenue
+        FROM order_items oi
+        JOIN menu m ON oi.menu_id = m.id
+        WHERE oi.del = 0
+        GROUP BY m.category
+    """
+    rows = fetch_data(query)
+    revenue_by_category = [{'category': row[0], 'total_revenue': row[1]} for row in rows]
+    return jsonify(revenue_by_category)
+
+@app.route('/reports/revenue/category/range', methods=['GET'])
+def get_revenue_by_category_range():
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+
+    try:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Invalid date format. Please use YYYY-MM-DD.'}), 400
+
+    query = """
+        SELECT m.category, SUM(oi.quantity * oi.price) AS total_revenue
+        FROM order_items oi
+        JOIN menu m ON oi.menu_id = m.id
+        JOIN orders o ON oi.order_id = o.id
+        WHERE oi.del = 0 AND o.order_date >= %s AND o.order_date <= %s
+        GROUP BY m.category
+    """
+    rows = fetch_data(query, (start_date, end_date))
+    revenue_by_category = [{'category': row[0], 'total_revenue': row[1]} for row in rows]
+    return jsonify(revenue_by_category)
+
+##dựa theo reports/revenue/range làm /reports/revenue/staff cũng dựa theo các khoảng thời gian
+@app.route('/reports/revenue/staff/range', methods=['GET'])
+def get_revenue_by_staff_range():
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+
+    try:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Invalid date format. Please use YYYY-MM-DD.'}), 400
+
+    query = """
+    SELECT 
+        s.id AS staff_id,
+        u.name AS staff_name,
+        SUM(b.total_amount) AS total_revenue
+    FROM bills AS b
+    JOIN orders AS o ON b.order_id = o.id
+    JOIN staff AS s ON o.staff_id = s.id
+    JOIN users AS u ON s.user_id = u.id
+    WHERE b.del = 0 AND o.order_date >= %s AND o.order_date <= %s
+    GROUP BY s.id, u.name
+    """
+    rows = fetch_data(query, (start_date, end_date))
+    revenue_by_staff = [{'staff_id': row[0], 'staff_name': row[1], 'total_revenue': row[2]} for row in rows]
+    return jsonify(revenue_by_staff)
+
+
+@app.route('/reports/revenue/staff', methods=['GET'])
+def get_revenue_by_staff():
+    query = """
+    SELECT 
+        s.id AS staff_id,
+        u.name AS staff_name,
+        SUM(b.total_amount) AS total_revenue
+    FROM bills AS b
+    JOIN orders AS o ON b.order_id = o.id
+    JOIN staff AS s ON o.staff_id = s.id
+    JOIN users AS u ON s.user_id = u.id
+    WHERE b.del = 0
+    GROUP BY s.id, u.name
+    """
+    rows = fetch_data(query)
+    revenue_by_staff = [{'staff_id': row[0], 'staff_name': row[1], 'total_revenue': row[2]} for row in rows]
+    return jsonify(revenue_by_staff)
+
 
 
 if __name__ == '__main__':

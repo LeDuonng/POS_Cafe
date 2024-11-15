@@ -1,3 +1,5 @@
+import 'package:coffeeapp/views/widgets/nofication.dart';
+
 import '../models/staff_model.dart';
 
 // select * from staff
@@ -23,11 +25,9 @@ Future<void> addStaff({
   };
   try {
     await addStaffItem(newStaff);
-    // ignore: avoid_print
-    print('Staff added successfully');
+    ToastNotification.showToast(message: 'Thêm nhân viên thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add staff: $e');
+    ToastNotification.showToast(message: 'Thêm nhân viên thất bại: $e');
   }
 }
 
@@ -47,11 +47,9 @@ Future<void> updateStaff({
   };
   try {
     await updateStaffItem(id, updatedStaff);
-    // ignore: avoid_print
-    print('Staff updated successfully');
+    ToastNotification.showToast(message: 'Cập nhật nhân viên thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to update staff: $e');
+    ToastNotification.showToast(message: 'Cập nhật nhân viên thất bại: $e');
   }
 }
 
@@ -59,10 +57,8 @@ Future<void> updateStaff({
 Future<void> deleteStaff(int id) async {
   try {
     await deleteStaffItem(id);
-    // ignore: avoid_print
-    print('Staff deleted successfully');
+    ToastNotification.showToast(message: 'Xóa nhân viên thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to delete staff: $e');
+    ToastNotification.showToast(message: 'Xóa nhân viên thất bại: $e');
   }
 }

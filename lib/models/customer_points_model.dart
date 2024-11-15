@@ -100,3 +100,18 @@ Future<List<dynamic>> fetchCustomerPointsById(int id) async {
     throw Exception('Failed to load customer points');
   }
 }
+
+Future<List<dynamic>> searchCustomerPoints([String? userId]) async {
+  final uri = userId != null
+      ? Uri.parse(
+          '${getPlatformBaseUrl()}/customer_points/search?user_id=$userId')
+      : Uri.parse('${getPlatformBaseUrl()}/customer_points/search');
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load customer points');
+  }
+}

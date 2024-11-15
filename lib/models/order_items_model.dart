@@ -38,6 +38,21 @@ class OrderItem {
   }
 }
 
+Future<List<dynamic>> searchOrderItems([String? orderId]) async {
+  final uri = orderId != null
+      ? Uri.parse(
+          '${getPlatformBaseUrl()}/order_items/search?order_id=$orderId')
+      : Uri.parse('${getPlatformBaseUrl()}/order_items/search');
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load order items');
+  }
+}
+
 Future<List<dynamic>> fetchOrderItems() async {
   final response =
       await http.get(Uri.parse('${getPlatformBaseUrl()}/order_items'));

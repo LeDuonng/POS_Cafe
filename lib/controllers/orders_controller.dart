@@ -1,3 +1,5 @@
+import 'package:coffeeapp/views/widgets/nofication.dart';
+
 import '../models/orders_model.dart';
 
 // Model for Order
@@ -66,11 +68,9 @@ Future<void> addOrder({
   };
   try {
     await addNewOrder(newOrder);
-    // ignore: avoid_print
-    print('Order added successfully');
+    ToastNotification.showToast(message: 'Đơn hàng đã được thêm thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add order: $e');
+    ToastNotification.showToast(message: 'Thêm đơn hàng thất bại: $e');
   }
 }
 
@@ -92,11 +92,10 @@ Future<void> updateOrder({
   };
   try {
     await updateExistingOrder(id, updatedOrder);
-    // ignore: avoid_print
-    print('Order updated successfully');
+    ToastNotification.showToast(
+        message: 'Đơn hàng đã được cập nhật thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to update order: $e');
+    ToastNotification.showToast(message: 'Cập nhật đơn hàng thất bại: $e');
   }
 }
 
@@ -104,10 +103,8 @@ Future<void> updateOrder({
 Future<void> deleteOrder(int id) async {
   try {
     await deleteExistingOrder(id);
-    // ignore: avoid_print
-    print('Order deleted successfully');
+    ToastNotification.showToast(message: 'Đơn hàng đã được xóa thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to delete order: $e');
+    ToastNotification.showToast(message: 'Xóa đơn hàng thất bại: $e');
   }
 }

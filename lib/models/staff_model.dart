@@ -42,6 +42,20 @@ class Staff {
   }
 }
 
+Future<List<dynamic>> searchStaff([String? position]) async {
+  final uri = position != null
+      ? Uri.parse('${getPlatformBaseUrl()}/staff/search?position=$position')
+      : Uri.parse('${getPlatformBaseUrl()}/staff/search');
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load staff');
+  }
+}
+
 Future<List<dynamic>> fetchStaff() async {
   final response = await http.get(Uri.parse('${getPlatformBaseUrl()}/staff'));
 

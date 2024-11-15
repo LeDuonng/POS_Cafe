@@ -62,23 +62,28 @@ Future<List<dynamic>> fetchMenus() async {
   }
 }
 
-Future<List<dynamic>> fetchToppings() async {
-  final response = await http.get(Uri.parse('${getPlatformBaseUrl()}/topping'));
-
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to load menu');
-  }
-}
-
 Future<List<dynamic>> fetchTopping() async {
   final response = await http.get(Uri.parse('${getPlatformBaseUrl()}/topping'));
 
   if (response.statusCode == 200) {
     return json.decode(response.body);
   } else {
-    throw Exception('Failed to load menu');
+    throw Exception('Failed to load topping');
+  }
+}
+
+//searchTopping
+Future<List<dynamic>> searchToppingItem([String? query]) async {
+  final uri = query != null
+      ? Uri.parse('${getPlatformBaseUrl()}/topping/search?q=$query')
+      : Uri.parse('${getPlatformBaseUrl()}/topping/search');
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load topping');
   }
 }
 
@@ -91,6 +96,9 @@ Future<void> addItem(Map<String, dynamic> item) async {
 
   if (response.statusCode != 201) {
     throw Exception('Failed to add item');
+  } else {
+    // ignore: avoid_print
+    print('Item added successfully');
   }
 }
 
@@ -105,7 +113,8 @@ Future<void> updateItem(int id, Map<String, dynamic> item) async {
     final responseBody = json.decode(response.body);
     if (responseBody['rows_affected'] == null ||
         responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to update Item');
+      // ignore: avoid_print
+      print('$responseBody');
     } else {
       // ignore: avoid_print
       print('Item update successfully');
@@ -189,7 +198,7 @@ Future<void> deleteToppingg(int id) async {
   }
 }
 
-Future<List<dynamic>> fetchToppingById(int query) async {
+Future<List<dynamic>> fetchToppingById(String query) async {
   final response = await http
       .get(Uri.parse('${getPlatformBaseUrl()}/topping/search?q=$query'));
 

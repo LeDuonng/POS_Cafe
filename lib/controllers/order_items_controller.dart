@@ -1,3 +1,5 @@
+import 'package:coffeeapp/views/widgets/nofication.dart';
+
 import '../models/order_items_model.dart';
 
 // select * from order_items
@@ -23,11 +25,9 @@ Future<void> addOrderItem({
   };
   try {
     await addOrderItemToDb(newItem);
-    // ignore: avoid_print
-    print('Order item added successfully');
+    ToastNotification.showToast(message: 'Thêm mục đơn hàng thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add order item: $e');
+    ToastNotification.showToast(message: 'Thêm mục đơn hàng thất bại: $e');
   }
 }
 
@@ -47,11 +47,9 @@ Future<void> updateOrderItem({
   };
   try {
     await updateOrderItemInDb(id, updatedItem);
-    // ignore: avoid_print
-    print('Order item updated successfully');
+    ToastNotification.showToast(message: 'Cập nhật mục đơn hàng thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to update order item: $e');
+    ToastNotification.showToast(message: 'Cập nhật mục đơn hàng thất bại: $e');
   }
 }
 
@@ -59,10 +57,8 @@ Future<void> updateOrderItem({
 Future<void> deleteOrderItem(int id) async {
   try {
     await deleteOrderItemFromDb(id);
-    // ignore: avoid_print
-    print('Order item deleted successfully');
+    ToastNotification.showToast(message: 'Xóa mục đơn hàng thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to delete order item: $e');
+    ToastNotification.showToast(message: 'Xóa mục đơn hàng thất bại: $e');
   }
 }

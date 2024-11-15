@@ -60,6 +60,20 @@ Future<List<dynamic>> fetchUsers() async {
   }
 }
 
+Future<List<dynamic>> searchUsers([String? name]) async {
+  final uri = name != null
+      ? Uri.parse('${getPlatformBaseUrl()}/users/search?name=$name')
+      : Uri.parse('${getPlatformBaseUrl()}/users/search');
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load users');
+  }
+}
+
 Future<void> addUserr(Map<String, dynamic> user) async {
   final response = await http.post(
     Uri.parse('${getPlatformBaseUrl()}/users'),
@@ -69,7 +83,7 @@ Future<void> addUserr(Map<String, dynamic> user) async {
 
   if (response.statusCode != 201) {
     throw Exception('Failed to add user');
-  }
+  } else {}
 }
 
 Future<void> updateUserr(int id, Map<String, dynamic> user) async {

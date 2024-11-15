@@ -1,3 +1,5 @@
+import 'package:coffeeapp/views/widgets/nofication.dart';
+
 import '../models/tables_model.dart';
 
 // select * from tables
@@ -23,11 +25,9 @@ Future<void> addTable({
   };
   try {
     await addTableItem(newTable);
-    // ignore: avoid_print
-    print('Table added successfully');
+    ToastNotification.showToast(message: 'Bàn đã được thêm thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add table: $e');
+    ToastNotification.showToast(message: 'Thêm bàn thất bại: $e');
   }
 }
 
@@ -47,11 +47,9 @@ Future<void> updateTable({
   };
   try {
     await updateTableItem(id, updatedTable);
-    // ignore: avoid_print
-    print('Table updated successfully');
+    ToastNotification.showToast(message: 'Bàn đã được cập nhật thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to update table: $e');
+    ToastNotification.showToast(message: 'Cập nhật bàn thất bại: $e');
   }
 }
 
@@ -59,10 +57,8 @@ Future<void> updateTable({
 Future<void> deleteTable(int id) async {
   try {
     await deleteTableItem(id);
-    // ignore: avoid_print
-    print('Table deleted successfully');
+    ToastNotification.showToast(message: 'Bàn đã được xóa thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to delete table: $e');
+    ToastNotification.showToast(message: 'Xóa bàn thất bại: $e');
   }
 }

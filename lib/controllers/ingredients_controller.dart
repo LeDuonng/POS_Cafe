@@ -1,3 +1,5 @@
+import 'package:coffeeapp/views/widgets/nofication.dart';
+
 import '../models/ingredients_model.dart';
 
 // select * from ingredients
@@ -21,11 +23,9 @@ Future<void> addIngredient({
   };
   try {
     await addIngredientItem(newIngredient);
-    // ignore: avoid_print
-    print('Ingredient added successfully');
+    ToastNotification.showToast(message: 'Thêm nguyên liệu thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add ingredient: $e');
+    ToastNotification.showToast(message: 'Thêm nguyên liệu thành công');
   }
 }
 
@@ -43,11 +43,9 @@ Future<void> updateIngredient({
   };
   try {
     await updateIngredientItem(id, updatedIngredient);
-    // ignore: avoid_print
-    print('Ingredient updated successfully');
+    ToastNotification.showToast(message: 'Cập nhật nguyên liệu thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to update ingredient: $e');
+    ToastNotification.showToast(message: 'Cập nhật nguyên liệu thất bại: $e');
   }
 }
 
@@ -55,10 +53,8 @@ Future<void> updateIngredient({
 Future<void> deleteIngredient(int id) async {
   try {
     await deleteIngredientItem(id);
-    // ignore: avoid_print
-    print('Ingredient deleted successfully');
+    ToastNotification.showToast(message: 'Xóa nguyên liệu thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to delete ingredient: $e');
+    ToastNotification.showToast(message: 'Xóa nguyên liệu thất bại: $e');
   }
 }

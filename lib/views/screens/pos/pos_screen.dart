@@ -487,7 +487,8 @@ class _POSScreenState extends State<POSScreen> {
 
                 // Customer Loyalty, Discount Code
                 const SizedBox(height: 16.0),
-                if (Responsive.isMobile(context))
+                if (Responsive.isMobile(context) ||
+                    Responsive.isTablet(context))
                   Column(
                     children: [
                       Row(

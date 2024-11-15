@@ -34,6 +34,20 @@ class Ingredient {
   }
 }
 
+Future<List<dynamic>> searchIngredients([String? name]) async {
+  final uri = name != null
+      ? Uri.parse('${getPlatformBaseUrl()}/ingredients/search?name=$name')
+      : Uri.parse('${getPlatformBaseUrl()}/ingredients/search');
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load ingredients');
+  }
+}
+
 Future<List<dynamic>> fetchIngredients() async {
   final response =
       await http.get(Uri.parse('${getPlatformBaseUrl()}/ingredients'));

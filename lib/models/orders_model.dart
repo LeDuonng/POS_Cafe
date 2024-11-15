@@ -42,6 +42,20 @@ class Order {
   }
 }
 
+Future<List<dynamic>> searchOrders([String? status]) async {
+  final uri = status != null
+      ? Uri.parse('${getPlatformBaseUrl()}/orders/search?status=$status')
+      : Uri.parse('${getPlatformBaseUrl()}/orders/search');
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load orders');
+  }
+}
+
 Future<List<dynamic>> fetchOrders() async {
   final response = await http.get(Uri.parse('${getPlatformBaseUrl()}/orders'));
 
@@ -58,6 +72,7 @@ Future<void> addNewOrder(Map<String, dynamic> order) async {
     headers: {'Content-Type': 'application/json'},
     body: json.encode(order),
   );
+  print(order['order_date']);
 
   if (response.statusCode != 201) {
     throw Exception('Failed to add order');

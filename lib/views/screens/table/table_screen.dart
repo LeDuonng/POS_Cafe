@@ -1,4 +1,6 @@
+// table_screen.dart
 import 'package:coffeeapp/models/tables_model.dart';
+import 'package:coffeeapp/views/screens/pos/pos_screen.dart';
 import 'package:flutter/material.dart';
 import 'area_screen.dart';
 
@@ -17,6 +19,7 @@ class TableScreen extends StatefulWidget {
 class _TableScreenState extends State<TableScreen> {
   Future<List<dynamic>>? tableList;
   String selectedArea = 'Tất cả';
+  String? selectedTable; // Biến lưu trữ bàn được chọn
 
   @override
   void initState() {
@@ -75,18 +78,25 @@ class _TableScreenState extends State<TableScreen> {
                       final table = tables[index];
                       return GestureDetector(
                         onTap: () {
-                          widget.onTableSelected('Bàn: ${table['name']}');
-                          Navigator.pop(context);
+                          setState(() {
+                            selectedTable = table['name'];
+                            widget.onTableSelected('Bàn: ${table['name']}');
+                            POSScreen(
+                              tableId: table['id'],
+                              userID: widget.userID,
+                            );
+                          });
                         },
                         child: Card(
+                          color: selectedTable == table['name']
+                              ? Colors.lightBlueAccent // Màu khi được chọn
+                              : null, // Màu mặc định
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Expanded(
-                                child: Icon(
-                                  Icons.table_bar,
-                                  size: 48.0,
-                                  color: Colors.orange,
+                              Expanded(
+                                child: TableBarIcon(
+                                  status: table['status'],
                                 ),
                               ),
                               Padding(
@@ -117,6 +127,27 @@ class _TableScreenState extends State<TableScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class TableBarIcon extends StatefulWidget {
+  final String status;
+
+  const TableBarIcon({super.key, required this.status});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _TableBarIconState createState() => _TableBarIconState();
+}
+
+class _TableBarIconState extends State<TableBarIcon> {
+  @override
+  Widget build(BuildContext context) {
+    return Icon(
+      Icons.table_bar,
+      size: 48.0,
+      color: widget.status == 'available' ? Colors.green : Colors.orange,
     );
   }
 }

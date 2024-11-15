@@ -1,4 +1,5 @@
 import 'package:coffeeapp/models/users_model.dart';
+import 'package:coffeeapp/views/widgets/nofication.dart';
 
 Future<List<dynamic>> userList = fetchUsers();
 
@@ -26,11 +27,9 @@ Future<void> addUser({
   };
   try {
     await addUserr(newUser);
-    // ignore: avoid_print
-    print('User added successfully');
+    ToastNotification.showToast(message: 'Thêm người dùng thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add user: $e');
+    ToastNotification.showToast(message: 'Thêm người dùng thất bại: $e');
   }
 }
 
@@ -55,22 +54,18 @@ Future<void> updateUser({
   };
   try {
     await updateUserr(id, updatedUser);
-    // ignore: avoid_print
-    print('User updated successfully');
+    ToastNotification.showToast(message: 'Cập nhật người dùng thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to update user in model: $e');
+    ToastNotification.showToast(message: 'Cập nhật người dùng thất bại: $e');
   }
 }
 
 Future<void> deleteUser(int id) async {
   try {
     await deleteUserr(id);
-    // ignore: avoid_print
-    print('User deleted successfully');
+    ToastNotification.showToast(message: 'Xóa người dùng thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to delete user: $e');
+    ToastNotification.showToast(message: 'Xóa người dùng thất bại: $e');
   }
 }
 
@@ -78,9 +73,8 @@ Future<List<dynamic>> signin(String username, String password) async {
   try {
     return await authenticateUser(username, password);
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to login: $e');
-    return []; // Trả về một Map rỗng thay vì List rỗng
+    ToastNotification.showToast(message: 'Đăng nhập thất bại: $e');
+    return [];
   }
 }
 
@@ -104,12 +98,10 @@ Future<bool> registerUser({
   };
   try {
     await registerNewUser(newUser);
-    // ignore: avoid_print
-    print('User registered successfully');
+    ToastNotification.showToast(message: 'Đăng ký người dùng thành công');
     return true;
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to register user: $e');
+    ToastNotification.showToast(message: 'Đăng ký người dùng thất bại: $e');
     return false;
   }
 }

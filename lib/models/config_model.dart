@@ -85,3 +85,17 @@ Future<void> updateConfig(int id, Map<String, dynamic> config) async {
     }
   }
 }
+
+Future<List<dynamic>> searchConfig([String? key]) async {
+  final uri = key != null
+      ? Uri.parse('${getPlatformBaseUrl()}/config/search?key=$key')
+      : Uri.parse('${getPlatformBaseUrl()}/config/search');
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load config');
+  }
+}

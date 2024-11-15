@@ -1,3 +1,5 @@
+import 'package:coffeeapp/views/widgets/nofication.dart';
+
 import '../models/customer_points_model.dart';
 
 // select * from customer_points
@@ -19,11 +21,10 @@ Future<void> addCustomerPoints({
   };
   try {
     await addCustomerPointsItem(newCustomerPoints);
-    // ignore: avoid_print
-    print('Customer points added successfully');
+    ToastNotification.showToast(
+        message: 'Điểm khách hàng đã được thêm thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add customer points: $e');
+    ToastNotification.showToast(message: 'Thêm điểm khách hàng thất bại: $e');
   }
 }
 
@@ -37,11 +38,11 @@ Future<void> updateCustomerPoints({
   };
   try {
     await updateCustomerPointsItem(id, updatedCustomerPoints);
-    // ignore: avoid_print
-    print('Customer points updated successfully');
+    ToastNotification.showToast(
+        message: 'Điểm khách hàng đã được cập nhật thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to update customer points: $e');
+    ToastNotification.showToast(
+        message: 'Cập nhật điểm khách hàng thất bại: $e');
   }
 }
 
@@ -49,10 +50,9 @@ Future<void> updateCustomerPoints({
 Future<void> deleteCustomerPoints(int id) async {
   try {
     await deleteCustomerPointsItem(id);
-    // ignore: avoid_print
-    print('Customer points deleted successfully');
+    ToastNotification.showToast(
+        message: 'Điểm khách hàng đã được xóa thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to delete customer points: $e');
+    ToastNotification.showToast(message: 'Xóa điểm khách hàng thất bại: $e');
   }
 }

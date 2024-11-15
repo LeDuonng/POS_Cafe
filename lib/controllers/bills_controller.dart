@@ -1,3 +1,5 @@
+import 'package:coffeeapp/views/widgets/nofication.dart';
+
 import '../models/bills_model.dart';
 
 //select * from bills
@@ -23,11 +25,9 @@ Future<void> addBill({
   };
   try {
     await addBillItem(newBill);
-    // ignore: avoid_print
-    print('Bill added successfully');
+    ToastNotification.showToast(message: 'Thêm hóa đơn thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add bill: $e');
+    ToastNotification.showToast(message: 'Thêm hóa đơn thất bại: $e');
   }
 }
 
@@ -47,11 +47,9 @@ Future<void> updateBill({
   };
   try {
     await updateBillItem(id, updatedBill);
-    // ignore: avoid_print
-    print('Bill updated successfully');
+    ToastNotification.showToast(message: 'Cập nhật hóa đơn thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to update bill: $e');
+    ToastNotification.showToast(message: 'Cập nhật hóa đơn thất bại: $e');
   }
 }
 
@@ -59,10 +57,8 @@ Future<void> updateBill({
 Future<void> deleteBill(int id) async {
   try {
     await deleteBillItem(id);
-    // ignore: avoid_print
-    print('Bill deleted successfully');
+    ToastNotification.showToast(message: 'Xóa hóa đơn thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to delete bill: $e');
+    ToastNotification.showToast(message: 'Xóa hóa đơn thất bại: $e');
   }
 }

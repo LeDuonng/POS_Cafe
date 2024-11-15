@@ -1,3 +1,5 @@
+import 'package:coffeeapp/views/widgets/nofication.dart';
+
 import '../models/inventory_model.dart';
 
 // select * from inventory
@@ -21,11 +23,9 @@ Future<void> addInventory({
   };
   try {
     await addInventoryItem(newItem);
-    // ignore: avoid_print
-    print('Inventory item added successfully');
+    ToastNotification.showToast(message: 'Thêm mục hàng tồn kho thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add inventory item: $e');
+    ToastNotification.showToast(message: 'Thêm mục hàng tồn kho thất bại: $e');
   }
 }
 
@@ -43,11 +43,11 @@ Future<void> updateInventory({
   };
   try {
     await updateInventoryItem(id, updatedItem);
-    // ignore: avoid_print
-    print('Inventory item updated successfully');
+    ToastNotification.showToast(
+        message: 'Cập nhật mục hàng tồn kho thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to update inventory item: $e');
+    ToastNotification.showToast(
+        message: 'Cập nhật mục hàng tồn kho thất bại: $e');
   }
 }
 
@@ -55,10 +55,8 @@ Future<void> updateInventory({
 Future<void> deleteInventory(int id) async {
   try {
     await deleteInventoryItem(id);
-    // ignore: avoid_print
-    print('Inventory item deleted successfully');
+    ToastNotification.showToast(message: 'Xóa mục hàng tồn kho thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to delete inventory item: $e');
+    ToastNotification.showToast(message: 'Xóa mục hàng tồn kho thất bại: $e');
   }
 }

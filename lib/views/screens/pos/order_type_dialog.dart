@@ -3,6 +3,7 @@ import 'package:coffeeapp/responsive.dart';
 import 'package:coffeeapp/views/screens/table/table_screen.dart';
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class OrderTypeDialog extends StatefulWidget {
   final String initialOrderType;
   final Function(String) onOrderTypeSelected;
@@ -163,6 +164,8 @@ class _OrderTypeDialogState extends State<OrderTypeDialog> {
                                   onTableSelected: (selectedTable) {
                                     setState(() {
                                       selectedOrderType = selectedTable;
+                                      isTableSelected =
+                                          true; // Cập nhật isTableSelected
                                     });
                                   },
                                 ),

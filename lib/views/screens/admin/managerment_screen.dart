@@ -1,6 +1,6 @@
 import 'package:coffeeapp/views/screens/admin/config_screen.dart';
 import 'package:coffeeapp/views/screens/admin/curd_screen.dart';
-import 'package:coffeeapp/views/screens/pos/pos_screen.dart';
+import 'package:coffeeapp/views/screens/admin/statistical.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -53,8 +53,7 @@ class _ManagementState extends State<Management> {
                     itemBuilder: (context, index) {
                       switch (index) {
                         case 0:
-                          return _buildPanel(
-                              'New Sales', '22,880.50 USD', Colors.blue);
+                          return _buildStatisticalPanel(context);
                         case 1:
                           return _buildDateRevenuePanel();
 
@@ -68,8 +67,8 @@ class _ManagementState extends State<Management> {
                         case 5:
                           return _buildCURDPanel(context, widget.userID,
                               widget.username, widget.role);
-                        case 6:
-                          return _buildPOSPanel(context, widget.userID);
+                        // case 6:
+                        //   return _buildPOSPanel(context, widget.userID);
                         default:
                           return const SizedBox.shrink();
                       }
@@ -83,51 +82,6 @@ class _ManagementState extends State<Management> {
       ),
     );
   }
-
-  // Các phương thức khác như _buildPanel, _buildBarChartPanel, v.v.
-}
-
-// Panel thông thường
-Widget _buildPanel(String title, String value, Color color) {
-  return Card(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15),
-    ),
-    elevation: 4,
-    child: Container(
-      width: 120,
-      height: 120,
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        color: color.withOpacity(0.1),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(Icons.info_outline, color: color, size: 30),
-          const SizedBox(height: 10),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
 }
 
 // Panel chứa biểu đồ cột
@@ -407,7 +361,60 @@ Widget _buildCURDPanel(
   );
 }
 
-Widget _buildPOSPanel(BuildContext context, String userID) {
+// Widget _buildPOSPanel(BuildContext context, String userID) {
+//   return Card(
+//     shape: RoundedRectangleBorder(
+//       borderRadius: BorderRadius.circular(15),
+//     ),
+//     elevation: 4,
+//     child: InkWell(
+//       onTap: () {
+//         Navigator.push(
+//           context,
+//           MaterialPageRoute(
+//             builder: (context) => POSScreen(
+//               tableId: null,
+//               userID: userID,
+//             ),
+//           ),
+//         );
+//       },
+//       child: Container(
+//         padding: const EdgeInsets.all(16.0),
+//         child: const Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             SingleChildScrollView(
+//               scrollDirection: Axis.horizontal,
+//               child: Row(
+//                 children: [
+//                   Icon(Icons.shopping_cart, size: 40, color: Colors.blue),
+//                   SizedBox(width: 16),
+//                   Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Text(
+//                         'BÁN HÀNG',
+//                         style: TextStyle(
+//                             fontSize: 18, fontWeight: FontWeight.bold),
+//                       ),
+//                       SizedBox(height: 10),
+//                       Text(
+//                         'ĐI ĐẾN TRANG BÁN HÀNG',
+//                         style: TextStyle(fontSize: 16),
+//                       ),
+//                     ],
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     ),
+//   );
+// }
+Widget _buildStatisticalPanel(BuildContext context) {
   return Card(
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(15),
@@ -417,12 +424,7 @@ Widget _buildPOSPanel(BuildContext context, String userID) {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => POSScreen(
-              tableId: null,
-              userID: userID,
-            ),
-          ),
+          MaterialPageRoute(builder: (context) => const StatisticalScreen()),
         );
       },
       child: Container(
@@ -434,19 +436,19 @@ Widget _buildPOSPanel(BuildContext context, String userID) {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  Icon(Icons.shopping_cart, size: 40, color: Colors.blue),
+                  Icon(Icons.bar_chart, size: 40, color: Colors.red),
                   SizedBox(width: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'BÁN HÀNG',
+                        'THỐNG KÊ',
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'ĐI ĐẾN TRANG BÁN HÀNG',
+                        'ĐI ĐẾN TRANG THỐNG KÊ',
                         style: TextStyle(fontSize: 16),
                       ),
                     ],

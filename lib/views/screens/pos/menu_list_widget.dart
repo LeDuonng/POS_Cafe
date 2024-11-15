@@ -56,13 +56,20 @@ class MenuListWidget extends StatelessWidget {
                           final item = items[index];
                           return GestureDetector(
                             onTap: () {
-                              onAddToCart({
-                                'id': item['id'],
-                                'name': item['name'],
-                                'price': double.parse(item['price'].toString()),
-                                'image': item['image'],
-                                'quantity': 1,
-                              });
+                              try {
+                                onAddToCart({
+                                  'id': item['id'],
+                                  'name': item['name'],
+                                  'price':
+                                      double.parse(item['price'].toString()),
+                                  'image': item['image'],
+                                  'quantity': 1,
+                                });
+                              } catch (e) {
+                                // Handle error if item information is incomplete
+                                // ignore: avoid_print
+                                print('Error adding to cart: $e');
+                              }
                             },
                             child: Card(
                               child: Column(
@@ -75,25 +82,21 @@ class MenuListWidget extends StatelessWidget {
                                       errorBuilder:
                                           (context, error, stackTrace) {
                                         return Image.asset(
-                                          'assets/menu/${item['image']}',
+                                          'assets/menu/error.png',
                                           height: double.infinity,
                                           fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                            return const Icon(Icons.error);
-                                          },
                                         );
                                       },
                                     ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: Text(item['name']),
+                                    child: Text(item['name'] ?? 'Unknown'),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
-                                      'Giá: ${double.parse(item['price'].toString())} VNĐ',
+                                      'Giá: ${item['price'] != null ? double.parse(item['price'].toString()) : 'N/A'} VNĐ',
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),

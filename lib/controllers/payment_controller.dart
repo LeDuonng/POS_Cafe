@@ -1,3 +1,5 @@
+import 'package:coffeeapp/views/widgets/nofication.dart';
+
 import '../models/bills_model.dart';
 import '../models/orders_model.dart';
 import '../models/order_items_model.dart';
@@ -21,11 +23,9 @@ Future<void> addOrder({
   };
   try {
     await addNewOrder(newOrder);
-    // ignore: avoid_print
-    print('Order added successfully');
+    ToastNotification.showToast(message: 'Đơn hàng đã được thêm thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add order: $e');
+    ToastNotification.showToast(message: 'Thêm đơn hàng thất bại: $e');
   }
 }
 
@@ -46,11 +46,9 @@ Future<void> addOrderItem({
   };
   try {
     await addOrderItemToDb(newItem);
-    // ignore: avoid_print
-    print('Order item added successfully');
+    ToastNotification.showToast(message: 'Món hàng đã được thêm thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add order item: $e');
+    ToastNotification.showToast(message: 'Thêm món hàng thất bại: $e');
   }
 }
 
@@ -71,10 +69,8 @@ Future<void> addBill({
   };
   try {
     await addBillItem(newBill);
-    // ignore: avoid_print
-    print('Bill added successfully');
+    ToastNotification.showToast(message: 'Hóa đơn đã được thêm thành công');
   } catch (e) {
-    // ignore: avoid_print
-    print('Failed to add bill: $e');
+    ToastNotification.showToast(message: 'Thêm hóa đơn thất bại: $e');
   }
 }

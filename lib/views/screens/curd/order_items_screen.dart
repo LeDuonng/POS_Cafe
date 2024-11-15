@@ -1,6 +1,7 @@
 import 'package:coffeeapp/models/order_items_model.dart';
 import 'package:flutter/material.dart';
 import '../../../controllers/order_items_controller.dart';
+import '../../../responsive.dart'; // Import the Responsive widget
 
 class OrderItemsScreen extends StatefulWidget {
   const OrderItemsScreen({super.key});
@@ -11,6 +12,7 @@ class OrderItemsScreen extends StatefulWidget {
 }
 
 late Future<List<dynamic>> orderItemsList;
+String searchText = '';
 
 class _OrderItemsScreenState extends State<OrderItemsScreen> {
   @override
@@ -19,9 +21,10 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
     orderItemsList = fetchOrderItems();
   }
 
-  Future<void> _refreshOrderItemsList() async {
+  Future<void> _refreshOrderItemsList([String? orderId]) async {
+    var temp = searchOrderItems(orderId);
     setState(() {
-      orderItemsList = fetchOrderItems();
+      orderItemsList = temp;
     });
   }
 
@@ -31,75 +34,220 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
       appBar: AppBar(
         title: const Text('Order Items List'),
         actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: SizedBox(
+              width: 300,
+              child: TextFormField(
+                decoration: InputDecoration(
+                  hintText: 'Search by Order ID...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    searchText = value;
+                    _refreshOrderItemsList(searchText);
+                  });
+                },
+              ),
+            ),
+          ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.add),
             onPressed: () async {
+              await showDialog(
+                context: context,
+                builder: (context) => const AddOrderItemScreen(),
+              );
               _refreshOrderItemsList();
             },
-          )
+          ),
         ],
       ),
-      body: FutureBuilder<List<dynamic>>(
-        future: orderItemsList,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No data available'));
-          } else {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                return Dismissible(
-                  key: Key(snapshot.data![index]['id'].toString()),
-                  onDismissed: (direction) {
-                    // Delete the item from the database
-                    deleteOrderItem(snapshot.data![index]['id']);
-                    // Remove the item from the list
-                    setState(() {
-                      snapshot.data!.removeAt(index);
-                    });
-                  },
-                  background: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerRight,
-                    child: const Icon(Icons.delete, color: Colors.white),
-                  ),
-                  child: ListTile(
-                    onTap: () {
-                      // Navigate to Edit screen
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditOrderItemScreen(
-                            orderItem: snapshot.data![index],
+      body: Responsive(
+        mobile: _buildOrderItemsList(context),
+        tablet: _buildOrderItemsList(context),
+        desktop: _buildOrderItemsList(context),
+      ),
+    );
+  }
+
+  Widget _buildOrderItemsList(BuildContext context) {
+    return FutureBuilder<List<dynamic>>(
+      future: orderItemsList,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No data available'));
+        } else {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              double totalWidth = constraints.maxWidth;
+              double columnWidth = totalWidth / 5; // 5 là tổng số cột hiện có
+
+              return SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: DataTable(
+                  columnSpacing: 12,
+                  // ignore: deprecated_member_use
+                  dataRowHeight: 100,
+                  columns: [
+                    DataColumn(
+                      label: SizedBox(
+                        width: columnWidth,
+                        child: const Text(
+                          'STT',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown,
                           ),
                         ),
-                      );
-                    },
-                    title:
-                        Text('Order ID: ${snapshot.data![index]['order_id']}'),
-                    subtitle: Text(
-                        'Menu ID: ${snapshot.data![index]['menu_id']}, Quantity: ${snapshot.data![index]['quantity']}, Price: ${snapshot.data![index]['price']}'),
-                  ),
-                );
-              },
-            );
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AddOrderItemScreen()),
+                      ),
+                    ),
+                    DataColumn(
+                      label: SizedBox(
+                        width: columnWidth,
+                        child: const Text(
+                          'Order ID',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown,
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: SizedBox(
+                        width: columnWidth,
+                        child: const Text(
+                          'Menu ID',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown,
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: SizedBox(
+                        width: columnWidth,
+                        child: const Text(
+                          'Quantity',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown,
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: SizedBox(
+                        width: columnWidth,
+                        child: const Text(
+                          'Actions',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  rows: List.generate(snapshot.data!.length, (index) {
+                    return DataRow(
+                      color: WidgetStateProperty.resolveWith<Color?>(
+                        (Set<WidgetState> states) {
+                          return index.isEven
+                              ? Colors.grey.withOpacity(0.1)
+                              : Colors.white;
+                        },
+                      ),
+                      cells: [
+                        DataCell(Text((index + 1).toString())),
+                        DataCell(
+                            Text(snapshot.data![index]['order_id'].toString())),
+                        DataCell(
+                            Text(snapshot.data![index]['menu_id'].toString())),
+                        DataCell(
+                            Text(snapshot.data![index]['quantity'].toString())),
+                        DataCell(
+                          Row(
+                            children: [
+                              IconButton(
+                                icon:
+                                    const Icon(Icons.edit, color: Colors.blue),
+                                onPressed: () async {
+                                  await showDialog(
+                                    context: context,
+                                    builder: (context) => EditOrderItemScreen(
+                                      orderItem: snapshot.data![index],
+                                    ),
+                                  );
+                                  _refreshOrderItemsList();
+                                },
+                              ),
+                              IconButton(
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text('Confirm Delete'),
+                                        content: const Text(
+                                            'Are you sure you want to delete this order item?'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: const Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                try {
+                                                  deleteOrderItem(snapshot
+                                                      .data![index]['id']);
+                                                  snapshot.data!
+                                                      .removeAt(index);
+                                                } catch (e) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                        content:
+                                                            Text('Error: $e')),
+                                                  );
+                                                }
+                                              });
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: const Text('Delete'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                ),
+              );
+            },
           );
-          _refreshOrderItemsList();
-        },
-        child: const Icon(Icons.add),
-      ),
+        }
+      },
     );
   }
 }
@@ -132,72 +280,84 @@ class _AddOrderItemScreenState extends State<AddOrderItemScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Order Item'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: <Widget>[
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Order ID'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an order ID';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  orderId = int.parse(value!);
-                },
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Menu ID'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a menu ID';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  menuId = int.parse(value!);
-                },
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Quantity'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a quantity';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  quantity = int.parse(value!);
-                },
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Price'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a price';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  price = double.parse(value!);
-                },
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  _submitForm();
-                },
-                child: const Text('Add Item'),
-              ),
-            ],
+    return Dialog(
+      insetPadding: const EdgeInsets.all(10),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 900),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              children: <Widget>[
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Order ID'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an order ID';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    orderId = int.parse(value!);
+                  },
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Menu ID'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a menu ID';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    menuId = int.parse(value!);
+                  },
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Quantity'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a quantity';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    quantity = int.parse(value!);
+                  },
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Price'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a price';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    price = double.parse(value!);
+                  },
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    _submitForm();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green, // Green for Add Item
+                  ),
+                  child: const Text('Add Item'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red, // Red for Cancel
+                  ),
+                  child: const Text('Cancel'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -245,81 +405,93 @@ class _EditOrderItemScreenState extends State<EditOrderItemScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Order Item'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: <Widget>[
-              TextFormField(
-                initialValue: widget.orderItem['id'].toString(),
-                decoration: const InputDecoration(labelText: 'ID'),
-                readOnly: true,
-              ),
-              TextFormField(
-                initialValue: orderId.toString(),
-                decoration: const InputDecoration(labelText: 'Order ID'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an order ID';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  orderId = int.parse(value!);
-                },
-              ),
-              TextFormField(
-                initialValue: menuId.toString(),
-                decoration: const InputDecoration(labelText: 'Menu ID'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a menu ID';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  menuId = int.parse(value!);
-                },
-              ),
-              TextFormField(
-                initialValue: quantity.toString(),
-                decoration: const InputDecoration(labelText: 'Quantity'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a quantity';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  quantity = int.parse(value!);
-                },
-              ),
-              TextFormField(
-                initialValue: price.toString(),
-                decoration: const InputDecoration(labelText: 'Price'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a price';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  price = double.parse(value!);
-                },
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  _submitForm();
-                },
-                child: const Text('Save Changes'),
-              ),
-            ],
+    return Dialog(
+      insetPadding: const EdgeInsets.all(10),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 900),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              children: <Widget>[
+                TextFormField(
+                  initialValue: widget.orderItem['id'].toString(),
+                  decoration: const InputDecoration(labelText: 'ID'),
+                  readOnly: true,
+                ),
+                TextFormField(
+                  initialValue: orderId.toString(),
+                  decoration: const InputDecoration(labelText: 'Order ID'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an order ID';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    orderId = int.parse(value!);
+                  },
+                ),
+                TextFormField(
+                  initialValue: menuId.toString(),
+                  decoration: const InputDecoration(labelText: 'Menu ID'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a menu ID';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    menuId = int.parse(value!);
+                  },
+                ),
+                TextFormField(
+                  initialValue: quantity.toString(),
+                  decoration: const InputDecoration(labelText: 'Quantity'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a quantity';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    quantity = int.parse(value!);
+                  },
+                ),
+                TextFormField(
+                  initialValue: price.toString(),
+                  decoration: const InputDecoration(labelText: 'Price'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a price';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    price = double.parse(value!);
+                  },
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    _submitForm();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green, // Green for Save
+                  ),
+                  child: const Text('Save Changes'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red, // Red for Cancel
+                  ),
+                  child: const Text('Cancel'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

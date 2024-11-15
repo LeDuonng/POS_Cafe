@@ -38,6 +38,21 @@ class Bill {
   }
 }
 
+Future<List<dynamic>> searchBills([String? paymentMethod]) async {
+  final uri = paymentMethod != null
+      ? Uri.parse(
+          '${getPlatformBaseUrl()}/bills/search?payment_method=$paymentMethod')
+      : Uri.parse('${getPlatformBaseUrl()}/bills/search');
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load bills');
+  }
+}
+
 Future<List<dynamic>> fetchBills() async {
   final response = await http.get(Uri.parse('${getPlatformBaseUrl()}/bills'));
 

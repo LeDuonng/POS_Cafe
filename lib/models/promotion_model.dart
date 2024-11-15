@@ -198,3 +198,32 @@ class PromotionController {
     }
   }
 }
+
+Future<List<dynamic>> searchPromotions([String? name]) async {
+  final uri = name != null
+      ? Uri.parse('${getPlatformBaseUrl()}/promotions/search?name=$name')
+      : Uri.parse('${getPlatformBaseUrl()}/promotions/search');
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load promotions');
+  }
+}
+
+Future<List<dynamic>> searchPromotionCodes([int? promotionId]) async {
+  final uri = promotionId != null
+      ? Uri.parse(
+          '${getPlatformBaseUrl()}/promotion_codes/search?promotion_id=$promotionId')
+      : Uri.parse('${getPlatformBaseUrl()}/promotion_codes/search');
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load promotion codes');
+  }
+}

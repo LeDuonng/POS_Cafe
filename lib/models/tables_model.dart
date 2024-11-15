@@ -38,6 +38,20 @@ class Table {
   }
 }
 
+Future<List<dynamic>> searchTables([String? area]) async {
+  final uri = area != null
+      ? Uri.parse('${getPlatformBaseUrl()}/tables/search?area=$area')
+      : Uri.parse('${getPlatformBaseUrl()}/tables/search');
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load tables');
+  }
+}
+
 Future<List<dynamic>> fetchTables() async {
   final response = await http.get(Uri.parse('${getPlatformBaseUrl()}/tables'));
 
