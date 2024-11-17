@@ -113,7 +113,7 @@ class _ToppingScreenState extends State<ToppingScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Name',
+                          'Tên Topping',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -125,7 +125,7 @@ class _ToppingScreenState extends State<ToppingScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Description',
+                          'Mô tả',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -137,7 +137,7 @@ class _ToppingScreenState extends State<ToppingScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Price',
+                          'Giá',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -149,7 +149,7 @@ class _ToppingScreenState extends State<ToppingScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Image',
+                          'Hình ảnh',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -161,7 +161,7 @@ class _ToppingScreenState extends State<ToppingScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Category',
+                          'Danh mục',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -173,7 +173,7 @@ class _ToppingScreenState extends State<ToppingScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Actions',
+                          'Hành động',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,

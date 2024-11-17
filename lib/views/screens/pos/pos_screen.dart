@@ -154,6 +154,7 @@ class _POSScreenState extends State<POSScreen> {
         return PaymentConfirmationDialog(
           tableId: widget.tableId,
           userID: widget.userID,
+          customerId: customerID,
           cartItems: _cartItems,
           totalPrice: _totalPrice,
           tax: _tax,
@@ -550,12 +551,10 @@ class _POSScreenState extends State<POSScreen> {
                                   textStyle: const TextStyle(fontSize: 18.0),
                                 ),
                                 child: customerName != null
-                                    ? Column(
-                                        children: [
-                                          const Text('Khách hàng:'),
-                                          Text(customerName.toString()),
-                                        ],
-                                      )
+                                    ? SingleChildScrollView(
+                                        child: Center(
+                                        child: Text('KH: $customerName'),
+                                      ))
                                     : const Text('Tích điểm',
                                         textAlign: TextAlign.center),
                               ),
@@ -618,7 +617,7 @@ class _POSScreenState extends State<POSScreen> {
                                 },
                                 child: Text(
                                   _selectedPromotionCode != null
-                                      ? 'Mã giảm giá: $_selectedPromotionCode'
+                                      ? 'MGG: $_selectedPromotionCode'
                                       : 'Khuyến mãi',
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(fontSize: 18.0),
@@ -709,12 +708,10 @@ class _POSScreenState extends State<POSScreen> {
                               textStyle: const TextStyle(fontSize: 18.0),
                             ),
                             child: customerName != null
-                                ? Column(
-                                    children: [
-                                      const Text('Khách hàng:'),
-                                      Text(customerName.toString()),
-                                    ],
-                                  )
+                                ? SingleChildScrollView(
+                                    child: Center(
+                                    child: Text('KH: $customerName'),
+                                  ))
                                 : const Text('Tích điểm',
                                     textAlign: TextAlign.center),
                           ),
@@ -771,7 +768,7 @@ class _POSScreenState extends State<POSScreen> {
                             },
                             child: Text(
                               _selectedPromotionCode != null
-                                  ? 'Mã giảm giá: $_selectedPromotionCode'
+                                  ? 'MGG: $_selectedPromotionCode'
                                   : 'Khuyến mãi',
                               textAlign: TextAlign.center,
                               style: const TextStyle(fontSize: 18.0),
@@ -820,6 +817,8 @@ class _POSScreenState extends State<POSScreen> {
                               _promotionType = null;
                               _surcharge = 0.0;
                               _surchargeReason = '';
+                              customerID = null;
+                              customerName = null;
                             });
                           },
                           style: ElevatedButton.styleFrom(
@@ -836,7 +835,12 @@ class _POSScreenState extends State<POSScreen> {
                         height: 50.0, // Chiều cao cố định cho cả hai nút
                         child: ElevatedButton(
                           onPressed: () {
-                            _showPaymentConfirmationDialog(); // Hiển thị dialog xác nhận thanh toán
+                            if (_cartItems.isNotEmpty) {
+                              _showPaymentConfirmationDialog(); // Hiển thị dialog xác nhận thanh toán
+                            } else {
+                              ToastNotification.showToast(
+                                  message: 'Giỏ hàng của bạn đang trống.');
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,

@@ -309,8 +309,18 @@ def delete_ingredient(id):
 @app.route('/orders', methods=['POST'])
 def add_order():
     data = request.json
-    query = "INSERT INTO orders (table_id, customer_id, staff_id, order_date, status, description) VALUES (%s, %s, %s, %s, %s, %s)"
-    order_id = execute_query(query, (data['table_id'], data['customer_id'], data['staff_id'], data['order_date'], data['status'], data['description']))
+    if 'table_id' in data and 'customer_id' in data:
+        query = "INSERT INTO orders (table_id, customer_id, staff_id, order_date, status, description) VALUES (%s, %s, %s, %s, %s, %s)"
+        order_id = execute_query(query, (data['table_id'], data['customer_id'], data['staff_id'], data['order_date'], data['status'], data['description']))
+    elif 'table_id' in data:
+        query = "INSERT INTO orders (table_id, staff_id, order_date, status, description) VALUES (%s, %s, %s, %s, %s)"
+        order_id = execute_query(query, (data['table_id'], data['staff_id'], data['order_date'], data['status'], data['description']))
+    elif 'customer_id' in data:
+        query = "INSERT INTO orders (customer_id, staff_id, order_date, status, description) VALUES (%s, %s, %s, %s, %s)"
+        order_id = execute_query(query, (data['customer_id'], data['staff_id'], data['order_date'], data['status'], data['description']))
+    else:
+        query = "INSERT INTO orders (staff_id, order_date, status, description) VALUES (%s, %s, %s, %s)"
+        order_id = execute_query(query, (data['staff_id'], data['order_date'], data['status'], data['description']))
     return jsonify({'id': order_id}), 201
 
 @app.route('/orders/<int:id>', methods=['PUT'])
@@ -454,14 +464,14 @@ def search_ingredients():
 
 @app.route('/orders/search', methods=['GET'])
 def search_orders():
-    status = request.args.get('status', None)
-    if status:
-        query = "SELECT id, table_id, customer_id, staff_id, order_date, status FROM orders WHERE del = 0 AND status COLLATE utf8mb4_general_ci LIKE %s"
-        rows = fetch_data(query, (f"%{status}%",))
+    id = request.args.get('id', None)
+    if id:
+        query = "SELECT id, table_id, customer_id, staff_id, order_date, status, description FROM orders WHERE del = 0 AND id = %s"
+        rows = fetch_data(query, (id,))
     else:
-        query = "SELECT id, table_id, customer_id, staff_id, order_date, status FROM orders WHERE del = 0"
+        query = "SELECT id, table_id, customer_id, staff_id, order_date, status, description FROM orders WHERE del = 0"
         rows = fetch_data(query)
-    orders = [{'id': row[0], 'table_id': row[1], 'customer_id': row[2], 'staff_id': row[3], 'order_date': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None, 'status': row[5]} for row in rows]
+    orders = [{'id': row[0], 'table_id': row[1], 'customer_id': row[2], 'staff_id': row[3], 'order_date': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None, 'status': row[5], 'description': row[6]} for row in rows]
     return jsonify(orders)
 
 
@@ -967,26 +977,58 @@ def get_revenue_by_staff_range():
     revenue_by_staff = [{'staff_id': row[0], 'staff_name': row[1], 'total_revenue': row[2]} for row in rows]
     return jsonify(revenue_by_staff)
 
+@app.route('/getnameuserbyid/<int:id>', methods=['GET'])
+def get_name_user_by_id(id):
+    query = "SELECT name FROM users WHERE id=%s "
+    rows = fetch_data(query, (id,))
+    results = {'name': rows[0][0]}
+    return jsonify(results)
 
-@app.route('/reports/revenue/staff', methods=['GET'])
-def get_revenue_by_staff():
+@app.route('/getnameingredientbyid/<int:id>', methods=['GET'])
+def get_name_ingredient_by_id(id):
+    query = "SELECT name FROM ingredients WHERE id=%s "
+    rows = fetch_data(query, (id,))
+    results = {'name': rows[0][0]}
+    return jsonify(results)
+
+@app.route('/getnamemenuitembyid/<int:id>', methods=['GET'])
+def get_name_menu_item_by_id(id):
+    query = "SELECT name FROM menu WHERE id=%s"
+    rows = fetch_data(query, (id,))
+    results = {'name': rows[0][0]}
+    return jsonify(results)
+
+@app.route('/getnametablebyid/<int:id>', methods=['GET'])
+def get_name_table_by_id(id):
+    query = "SELECT name FROM tables WHERE id=%s "
+    rows = fetch_data(query, (id,))
+    results = {'name': rows[0][0]}
+    return jsonify(results)
+
+@app.route('/getnamepromotionbyid/<int:id>', methods=['GET'])
+def get_name_promotion_by_id(id):
+    query = "SELECT name FROM promotions WHERE id=%s"
+    rows = fetch_data(query, (id,))
+    results = {'name': rows[0][0]}
+    return jsonify(results)
+
+@app.route('/getnamestaffbyid/<int:id>', methods=['GET'])
+def get_name_staff_by_id(id):
     query = """
-    SELECT 
-        s.id AS staff_id,
-        u.name AS staff_name,
-        SUM(b.total_amount) AS total_revenue
-    FROM bills AS b
-    JOIN orders AS o ON b.order_id = o.id
-    JOIN staff AS s ON o.staff_id = s.id
-    JOIN users AS u ON s.user_id = u.id
-    WHERE b.del = 0
-    GROUP BY s.id, u.name
-    """
-    rows = fetch_data(query)
-    revenue_by_staff = [{'staff_id': row[0], 'staff_name': row[1], 'total_revenue': row[2]} for row in rows]
-    return jsonify(revenue_by_staff)
+        SELECT 
+            users.name
+        FROM 
+            staff
+        INNER JOIN 
+            users ON staff.user_id = users.id
+        WHERE 
+            staff.id = %s 
+    """    
+    rows = fetch_data(query, (id,))
+   
+    results = {'user_name': rows[0][0]}
+    return jsonify(results)
 
-
-
+    
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

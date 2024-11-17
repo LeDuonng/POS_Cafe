@@ -1,5 +1,8 @@
 import 'package:coffeeapp/models/orders_model.dart' as controller;
 import 'package:coffeeapp/controllers/orders_controller.dart';
+import 'package:coffeeapp/models/staff_model.dart';
+import 'package:coffeeapp/models/tables_model.dart';
+import 'package:coffeeapp/models/users_model.dart';
 import 'package:flutter/material.dart';
 import '../../../responsive.dart'; // Import the Responsive widget
 
@@ -18,7 +21,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   void initState() {
     super.initState();
-    ordersList = controller.fetchOrders();
+    ordersList = controller.searchOrders();
   }
 
   Future<void> _refreshOrdersList([String? orderId]) async {
@@ -88,7 +91,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           return LayoutBuilder(
             builder: (context, constraints) {
               double totalWidth = constraints.maxWidth;
-              double columnWidth = totalWidth / 7; // 7 là tổng số cột hiện có
+              double columnWidth = totalWidth / 8; // 8 là tổng số cột hiện có
 
               return SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -113,7 +116,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Order ID',
+                          'Mã đơn hàng',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -125,7 +128,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Table ID',
+                          'Bàn',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -137,7 +140,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Customer ID',
+                          'Khách hàng',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -149,7 +152,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Staff ID',
+                          'Nhân viên phục vụ',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -161,7 +164,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Status',
+                          'Trạng thái',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -173,7 +176,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Actions',
+                          'Mô tả',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown,
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: SizedBox(
+                        width: columnWidth,
+                        child: const Text(
+                          'Hành động',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -195,12 +210,66 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         DataCell(Text((index + 1).toString())),
                         DataCell(Text(snapshot.data![index]['id'].toString())),
                         DataCell(
-                            Text(snapshot.data![index]['table_id'].toString())),
-                        DataCell(Text(
-                            snapshot.data![index]['customer_id'].toString())),
+                          FutureBuilder<String>(
+                            future: snapshot.data![index]['table_id'] != null
+                                ? getNameTableById(int.parse(snapshot
+                                    .data![index]['table_id']
+                                    .toString()))
+                                : Future.value('Unknown'),
+                            builder: (context, nameSnapshot) {
+                              if (nameSnapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const CircularProgressIndicator();
+                              } else if (nameSnapshot.hasError) {
+                                return Text('Error: ${nameSnapshot.error}');
+                              } else {
+                                return Text(nameSnapshot.data ?? 'Unknown');
+                              }
+                            },
+                          ),
+                        ),
                         DataCell(
-                            Text(snapshot.data![index]['staff_id'].toString())),
-                        DataCell(Text(snapshot.data![index]['status'])),
+                          FutureBuilder<String>(
+                            future: snapshot.data![index]['customer_id'] != null
+                                ? getNameUserById(int.parse(snapshot
+                                    .data![index]['customer_id']
+                                    .toString()))
+                                : Future.value('Unknown'),
+                            builder: (context, nameSnapshot) {
+                              if (nameSnapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const CircularProgressIndicator();
+                              } else if (nameSnapshot.hasError) {
+                                return Text('Error: ${nameSnapshot.error}');
+                              } else {
+                                return Text(nameSnapshot.data ?? 'Unknown');
+                              }
+                            },
+                          ),
+                        ),
+                        DataCell(FutureBuilder<String>(
+                          future: getNameStaffById(int.parse(
+                              snapshot.data![index]['staff_id'].toString())),
+                          builder: (context, nameSnapshot) {
+                            if (nameSnapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (nameSnapshot.hasError) {
+                              return Text('Error: ${nameSnapshot.error}');
+                            } else {
+                              return Text(nameSnapshot.data ?? 'Unknown');
+                            }
+                          },
+                        )),
+                        DataCell(Text(
+                          snapshot.data![index]['status'] == 'received'
+                              ? 'Đã nhận đơn'
+                              : snapshot.data![index]['status'] == 'preparing'
+                                  ? 'Đang chuẩn bị'
+                                  : 'Đã hoàn thành',
+                        )),
+                        DataCell(Text(snapshot.data![index]['description'] ??
+                            'Khôngg có mô tả')),
                         DataCell(
                           Row(
                             children: [
@@ -302,7 +371,7 @@ class AddOrderScreen extends StatefulWidget {
 class _AddOrderScreenState extends State<AddOrderScreen> {
   final _formKey = GlobalKey<FormState>();
   late int tableId, customerId, staffId;
-  late String status;
+  late String status, description;
   late DateTime orderDate;
 
   void _submitForm() {
@@ -314,6 +383,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
         staffId: staffId,
         orderDate: orderDate,
         status: status,
+        description: description,
       );
       Navigator.pop(context);
     }
@@ -398,6 +468,12 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                     return null;
                   },
                 ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Description'),
+                  onSaved: (value) {
+                    description = value!;
+                  },
+                ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
@@ -443,7 +519,7 @@ class EditOrderScreen extends StatefulWidget {
 class _EditOrderScreenState extends State<EditOrderScreen> {
   final _formKey = GlobalKey<FormState>();
   late int tableId, customerId, staffId;
-  late String status;
+  late String status, description;
   late DateTime orderDate;
 
   @override
@@ -454,6 +530,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     staffId = widget.orderItem['staff_id'];
     orderDate = DateTime.parse(widget.orderItem['order_date']);
     status = widget.orderItem['status'];
+    description = widget.order['description'];
   }
 
   void _submitForm() {
@@ -466,6 +543,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
         staffId: staffId,
         orderDate: orderDate,
         status: status,
+        description: description,
       );
       Navigator.pop(context);
     }
@@ -549,6 +627,13 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                       return 'Please select a status';
                     }
                     return null;
+                  },
+                ),
+                TextFormField(
+                  initialValue: description,
+                  decoration: const InputDecoration(labelText: 'Description'),
+                  onSaved: (value) {
+                    description = value!;
                   },
                 ),
                 const SizedBox(height: 20),

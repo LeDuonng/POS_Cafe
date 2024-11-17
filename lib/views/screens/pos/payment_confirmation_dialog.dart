@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 class PaymentConfirmationDialog extends StatefulWidget {
   final String? tableId;
   final String? userID;
+  final String? customerId;
   final List<Map<String, dynamic>> cartItems;
   final double totalPrice;
   final double tax;
@@ -24,6 +25,7 @@ class PaymentConfirmationDialog extends StatefulWidget {
     super.key,
     this.tableId,
     this.userID,
+    this.customerId,
     required this.cartItems,
     required this.totalPrice,
     required this.tax,
@@ -172,7 +174,7 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
               'Phương thức thanh toán:',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-
+            const SizedBox(height: 8.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -214,6 +216,7 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
                 ),
               ],
             ),
+            const SizedBox(height: 8.0),
 
             if (widget.selectedPaymentMethod == 'card')
               FutureBuilder<Widget>(
@@ -264,8 +267,10 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
             try {
               addOrder(
                 tableId:
-                    widget.tableId != null ? int.parse(widget.tableId!) : 1,
-                customerId: int.parse(widget.userID!),
+                    widget.tableId != null ? int.parse(widget.tableId!) : null,
+                customerId: widget.customerId != null
+                    ? int.parse(widget.customerId!)
+                    : null,
                 staffId: int.parse(widget.userID!),
                 orderDate: DateTime.now(),
                 status: 'Paid',

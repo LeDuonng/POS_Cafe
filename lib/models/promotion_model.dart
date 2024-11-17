@@ -227,3 +227,15 @@ Future<List<dynamic>> searchPromotionCodes([int? promotionId]) async {
     throw Exception('Failed to load promotion codes');
   }
 }
+
+Future<String> getNamePromotionById(int id) async {
+  final response = await http
+      .get(Uri.parse('${getPlatformBaseUrl()}/getnamepromotionbyid/$id'));
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    return data['name'];
+  } else {
+    throw Exception('Failed to load promotion name');
+  }
+}

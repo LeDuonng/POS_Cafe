@@ -1,3 +1,4 @@
+import 'package:coffeeapp/models/menu_model.dart';
 import 'package:coffeeapp/models/order_items_model.dart';
 import 'package:flutter/material.dart';
 import '../../../controllers/order_items_controller.dart';
@@ -113,7 +114,7 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Order ID',
+                          'Mã đơn hàng',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -125,7 +126,7 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Menu ID',
+                          'Tên sản phẩm',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -137,7 +138,7 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Quantity',
+                          'Số lượng',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -149,7 +150,7 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Actions',
+                          'Hành động',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -171,8 +172,20 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
                         DataCell(Text((index + 1).toString())),
                         DataCell(
                             Text(snapshot.data![index]['order_id'].toString())),
-                        DataCell(
-                            Text(snapshot.data![index]['menu_id'].toString())),
+                        DataCell(FutureBuilder<String>(
+                          future: getNameMenuItemById(int.parse(
+                              snapshot.data![index]['menu_id'].toString())),
+                          builder: (context, nameSnapshot) {
+                            if (nameSnapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (nameSnapshot.hasError) {
+                              return Text('Error: ${nameSnapshot.error}');
+                            } else {
+                              return Text(nameSnapshot.data ?? 'Unknown');
+                            }
+                          },
+                        )),
                         DataCell(
                             Text(snapshot.data![index]['quantity'].toString())),
                         DataCell(

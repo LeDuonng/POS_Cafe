@@ -113,7 +113,7 @@ class _PromotionScreenState extends State<PromotionScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Name',
+                          'Mã giảm giá',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -125,7 +125,7 @@ class _PromotionScreenState extends State<PromotionScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Discount Type',
+                          'Kiểu giảm giá',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -137,7 +137,7 @@ class _PromotionScreenState extends State<PromotionScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Discount Value',
+                          'Giá trị giảm giá',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -149,7 +149,7 @@ class _PromotionScreenState extends State<PromotionScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Start Date',
+                          'Ngày bắt đầu',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -161,7 +161,7 @@ class _PromotionScreenState extends State<PromotionScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'End Date',
+                          'Ngày kết thúc',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -173,7 +173,7 @@ class _PromotionScreenState extends State<PromotionScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Actions',
+                          'Hành động',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -194,9 +194,14 @@ class _PromotionScreenState extends State<PromotionScreen> {
                       cells: [
                         DataCell(Text((index + 1).toString())),
                         DataCell(Text(snapshot.data![index]['name'])),
-                        DataCell(Text(snapshot.data![index]['discount_type'])),
-                        DataCell(Text(snapshot.data![index]['discount_value']
-                            .toString())),
+                        DataCell(Text(snapshot.data![index]['discount_type'] ==
+                                'percentage'
+                            ? 'Phần trăm'
+                            : 'Tiền mặt')),
+                        DataCell(Text(snapshot.data![index]['discount_type'] ==
+                                'percentage'
+                            ? '${snapshot.data![index]['discount_value']} %'
+                            : '${snapshot.data![index]['discount_value']} VNĐ')),
                         DataCell(Text(snapshot.data![index]['start_date'])),
                         DataCell(Text(snapshot.data![index]['end_date'])),
                         DataCell(

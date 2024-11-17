@@ -113,7 +113,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Name',
+                          'Tên nguyên liệu',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -125,7 +125,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Unit',
+                          'Đơn vị',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -137,7 +137,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Quantity',
+                          'Số lượng',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -149,7 +149,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Actions',
+                          'Hành động',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,

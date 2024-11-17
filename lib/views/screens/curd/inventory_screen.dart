@@ -1,3 +1,4 @@
+import 'package:coffeeapp/models/ingredients_model.dart';
 import 'package:coffeeapp/models/inventory_model.dart';
 import 'package:flutter/material.dart';
 import '../../../controllers/inventory_controller.dart';
@@ -113,7 +114,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Ingredient ID',
+                          'Nguyên liệu',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -125,7 +126,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Quantity',
+                          'Số lượng',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -137,7 +138,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Last Updated',
+                          'Ngày cập nhật',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -149,7 +150,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Actions',
+                          'Hành động',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -169,8 +170,21 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       ),
                       cells: [
                         DataCell(Text((index + 1).toString())),
-                        DataCell(Text(
-                            snapshot.data![index]['ingredient_id'].toString())),
+                        DataCell(FutureBuilder<String>(
+                          future: getNameIngredientById(int.parse(snapshot
+                              .data![index]['ingredient_id']
+                              .toString())),
+                          builder: (context, nameSnapshot) {
+                            if (nameSnapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (nameSnapshot.hasError) {
+                              return Text('Error: ${nameSnapshot.error}');
+                            } else {
+                              return Text(nameSnapshot.data ?? 'Unknown');
+                            }
+                          },
+                        )),
                         DataCell(
                             Text(snapshot.data![index]['quantity'].toString())),
                         DataCell(Text(snapshot.data![index]['last_updated'])),

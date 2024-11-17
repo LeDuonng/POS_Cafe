@@ -1,4 +1,5 @@
 import 'package:coffeeapp/models/customer_points_model.dart';
+import 'package:coffeeapp/models/users_model.dart';
 import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
 import '../../../controllers/customer_points_controller.dart';
@@ -114,7 +115,7 @@ class _CustomerPointsScreenState extends State<CustomerPointsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'User ID',
+                          'Khách hàng',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -126,7 +127,7 @@ class _CustomerPointsScreenState extends State<CustomerPointsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Points',
+                          'Điểm tích luỹ',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -138,7 +139,7 @@ class _CustomerPointsScreenState extends State<CustomerPointsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Actions',
+                          'Hành động',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -158,8 +159,20 @@ class _CustomerPointsScreenState extends State<CustomerPointsScreen> {
                       ),
                       cells: [
                         DataCell(Text((index + 1).toString())),
-                        DataCell(
-                            Text(snapshot.data![index]['user_id'].toString())),
+                        DataCell(FutureBuilder<String>(
+                          future: getNameUserById(int.parse(
+                              snapshot.data![index]['user_id'].toString())),
+                          builder: (context, nameSnapshot) {
+                            if (nameSnapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (nameSnapshot.hasError) {
+                              return Text('Error: ${nameSnapshot.error}');
+                            } else {
+                              return Text(nameSnapshot.data ?? 'Unknown');
+                            }
+                          },
+                        )),
                         DataCell(
                             Text(snapshot.data![index]['points'].toString())),
                         DataCell(

@@ -113,7 +113,7 @@ class _BillsScreenState extends State<BillsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Order ID',
+                          'Mã đơn hàng',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -125,7 +125,7 @@ class _BillsScreenState extends State<BillsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Total Amount',
+                          'Thành tiền',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -137,7 +137,7 @@ class _BillsScreenState extends State<BillsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Payment Method',
+                          'Phương thức thanh toán',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -149,7 +149,7 @@ class _BillsScreenState extends State<BillsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Payment Date',
+                          'Ngày thanh toán',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,

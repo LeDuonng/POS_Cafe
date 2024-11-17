@@ -114,7 +114,7 @@ class _TableScreenState extends State<TableScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Name',
+                          'Tên bàn',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -126,7 +126,7 @@ class _TableScreenState extends State<TableScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Floor',
+                          'Tầng',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -138,7 +138,7 @@ class _TableScreenState extends State<TableScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Area',
+                          'Khu vực',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -150,7 +150,7 @@ class _TableScreenState extends State<TableScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Status',
+                          'Trạng thái',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -162,7 +162,7 @@ class _TableScreenState extends State<TableScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Actions',
+                          'Hành động',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -184,9 +184,12 @@ class _TableScreenState extends State<TableScreen> {
                         DataCell(Text((index + 1).toString())),
                         DataCell(Text(snapshot.data![index]['name'])),
                         DataCell(
-                            Text(snapshot.data![index]['floor'].toString())),
+                            Text('Tầng ${snapshot.data![index]['floor']}')),
                         DataCell(Text(snapshot.data![index]['area'])),
-                        DataCell(Text(snapshot.data![index]['status'])),
+                        DataCell(Text(
+                            snapshot.data![index]['status'] == 'available'
+                                ? 'Sẵn sàng'
+                                : 'Đang bận')),
                         DataCell(
                           Row(
                             children: [

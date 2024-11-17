@@ -126,3 +126,15 @@ Future<List<dynamic>> fetchStaffById(int id) async {
     throw Exception('Failed to load staff');
   }
 }
+
+Future<String> getNameStaffById(int id) async {
+  final response =
+      await http.get(Uri.parse('${getPlatformBaseUrl()}/getnamestaffbyid/$id'));
+
+  if (response.statusCode == 200) {
+    final responseBody = json.decode(response.body);
+    return responseBody['user_name'];
+  } else {
+    throw Exception('Failed to load staff name');
+  }
+}

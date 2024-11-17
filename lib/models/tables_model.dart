@@ -145,3 +145,15 @@ Future<List<dynamic>> fetchTableArea([String? area]) async {
     throw Exception('Failed to load table area');
   }
 }
+
+Future<String> getNameTableById(int id) async {
+  final response =
+      await http.get(Uri.parse('${getPlatformBaseUrl()}/getnametablebyid/$id'));
+
+  if (response.statusCode == 200) {
+    final responseBody = json.decode(response.body);
+    return responseBody['name'];
+  } else {
+    throw Exception('Failed to load table name');
+  }
+}

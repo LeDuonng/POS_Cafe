@@ -44,7 +44,7 @@ class Order {
 
 Future<List<dynamic>> searchOrders([String? status]) async {
   final uri = status != null
-      ? Uri.parse('${getPlatformBaseUrl()}/orders/search?status=$status')
+      ? Uri.parse('${getPlatformBaseUrl()}/orders/search?id=$status')
       : Uri.parse('${getPlatformBaseUrl()}/orders/search');
 
   final response = await http.get(uri);
@@ -74,7 +74,7 @@ Future<void> addNewOrder(Map<String, dynamic> order) async {
   );
 
   if (response.statusCode != 201) {
-    throw Exception('Failed to add order');
+    print('Failed to add order: ${response.body}');
   }
 }
 

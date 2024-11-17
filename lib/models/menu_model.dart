@@ -233,3 +233,15 @@ Future<List<dynamic>> fetchMenuCategory([String? category]) async {
     throw Exception('Failed to load menu category');
   }
 }
+
+Future<String> getNameMenuItemById(int id) async {
+  final response = await http
+      .get(Uri.parse('${getPlatformBaseUrl()}/getnamemenuitembyid/$id'));
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    return data['name'];
+  } else {
+    throw Exception('Failed to load menu item name');
+  }
+}

@@ -116,7 +116,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Name',
+                          'Tên món',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -128,7 +128,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Description',
+                          'Mô tả',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -140,7 +140,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Price',
+                          'Giá',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -152,7 +152,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Image',
+                          'Hình ảnh',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -164,7 +164,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Category',
+                          'Danh mục',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -176,7 +176,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Actions',
+                          'Hành động',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,

@@ -58,6 +58,7 @@ Future<void> addOrder({
   required int staffId,
   required DateTime orderDate,
   required String status,
+  required String description,
 }) async {
   Map<String, dynamic> newOrder = {
     'table_id': tableId,
@@ -65,6 +66,7 @@ Future<void> addOrder({
     'staff_id': staffId,
     'order_date': orderDate.toIso8601String(),
     'status': status,
+    'description': description,
   };
   try {
     await addNewOrder(newOrder);
@@ -82,6 +84,7 @@ Future<void> updateOrder({
   required int staffId,
   required DateTime orderDate,
   required String status,
+  required String description,
 }) async {
   Map<String, dynamic> updatedOrder = {
     'table_id': tableId,
@@ -89,6 +92,7 @@ Future<void> updateOrder({
     'staff_id': staffId,
     'order_date': orderDate.toIso8601String(),
     'status': status,
+    'description': description,
   };
   try {
     await updateExistingOrder(id, updatedOrder);

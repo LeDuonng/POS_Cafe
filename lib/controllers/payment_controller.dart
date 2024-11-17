@@ -6,15 +6,15 @@ import '../models/order_items_model.dart';
 
 // Add a new order
 Future<void> addOrder({
-  required int tableId,
-  required int customerId,
+  int? tableId,
+  int? customerId,
   required int staffId,
   required DateTime orderDate,
   required String status,
   required String description,
 }) async {
   Map<String, dynamic> newOrder = {
-    'table_id': tableId,
+    if (tableId != null) 'table_id': tableId,
     'customer_id': customerId,
     'staff_id': staffId,
     'order_date': orderDate.toIso8601String(),

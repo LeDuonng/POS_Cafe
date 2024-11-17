@@ -112,31 +112,31 @@ class _UserScreenState extends State<UserScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
+                          'Tên người dùng',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown,
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: SizedBox(
+                        width: columnWidth,
+                        child: const Text(
+                          'Quyền',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown,
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: SizedBox(
+                        width: columnWidth,
+                        child: const Text(
                           'Username',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.brown,
-                          ),
-                        ),
-                      ),
-                    ),
-                    DataColumn(
-                      label: SizedBox(
-                        width: columnWidth,
-                        child: const Text(
-                          'Role',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.brown,
-                          ),
-                        ),
-                      ),
-                    ),
-                    DataColumn(
-                      label: SizedBox(
-                        width: columnWidth,
-                        child: const Text(
-                          'Name',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -160,7 +160,7 @@ class _UserScreenState extends State<UserScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Phone',
+                          'Điện thoại',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -172,7 +172,7 @@ class _UserScreenState extends State<UserScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Address',
+                          'Địa chỉ',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -204,9 +204,9 @@ class _UserScreenState extends State<UserScreen> {
                       ),
                       cells: [
                         DataCell(Text((index + 1).toString())),
-                        DataCell(Text(snapshot.data![index]['username'])),
-                        DataCell(Text(snapshot.data![index]['role'])),
                         DataCell(Text(snapshot.data![index]['name'])),
+                        DataCell(Text(snapshot.data![index]['role'])),
+                        DataCell(Text(snapshot.data![index]['username'])),
                         DataCell(Text(snapshot.data![index]['email'])),
                         DataCell(Text(snapshot.data![index]['phone'])),
                         DataCell(Text(snapshot.data![index]['address'])),

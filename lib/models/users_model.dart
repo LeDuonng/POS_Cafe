@@ -179,3 +179,15 @@ Future<List<dynamic>> findUser(String searchTerm) async {
     throw Exception('Failed to search users');
   }
 }
+
+Future<String> getNameUserById(int id) async {
+  final response =
+      await http.get(Uri.parse('${getPlatformBaseUrl()}/getnameuserbyid/$id'));
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    return data['name'];
+  } else {
+    throw Exception('Failed to load user name');
+  }
+}
