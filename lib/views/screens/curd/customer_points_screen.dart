@@ -169,7 +169,7 @@ class _CustomerPointsScreenState extends State<CustomerPointsScreen> {
                             } else if (nameSnapshot.hasError) {
                               return Text('Error: ${nameSnapshot.error}');
                             } else {
-                              return Text(nameSnapshot.data ?? 'Unknown');
+                              return Text(nameSnapshot.data ?? 'Không có');
                             }
                           },
                         )),

@@ -15,6 +15,7 @@ class PaymentConfirmationDialog extends StatefulWidget {
   final double surcharge;
   final String surchargeReason;
   String selectedPaymentMethod;
+  String orderType;
   final String? selectedPromotionCode;
   final double? promotionValue;
   final String? promotionType;
@@ -26,6 +27,7 @@ class PaymentConfirmationDialog extends StatefulWidget {
     this.tableId,
     this.userID,
     this.customerId,
+    required this.orderType,
     required this.cartItems,
     required this.totalPrice,
     required this.tax,
@@ -275,7 +277,7 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
                 orderDate: DateTime.now(),
                 status: 'Paid',
                 description:
-                    'Order from POS${widget.surcharge > 0 ? ', Phụ thu: ${widget.surcharge} VNĐ, Lý do: ${widget.surchargeReason}' : ''}',
+                    '${widget.orderType} \n${widget.surcharge > 0 ? ', Phụ thu: ${widget.surcharge} VNĐ, Lý do: ${widget.surchargeReason}' : ''}',
               );
 
               addBill(

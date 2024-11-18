@@ -204,7 +204,7 @@ class _RevenueReportPageState extends State<RevenueReportPage>
                   child: SfCircularChart(
                     title: ChartTitle(
                       text:
-                          'Doanh thu theo phương thức\nTổng: ${NumberFormat.currency(locale: "vi_VN", symbol: "").format(totalCash + totalCard)} VNĐ',
+                          'Doanh thu trong ngày\nTổng: ${NumberFormat.currency(locale: "vi_VN", symbol: "").format(totalCash + totalCard)} VNĐ',
                     ),
                     series: <CircularSeries>[
                       PieSeries<Map<String, dynamic>, String>(

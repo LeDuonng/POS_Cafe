@@ -662,6 +662,7 @@ class _POSScreenState extends State<POSScreen> {
                             onOrderTypeSelected: (newType) {
                               setState(() {
                                 selectedOrderType = newType;
+                                print(selectedOrderType);
                               });
                             },
                             userID: widget.userID,

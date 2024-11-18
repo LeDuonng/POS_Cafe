@@ -1,6 +1,5 @@
 // table_screen.dart
 import 'package:coffeeapp/models/tables_model.dart';
-import 'package:coffeeapp/views/screens/pos/pos_screen.dart';
 import 'package:flutter/material.dart';
 import 'area_screen.dart';
 
@@ -77,16 +76,7 @@ class _TableScreenState extends State<TableScreen> {
                     itemBuilder: (context, index) {
                       final table = tables[index];
                       return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedTable = table['name'];
-                            widget.onTableSelected('Bàn: ${table['name']}');
-                            POSScreen(
-                              tableId: table['id'],
-                              userID: widget.userID,
-                            );
-                          });
-                        },
+                        onTap: () {},
                         child: Card(
                           color: selectedTable == table['name']
                               ? Colors.lightBlueAccent // Màu khi được chọn

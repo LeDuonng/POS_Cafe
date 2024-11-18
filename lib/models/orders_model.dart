@@ -74,6 +74,7 @@ Future<void> addNewOrder(Map<String, dynamic> order) async {
   );
 
   if (response.statusCode != 201) {
+    // ignore: avoid_print
     print('Failed to add order: ${response.body}');
   }
 }

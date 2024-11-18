@@ -215,7 +215,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 ? getNameTableById(int.parse(snapshot
                                     .data![index]['table_id']
                                     .toString()))
-                                : Future.value('Unknown'),
+                                : Future.value('Không có'),
                             builder: (context, nameSnapshot) {
                               if (nameSnapshot.connectionState ==
                                   ConnectionState.waiting) {
@@ -223,7 +223,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                               } else if (nameSnapshot.hasError) {
                                 return Text('Error: ${nameSnapshot.error}');
                               } else {
-                                return Text(nameSnapshot.data ?? 'Unknown');
+                                return Text(nameSnapshot.data ?? 'Không có');
                               }
                             },
                           ),
@@ -234,7 +234,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 ? getNameUserById(int.parse(snapshot
                                     .data![index]['customer_id']
                                     .toString()))
-                                : Future.value('Unknown'),
+                                : Future.value('Không có'),
                             builder: (context, nameSnapshot) {
                               if (nameSnapshot.connectionState ==
                                   ConnectionState.waiting) {
@@ -242,7 +242,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                               } else if (nameSnapshot.hasError) {
                                 return Text('Error: ${nameSnapshot.error}');
                               } else {
-                                return Text(nameSnapshot.data ?? 'Unknown');
+                                return Text(nameSnapshot.data ?? 'Không có');
                               }
                             },
                           ),
@@ -257,7 +257,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             } else if (nameSnapshot.hasError) {
                               return Text('Error: ${nameSnapshot.error}');
                             } else {
-                              return Text(nameSnapshot.data ?? 'Unknown');
+                              return Text(nameSnapshot.data ?? 'Không có');
                             }
                           },
                         )),
