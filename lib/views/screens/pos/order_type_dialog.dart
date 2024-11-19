@@ -1,4 +1,5 @@
 // order_type_dialog.dart
+import 'package:coffeeapp/models/tables_model.dart';
 import 'package:coffeeapp/responsive.dart';
 import 'package:coffeeapp/views/screens/table/table_screen.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ class OrderTypeDialog extends StatefulWidget {
 class _OrderTypeDialogState extends State<OrderTypeDialog> {
   late String selectedOrderType;
   bool isTableSelected = false;
+  int? selectedTable;
 
   @override
   void initState() {
@@ -38,9 +40,6 @@ class _OrderTypeDialogState extends State<OrderTypeDialog> {
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
         textStyle: const TextStyle(fontSize: 18),
-        // shape: RoundedRectangleBorder(
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
       ),
       onPressed: () {
         showDialog(
@@ -161,9 +160,11 @@ class _OrderTypeDialogState extends State<OrderTypeDialog> {
                                 height: 300, // Ensure the height is fixed
                                 child: TableScreen(
                                   userID: widget.userID.toString(),
+                                  status: 1,
                                   onTableSelected: (selectedTable) {
                                     setState(() {
-                                      selectedOrderType = selectedTable;
+                                      selectedOrderType =
+                                          selectedTable.toString();
                                       isTableSelected =
                                           true; // Cập nhật isTableSelected
                                     });
@@ -197,7 +198,25 @@ class _OrderTypeDialogState extends State<OrderTypeDialog> {
           },
         );
       },
-      child: Text(selectedOrderType),
+      child: FutureBuilder<String>(
+        future: selectedOrderType != 'Giao hàng' &&
+                selectedOrderType != 'Mang đi'
+            ? getNameTableById(int.parse(selectedOrderType))
+            : Future.value(
+                selectedOrderType), // Trả về trực tiếp giá trị đồng bộ nếu không cần gọi hàm bất đồng bộ
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text(
+                'Loading...'); // Hoặc hiển thị biểu tượng chờ (spinner)
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else if (snapshot.hasData) {
+            return Text(snapshot.data!);
+          } else {
+            return const Text('No data available');
+          }
+        },
+      ),
     );
   }
 }

@@ -28,6 +28,11 @@ class _MenuScreenState extends State<MenuScreen> {
     });
   }
 
+  void searchMenu(String query) {
+    setState(() => searchText = query);
+    _refreshMenuList(searchText); // Gọi _refreshMenuList với searchText mới
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,6 +55,7 @@ class _MenuScreenState extends State<MenuScreen> {
                     searchText = value;
                     _refreshMenuList(searchText);
                   });
+                  searchMenu(value);
                 },
               ),
             ),
@@ -95,205 +101,217 @@ class _MenuScreenState extends State<MenuScreen> {
 
                 // child: SingleChildScrollView(
                 //   scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columnSpacing: 12,
-                  // ignore: deprecated_member_use
-                  dataRowHeight: 100,
-                  columns: [
-                    DataColumn(
-                      label: SizedBox(
-                        width: columnWidth,
-                        child: const Text(
-                          'STT',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.brown,
+                child: RefreshIndicator(
+                  onRefresh: () => _refreshMenuList(),
+                  triggerMode: RefreshIndicatorTriggerMode.onEdge,
+                  edgeOffset: 50,
+                  displacement: 200,
+                  strokeWidth: 5,
+                  color: Colors.green,
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  child: DataTable(
+                    columnSpacing: 12,
+                    // ignore: deprecated_member_use
+                    dataRowHeight: 100,
+                    columns: [
+                      DataColumn(
+                        label: SizedBox(
+                          width: columnWidth,
+                          child: const Text(
+                            'STT',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.brown,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    DataColumn(
-                      label: SizedBox(
-                        width: columnWidth,
-                        child: const Text(
-                          'Tên món',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.brown,
+                      DataColumn(
+                        label: SizedBox(
+                          width: columnWidth,
+                          child: const Text(
+                            'Tên món',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.brown,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    DataColumn(
-                      label: SizedBox(
-                        width: columnWidth,
-                        child: const Text(
-                          'Mô tả',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.brown,
+                      DataColumn(
+                        label: SizedBox(
+                          width: columnWidth,
+                          child: const Text(
+                            'Mô tả',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.brown,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    DataColumn(
-                      label: SizedBox(
-                        width: columnWidth,
-                        child: const Text(
-                          'Giá',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.brown,
+                      DataColumn(
+                        label: SizedBox(
+                          width: columnWidth,
+                          child: const Text(
+                            'Giá',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.brown,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    DataColumn(
-                      label: SizedBox(
-                        width: columnWidth,
-                        child: const Text(
-                          'Hình ảnh',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.brown,
+                      DataColumn(
+                        label: SizedBox(
+                          width: columnWidth,
+                          child: const Text(
+                            'Hình ảnh',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.brown,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    DataColumn(
-                      label: SizedBox(
-                        width: columnWidth,
-                        child: const Text(
-                          'Danh mục',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.brown,
+                      DataColumn(
+                        label: SizedBox(
+                          width: columnWidth,
+                          child: const Text(
+                            'Danh mục',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.brown,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    DataColumn(
-                      label: SizedBox(
-                        width: columnWidth,
-                        child: const Text(
-                          'Hành động',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.brown,
+                      DataColumn(
+                        label: SizedBox(
+                          width: columnWidth,
+                          child: const Text(
+                            'Hành động',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.brown,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                  rows: List.generate(snapshot.data!.length, (index) {
-                    return DataRow(
-                      color: WidgetStateProperty.resolveWith<Color?>(
-                        (Set<WidgetState> states) {
-                          return index.isEven
-                              ? Colors.grey.withOpacity(0.1)
-                              : Colors.white;
-                        },
-                      ),
-                      cells: [
-                        DataCell(Text((index + 1).toString())),
-                        DataCell(Text(snapshot.data![index]['name'])),
-                        DataCell(Text(snapshot.data![index]['description'])),
-                        DataCell(
-                            Text(snapshot.data![index]['price'].toString())),
-                        DataCell(
-                          Image.asset(
-                            'assets/menu/${snapshot.data![index]['name']}.png',
-                            height: 100,
-                            width: 100,
-                            fit: BoxFit.fitHeight,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                'assets/menu/error.png',
-                                height: 100,
-                                width: 100,
-                                fit: BoxFit.fitHeight,
-                              );
-                            },
-                          ),
+                    ],
+                    rows: List.generate(snapshot.data!.length, (index) {
+                      return DataRow(
+                        color: WidgetStateProperty.resolveWith<Color?>(
+                          (Set<WidgetState> states) {
+                            return index.isEven
+                                ? Colors.grey.withOpacity(0.1)
+                                : Colors.white;
+                          },
                         ),
-                        DataCell(Text(snapshot.data![index]['category'])),
-                        DataCell(
-                          Row(
-                            children: [
-                              IconButton(
-                                icon:
-                                    const Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () async {
-                                  await showDialog(
-                                    context: context,
-                                    builder: (context) => EditMenuItemScreen(
-                                      menu: snapshot.data![index],
-                                      menuItem: {
-                                        'id': snapshot.data![index]['id'],
-                                        'name': snapshot.data![index]['name'],
-                                        'description': snapshot.data![index]
-                                            ['description'],
-                                        'price': snapshot.data![index]['price'],
-                                        'image': snapshot.data![index]['image'],
-                                        'category': snapshot.data![index]
-                                            ['category'],
+                        cells: [
+                          DataCell(Text((index + 1).toString())),
+                          DataCell(Text(snapshot.data![index]['name'])),
+                          DataCell(Text(snapshot.data![index]['description'])),
+                          DataCell(
+                              Text(snapshot.data![index]['price'].toString())),
+                          DataCell(
+                            Image.asset(
+                              'assets/menu/${snapshot.data![index]['name']}.png',
+                              height: 100,
+                              width: 100,
+                              fit: BoxFit.fitHeight,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  'assets/menu/error.png',
+                                  height: 100,
+                                  width: 100,
+                                  fit: BoxFit.fitHeight,
+                                );
+                              },
+                            ),
+                          ),
+                          DataCell(Text(snapshot.data![index]['category'])),
+                          DataCell(
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit,
+                                      color: Colors.blue),
+                                  onPressed: () async {
+                                    await showDialog(
+                                      context: context,
+                                      builder: (context) => EditMenuItemScreen(
+                                        menu: snapshot.data![index],
+                                        menuItem: {
+                                          'id': snapshot.data![index]['id'],
+                                          'name': snapshot.data![index]['name'],
+                                          'description': snapshot.data![index]
+                                              ['description'],
+                                          'price': snapshot.data![index]
+                                              ['price'],
+                                          'image': snapshot.data![index]
+                                              ['image'],
+                                          'category': snapshot.data![index]
+                                              ['category'],
+                                        },
+                                      ),
+                                    );
+                                    _refreshMenuList();
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete,
+                                      color: Colors.red),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: const Text('Confirm Delete'),
+                                          content: const Text(
+                                              'Are you sure you want to delete this item?'),
+                                          actions: <Widget>[
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                setState(() {
+                                                  try {
+                                                    deleteMenu(snapshot
+                                                        .data![index]['id']);
+                                                    snapshot.data!
+                                                        .removeAt(index);
+                                                  } catch (e) {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      SnackBar(
+                                                          content: Text(
+                                                              'Error: $e')),
+                                                    );
+                                                  }
+                                                });
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('Delete'),
+                                            ),
+                                          ],
+                                        );
                                       },
-                                    ),
-                                  );
-                                  _refreshMenuList();
-                                },
-                              ),
-                              IconButton(
-                                icon:
-                                    const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Text('Confirm Delete'),
-                                        content: const Text(
-                                            'Are you sure you want to delete this item?'),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: const Text('Cancel'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                try {
-                                                  deleteMenu(snapshot
-                                                      .data![index]['id']);
-                                                  snapshot.data!
-                                                      .removeAt(index);
-                                                } catch (e) {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                        content:
-                                                            Text('Error: $e')),
-                                                  );
-                                                }
-                                              });
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: const Text('Delete'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
-                            ],
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-                  }),
+                        ],
+                      );
+                    }),
+                  ),
                 ),
               );
             },

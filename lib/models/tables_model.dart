@@ -157,3 +157,22 @@ Future<String> getNameTableById(int id) async {
     throw Exception('Failed to load table name');
   }
 }
+
+Future<void> updateTableStatus(int id, String status) async {
+  final response = await http.put(
+    Uri.parse('${getPlatformBaseUrl()}/tables/$id/status'),
+    headers: {'Content-Type': 'application/json'},
+    body: json.encode({'status': status}),
+  );
+
+  if (response.statusCode == 200) {
+    if (json.decode(response.body)['rows_affected'] == null ||
+        json.decode(response.body)['rows_affected'] == 0) {
+      // ignore: avoid_print
+      print('Table status update failed');
+    } else {
+      // ignore: avoid_print
+      print('Table status updated successfully');
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import 'package:coffeeapp/models/config_model.dart';
 import 'package:coffeeapp/models/menu_model.dart';
 import 'package:coffeeapp/models/promotion_model.dart';
+import 'package:coffeeapp/models/tables_model.dart';
 import 'package:coffeeapp/responsive.dart';
 import 'package:coffeeapp/views/screens/pos/customization_item_dialog.dart';
 import 'package:coffeeapp/views/screens/pos/find_customer_dialog.dart';
@@ -13,9 +14,10 @@ import 'package:coffeeapp/views/screens/pos/surcharge_dialog.dart';
 import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class POSScreen extends StatefulWidget {
-  const POSScreen({super.key, required this.tableId, required this.userID});
-  final String? tableId;
+  POSScreen({super.key, required this.tableId, required this.userID});
+  String? tableId;
   final String? userID;
 
   @override
@@ -29,6 +31,7 @@ class _POSScreenState extends State<POSScreen> {
   String? customerID;
   String? customerName;
   final String _selectedPaymentMethod = 'cash';
+  String? tableName;
   bool hasTaxMode = false;
   String selectedOrderType = 'Mang đi';
   String? _selectedPromotionCode;
@@ -57,6 +60,37 @@ class _POSScreenState extends State<POSScreen> {
       hasTaxMode = configData.any(
         (config) => config['key'] == 'tax' && config['value'] == 'true',
       );
+    });
+  }
+
+  Future<void> _checkOrderType() async {
+    if (selectedOrderType != 'Giao hàng' && selectedOrderType != 'Mang đi') {
+      try {
+        tableName = await getNameTableById(int.parse(selectedOrderType));
+        setState(() {
+          widget.tableId = selectedOrderType;
+        });
+      } catch (e) {
+        // Handle error
+        // ignore: avoid_print
+        print('Error fetching table name: $e');
+      }
+    }
+  }
+
+  void _reset() {
+    setState(() {
+      _cartItems.clear();
+      _calculateTotal();
+      _selectedPromotionCode = null;
+      _promotionValue = null;
+      _promotionType = null;
+      _surcharge = 0.0;
+      _surchargeReason = '';
+      customerID = null;
+      customerName = null;
+      selectedOrderType = 'Mang đi'; // Reset giá trị selectedOrderType
+      widget.tableId = null;
     });
   }
 
@@ -157,6 +191,10 @@ class _POSScreenState extends State<POSScreen> {
           customerId: customerID,
           cartItems: _cartItems,
           totalPrice: _totalPrice,
+          orderType:
+              selectedOrderType != 'Mang đi' && selectedOrderType != 'Giao hàng'
+                  ? 'Tại bàn'
+                  : selectedOrderType,
           tax: _tax,
           surcharge: _surcharge,
           surchargeReason: _surchargeReason,
@@ -166,15 +204,7 @@ class _POSScreenState extends State<POSScreen> {
           promotionType: _promotionType,
           hasTaxMode: hasTaxMode,
           onPaymentSuccess: () {
-            setState(() {
-              _cartItems.clear();
-              _calculateTotal();
-              _selectedPromotionCode = null;
-              _promotionValue = null;
-              _promotionType = null;
-              _surcharge = 0.0;
-              _surchargeReason = '';
-            });
+            _reset();
           },
         );
       },
@@ -503,6 +533,7 @@ class _POSScreenState extends State<POSScreen> {
                                 onOrderTypeSelected: (newType) {
                                   setState(() {
                                     selectedOrderType = newType;
+                                    _checkOrderType();
                                   });
                                 },
                                 userID: widget.userID,
@@ -662,7 +693,7 @@ class _POSScreenState extends State<POSScreen> {
                             onOrderTypeSelected: (newType) {
                               setState(() {
                                 selectedOrderType = newType;
-                                print(selectedOrderType);
+                                _checkOrderType();
                               });
                             },
                             userID: widget.userID,
@@ -810,17 +841,7 @@ class _POSScreenState extends State<POSScreen> {
                         height: 50.0, // Chiều cao cố định cho cả hai nút
                         child: ElevatedButton(
                           onPressed: () {
-                            setState(() {
-                              _cartItems.clear();
-                              _calculateTotal();
-                              _selectedPromotionCode = null;
-                              _promotionValue = null;
-                              _promotionType = null;
-                              _surcharge = 0.0;
-                              _surchargeReason = '';
-                              customerID = null;
-                              customerName = null;
-                            });
+                            _reset();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,

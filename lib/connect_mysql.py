@@ -1030,5 +1030,55 @@ def get_name_staff_by_id(id):
     return jsonify(results)
 
     
+@app.route('/tables/<int:id>/status', methods=['PUT'])
+def update_table_status(id):
+    data = request.json
+    new_status = data.get('status')
+    if new_status is None:
+        return jsonify({'error': 'Status is required'}), 400
+
+    query = "UPDATE tables SET status=%s WHERE id=%s AND del = 0"
+    rowcount = update_query(query, (new_status, id))
+    return jsonify({'rows_affected': rowcount}), 200
+
+
+
+@app.route('/orders/merge_change_table', methods=['PUT'])
+def merge_table():
+    data = request.json
+    old_table_id = data.get('old_table_id')
+    new_table_id = data.get('new_table_id')
+    if old_table_id is None or new_table_id is None:
+        return jsonify({'error': 'Old table ID and new table ID are required'}), 400
+
+    # Tìm kiếm đơn hàng dựa theo table_id cũ
+    query = "SELECT id FROM orders WHERE table_id=%s ORDER BY order_date DESC LIMIT 1"
+    rows = fetch_data(query, (old_table_id,))
+    if not rows:
+        return jsonify({'message': 'No orders found for this table'}), 404
+
+    order_id = rows[0][0]
+
+    # Update the order with the new table ID
+    update_order_query = "UPDATE orders SET table_id=%s WHERE id=%s AND del = 0"
+    update_order_rowcount = update_query(update_order_query, (new_table_id, order_id))
+
+    # Update the status of the new table
+    update_new_table_query = "UPDATE tables SET status='occupied' WHERE id=%s AND del = 0"
+    update_new_table_rowcount = update_query(update_new_table_query, (new_table_id,))
+
+    # Update the status of the old table
+    update_old_table_query = "UPDATE tables SET status='available' WHERE id=%s AND del = 0"
+    update_old_table_rowcount = update_query(update_old_table_query, (old_table_id,))
+
+    return jsonify({
+        'order_updated': update_order_rowcount,
+        'new_table_updated': update_new_table_rowcount,
+        'old_table_updated': update_old_table_rowcount
+    }), 200
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

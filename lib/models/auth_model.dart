@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart'
 const String baseUrl =
     'http://127.0.0.1:5000'; // Địa chỉ IP của server Flask cho Web
 const String baseUrlAndroid =
-    'http://192.168.1.6:5000'; // Địa chỉ IP của máy tính chạy server Flask cho Android
+    'http://192.168.1.2:5000'; // Địa chỉ IP của máy tính chạy server Flask cho Android
 
 String getPlatformBaseUrl() {
   if (kIsWeb) {

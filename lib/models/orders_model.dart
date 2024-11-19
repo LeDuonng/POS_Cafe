@@ -1,4 +1,5 @@
 import 'package:coffeeapp/models/auth_model.dart';
+import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -135,5 +136,29 @@ Future<int> getLastOrderId() async {
     return responseBody['id'];
   } else {
     throw Exception('Failed to fetch last order ID');
+  }
+}
+
+//gộp bàn, chuyển bàn
+Future<void> mergeTable(int oldTableId, int newTableId) async {
+  final response = await http.put(
+    Uri.parse('${getPlatformBaseUrl()}/orders/merge_change_table'),
+    headers: {'Content-Type': 'application/json'},
+    body: json.encode({
+      'old_table_id': oldTableId,
+      'new_table_id': newTableId,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    final responseBody = json.decode(response.body);
+    if (responseBody['order_updated'] == 0 ||
+        responseBody['table_updated'] == 0) {
+      ToastNotification.showToast(message: 'Gộp bàn thất bại');
+    } else {
+      ToastNotification.showToast(message: 'Gộp bàn thành công');
+    }
+  } else {
+    ToastNotification.showToast(message: 'Gộp bàn thất bại');
   }
 }

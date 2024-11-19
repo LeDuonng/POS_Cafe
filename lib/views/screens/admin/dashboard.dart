@@ -2,7 +2,7 @@ import 'package:coffeeapp/models/config_model.dart';
 import 'package:coffeeapp/views/screens/admin/managerment_screen.dart';
 import 'package:coffeeapp/views/screens/pos/pos_screen.dart';
 import 'package:coffeeapp/views/screens/signin_screen.dart';
-import 'package:coffeeapp/views/screens/table/table_screen.dart';
+import 'package:coffeeapp/views/screens/table/table_management.dart';
 import 'package:coffeeapp/views/screens/user_info.dart';
 
 import 'package:flutter/material.dart';
@@ -60,7 +60,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           role: widget.role.toString(),
         ),
         if (hasTableMode && (widget.role == 'admin' || widget.role == 'staff'))
-          TableScreen(
+          TableManagementScreen(
             userID: widget.id.toString(),
             onTableSelected: (String tableId) {},
           ),

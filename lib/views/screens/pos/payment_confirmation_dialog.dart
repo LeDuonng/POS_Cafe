@@ -1,4 +1,5 @@
 import 'package:coffeeapp/controllers/payment_controller.dart';
+import 'package:coffeeapp/models/tables_model.dart';
 import 'package:coffeeapp/views/screens/qr_code/qr_code.dart';
 import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
@@ -267,6 +268,15 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
         ElevatedButton(
           onPressed: () {
             try {
+              if (widget.tableId != null) {
+                try {
+                  updateTableStatus(
+                      int.parse(widget.tableId!), 'occupied'); //available
+                } catch (e) {
+                  ToastNotification.showToast(
+                      message: 'Cập nhật trạng thái bàn thất bại: $e');
+                }
+              }
               addOrder(
                 tableId:
                     widget.tableId != null ? int.parse(widget.tableId!) : null,

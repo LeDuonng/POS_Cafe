@@ -1,15 +1,18 @@
 // table_screen.dart
 import 'package:coffeeapp/models/tables_model.dart';
-import 'package:coffeeapp/views/screens/pos/pos_screen.dart';
 import 'package:flutter/material.dart';
 import 'area_screen.dart';
 
 class TableScreen extends StatefulWidget {
   final String userID;
   final Function(String) onTableSelected;
+  final int status; // 1: Tất cả, 2: Đang bận, 3: Sẵn sàng
 
   const TableScreen(
-      {super.key, required this.userID, required this.onTableSelected});
+      {super.key,
+      required this.userID,
+      required this.onTableSelected,
+      required this.status});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -19,7 +22,7 @@ class TableScreen extends StatefulWidget {
 class _TableScreenState extends State<TableScreen> {
   Future<List<dynamic>>? tableList;
   String selectedArea = 'Tất cả';
-  String? selectedTable; // Biến lưu trữ bàn được chọn
+  int? selectedTable; // Biến lưu trữ bàn được chọn
 
   @override
   void initState() {
@@ -28,11 +31,21 @@ class _TableScreenState extends State<TableScreen> {
   }
 
   Future<List<dynamic>> fetchTablesByArea(String area) async {
+    List<dynamic> tables;
     if (area == 'Tất cả') {
-      return fetchTableArea();
+      tables = await fetchTableArea();
     } else {
-      return fetchTableArea(area);
+      tables = await fetchTableArea(area);
     }
+
+    // Lọc bàn dựa trên trạng thái
+    if (widget.status == 2) {
+      tables = tables.where((table) => table['status'] == 'occupied').toList();
+    } else if (widget.status == 3) {
+      tables = tables.where((table) => table['status'] == 'available').toList();
+    }
+
+    return tables;
   }
 
   void onAreaSelected(String area) {
@@ -79,16 +92,12 @@ class _TableScreenState extends State<TableScreen> {
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedTable = table['name'];
-                            widget.onTableSelected('Bàn: ${table['name']}');
-                            POSScreen(
-                              tableId: table['id'],
-                              userID: widget.userID,
-                            );
+                            selectedTable = table['id'];
+                            widget.onTableSelected(table['id'].toString());
                           });
                         },
                         child: Card(
-                          color: selectedTable == table['name']
+                          color: selectedTable == table['id']
                               ? Colors.lightBlueAccent // Màu khi được chọn
                               : null, // Màu mặc định
                           child: Column(
