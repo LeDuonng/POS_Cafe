@@ -182,10 +182,10 @@ class _TableScreenState extends State<TableScreen> {
                       ),
                       cells: [
                         DataCell(Text((index + 1).toString())),
-                        DataCell(Text(snapshot.data![index]['name'])),
-                        DataCell(
-                            Text('Tầng ${snapshot.data![index]['floor']}')),
-                        DataCell(Text(snapshot.data![index]['area'])),
+                        DataCell(Text(snapshot.data![index]['name'] ?? '')),
+                        DataCell(Text(
+                            'Tầng ${snapshot.data![index]['floor'] ?? ''}')),
+                        DataCell(Text(snapshot.data![index]['area'] ?? '')),
                         DataCell(Text(
                             snapshot.data![index]['status'] == 'available'
                                 ? 'Sẵn sàng'
@@ -429,10 +429,10 @@ class _EditTableScreenState extends State<EditTableScreen> {
   @override
   void initState() {
     super.initState();
-    name = widget.tableItem['name'];
-    floor = widget.tableItem['floor'];
-    area = widget.tableItem['area'];
-    status = widget.tableItem['status'];
+    name = widget.tableItem['name'] ?? '';
+    floor = widget.tableItem['floor'] ?? 0;
+    area = widget.tableItem['area'] ?? '';
+    status = widget.tableItem['status'] ?? 'available';
   }
 
   void _submitForm() {

@@ -181,12 +181,16 @@ class _BillsScreenState extends State<BillsScreen> {
                       ),
                       cells: [
                         DataCell(Text((index + 1).toString())),
-                        DataCell(
-                            Text(snapshot.data![index]['order_id'].toString())),
                         DataCell(Text(
-                            snapshot.data![index]['total_amount'].toString())),
-                        DataCell(Text(snapshot.data![index]['payment_method'])),
-                        DataCell(Text(snapshot.data![index]['payment_date'])),
+                            snapshot.data![index]['order_id']?.toString() ??
+                                'N/A')),
+                        DataCell(Text(
+                            snapshot.data![index]['total_amount']?.toString() ??
+                                'N/A')),
+                        DataCell(Text(
+                            snapshot.data![index]['payment_method'] ?? 'N/A')),
+                        DataCell(Text(
+                            snapshot.data![index]['payment_date'] ?? 'N/A')),
                         DataCell(
                           Row(
                             children: [
@@ -405,10 +409,10 @@ class _EditBillScreenState extends State<EditBillScreen> {
   @override
   void initState() {
     super.initState();
-    orderId = widget.billItem['order_id'].toString();
-    totalAmount = widget.billItem['total_amount'].toString();
-    paymentMethod = widget.billItem['payment_method'];
-    paymentDate = DateTime.parse(widget.billItem['payment_date']);
+    orderId = widget.billItem['order_id']?.toString() ?? '';
+    totalAmount = widget.billItem['total_amount']?.toString() ?? '';
+    paymentMethod = widget.billItem['payment_method'] ?? '';
+    paymentDate = DateTime.parse(widget.billItem['payment_date'] ?? '');
   }
 
   void _submitForm() {

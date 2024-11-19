@@ -1,4 +1,6 @@
+import 'package:coffeeapp/controllers/customer_points_controller.dart';
 import 'package:coffeeapp/controllers/payment_controller.dart';
+import 'package:coffeeapp/models/config_model.dart';
 import 'package:coffeeapp/models/tables_model.dart';
 import 'package:coffeeapp/views/screens/qr_code/qr_code.dart';
 import 'package:coffeeapp/views/widgets/nofication.dart';
@@ -266,7 +268,7 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
           child: const Text('in hoá đơn'),
         ),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             try {
               if (widget.tableId != null) {
                 try {
@@ -275,6 +277,21 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
                 } catch (e) {
                   ToastNotification.showToast(
                       message: 'Cập nhật trạng thái bàn thất bại: $e');
+                }
+              }
+              if (widget.customerId != null) {
+                try {
+                  List<dynamic> configs = await fetchConfig();
+
+                  addCustomerPoints(
+                      userId: int.parse(widget.customerId!),
+                      points: widget.totalPrice.toInt() *
+                          (int.parse(configs.firstWhere((config) =>
+                              config['key'] == 'percent_points')['value'])) ~/
+                          100);
+                } catch (e) {
+                  ToastNotification.showToast(
+                      message: 'Cập nhật điểm thất bại: $e');
                 }
               }
               addOrder(
@@ -325,6 +342,7 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
               widget.onPaymentSuccess();
             } catch (e) {
               showDialog(
+                // ignore: use_build_context_synchronously
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
@@ -344,6 +362,7 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
               );
             }
 
+            // ignore: use_build_context_synchronously
             Navigator.of(context).pop();
           },
           child: const Text('Thanh toán'),

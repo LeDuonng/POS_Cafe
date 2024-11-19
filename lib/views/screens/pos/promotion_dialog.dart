@@ -29,8 +29,7 @@ class _PromotionScreenState extends State<PromotionScreen> {
 
   Future<void> _searchPromotions(String query) async {
     try {
-      List<dynamic> promotions =
-          await PromotionController.searchPromotionscustomer(query);
+      List<dynamic> promotions = await searchPromotionscustomer(query);
       setState(() {
         _foundPromotions = promotions;
       });

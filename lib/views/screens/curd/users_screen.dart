@@ -204,12 +204,18 @@ class _UserScreenState extends State<UserScreen> {
                       ),
                       cells: [
                         DataCell(Text((index + 1).toString())),
-                        DataCell(Text(snapshot.data![index]['name'])),
-                        DataCell(Text(snapshot.data![index]['role'])),
-                        DataCell(Text(snapshot.data![index]['username'])),
-                        DataCell(Text(snapshot.data![index]['email'])),
-                        DataCell(Text(snapshot.data![index]['phone'])),
-                        DataCell(Text(snapshot.data![index]['address'])),
+                        DataCell(
+                            Text(snapshot.data![index]['name'] ?? 'Không có')),
+                        DataCell(
+                            Text(snapshot.data![index]['role'] ?? 'Không có')),
+                        DataCell(Text(
+                            snapshot.data![index]['username'] ?? 'Không có')),
+                        DataCell(
+                            Text(snapshot.data![index]['email'] ?? 'Không có')),
+                        DataCell(
+                            Text(snapshot.data![index]['phone'] ?? 'Không có')),
+                        DataCell(Text(
+                            snapshot.data![index]['address'] ?? 'Không có')),
                         DataCell(
                           Row(
                             children: [
@@ -485,13 +491,13 @@ class _EditUserScreenState extends State<EditUserScreen> {
   @override
   void initState() {
     super.initState();
-    username = widget.userItem['username'];
-    password = widget.userItem['password'];
-    role = widget.userItem['role'];
-    name = widget.userItem['name'];
-    email = widget.userItem['email'];
-    phone = widget.userItem['phone'];
-    address = widget.userItem['address'];
+    username = widget.userItem['username'] ?? '';
+    password = widget.userItem['password'] ?? '';
+    role = widget.userItem['role'] ?? 'customer';
+    name = widget.userItem['name'] ?? '';
+    email = widget.userItem['email'] ?? '';
+    phone = widget.userItem['phone'] ?? '';
+    address = widget.userItem['address'] ?? '';
   }
 
   void _submitForm() {

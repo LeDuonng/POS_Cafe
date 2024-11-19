@@ -132,81 +132,81 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const Spacer(), // Đẩy các phần tử còn lại sang bên phải
 
           // PopupMenuButton khi nhấn vào cờ Việt Nam
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              // Xử lý logic khi chọn cờ từ danh sách
-              // ignore: avoid_print
-              print('Bạn đã chọn: $value');
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem(
-                value: 'vn',
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(
-                        'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Flag_of_Vietnam.svg/1200px-Flag_of_Vietnam.svg.png',
-                        scale: 1.0,
-                      ),
-                      radius: 12,
-                    ),
-                    SizedBox(width: 10),
-                    Text('Việt Nam'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'us',
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Flag_of_the_United_States.svg/1920px-Flag_of_the_United_States.svg.png',
-                          scale: 1.0),
-                      radius: 12,
-                    ),
-                    SizedBox(width: 10),
-                    Text('Mỹ'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'uk',
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Flag_of_the_United_Kingdom_%281-2%29.svg/1920px-Flag_of_the_United_Kingdom_%281-2%29.svg.png',
-                          scale: 1.0),
-                      radius: 12,
-                    ),
-                    SizedBox(width: 10),
-                    Text('Anh'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'cn',
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flag_of_the_People%27s_Republic_of_China.svg/1280px-Flag_of_the_People%27s_Republic_of_China.svg.png',
-                          scale: 1.0),
-                      radius: 12,
-                    ),
-                    SizedBox(width: 10),
-                    Text('Trung Quốc'),
-                  ],
-                ),
-              ),
-            ],
-            child: const CircleAvatar(
-              backgroundImage: NetworkImage(
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Flag_of_Vietnam.svg/1200px-Flag_of_Vietnam.svg.png',
-              ),
-            ),
-          ),
+          // PopupMenuButton<String>(
+          //   onSelected: (value) {
+          //     // Xử lý logic khi chọn cờ từ danh sách
+          //     // ignore: avoid_print
+          //     print('Bạn đã chọn: $value');
+          //   },
+          //   itemBuilder: (context) => const [
+          //     PopupMenuItem(
+          //       value: 'vn',
+          //       child: Row(
+          //         children: [
+          //           CircleAvatar(
+          //             backgroundImage: NetworkImage(
+          //               'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Flag_of_Vietnam.svg/1200px-Flag_of_Vietnam.svg.png',
+          //               scale: 1.0,
+          //             ),
+          //             radius: 12,
+          //           ),
+          //           SizedBox(width: 10),
+          //           Text('Việt Nam'),
+          //         ],
+          //       ),
+          //     ),
+          //     PopupMenuItem(
+          //       value: 'us',
+          //       child: Row(
+          //         children: [
+          //           CircleAvatar(
+          //             backgroundImage: NetworkImage(
+          //                 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Flag_of_the_United_States.svg/1920px-Flag_of_the_United_States.svg.png',
+          //                 scale: 1.0),
+          //             radius: 12,
+          //           ),
+          //           SizedBox(width: 10),
+          //           Text('Mỹ'),
+          //         ],
+          //       ),
+          //     ),
+          //     PopupMenuItem(
+          //       value: 'uk',
+          //       child: Row(
+          //         children: [
+          //           CircleAvatar(
+          //             backgroundImage: NetworkImage(
+          //                 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Flag_of_the_United_Kingdom_%281-2%29.svg/1920px-Flag_of_the_United_Kingdom_%281-2%29.svg.png',
+          //                 scale: 1.0),
+          //             radius: 12,
+          //           ),
+          //           SizedBox(width: 10),
+          //           Text('Anh'),
+          //         ],
+          //       ),
+          //     ),
+          //     PopupMenuItem(
+          //       value: 'cn',
+          //       child: Row(
+          //         children: [
+          //           CircleAvatar(
+          //             backgroundImage: NetworkImage(
+          //                 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flag_of_the_People%27s_Republic_of_China.svg/1280px-Flag_of_the_People%27s_Republic_of_China.svg.png',
+          //                 scale: 1.0),
+          //             radius: 12,
+          //           ),
+          //           SizedBox(width: 10),
+          //           Text('Trung Quốc'),
+          //         ],
+          //       ),
+          //     ),
+          //   ],
+          //   child: const CircleAvatar(
+          //     backgroundImage: NetworkImage(
+          //       'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Flag_of_Vietnam.svg/1200px-Flag_of_Vietnam.svg.png',
+          //     ),
+          //   ),
+          // ),
 
           const SizedBox(width: 10), // Khoảng cách giữa 2 hình
 
@@ -255,7 +255,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             if (hasTableMode &&
                 (widget.role == 'admin' || widget.role == 'staff'))
               _drawerItem(Icons.table_bar, 'Bàn', 2),
-            _drawerItem(Icons.person, 'User Info', hasTableMode ? 3 : 2),
+            _drawerItem(
+                Icons.person, 'Thông tin người dùng', hasTableMode ? 3 : 2),
             _drawerItem(Icons.logout, 'Đăng xuất', hasTableMode ? 4 : 4),
           ],
         ),

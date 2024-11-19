@@ -208,7 +208,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       ),
                       cells: [
                         DataCell(Text((index + 1).toString())),
-                        DataCell(Text(snapshot.data![index]['id'].toString())),
+                        DataCell(Text(snapshot.data![index]['id']?.toString() ??
+                            'Không có')),
                         DataCell(
                           FutureBuilder<String>(
                             future: snapshot.data![index]['table_id'] != null
@@ -525,12 +526,15 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   @override
   void initState() {
     super.initState();
-    tableId = widget.orderItem['table_id'];
-    customerId = widget.orderItem['customer_id'];
-    staffId = widget.orderItem['staff_id'];
-    orderDate = DateTime.parse(widget.orderItem['order_date']);
-    status = widget.orderItem['status'];
-    description = widget.order['description'];
+    tableId = widget.orderItem['table_id'] ?? 0;
+    staffId = widget.orderItem['staff_id'] ?? 0;
+
+    orderDate = widget.orderItem['order_date'] != null
+        ? DateTime.parse(widget.orderItem['order_date'])
+        : DateTime.now();
+
+    description = widget.order['description'] ?? '';
+    status = widget.orderItem['status'] ?? 'received';
   }
 
   void _submitForm() {

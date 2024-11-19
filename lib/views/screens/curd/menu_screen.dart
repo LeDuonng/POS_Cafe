@@ -210,10 +210,11 @@ class _MenuScreenState extends State<MenuScreen> {
                         ),
                         cells: [
                           DataCell(Text((index + 1).toString())),
-                          DataCell(Text(snapshot.data![index]['name'])),
-                          DataCell(Text(snapshot.data![index]['description'])),
+                          DataCell(Text(snapshot.data![index]['name'] ?? '')),
                           DataCell(
-                              Text(snapshot.data![index]['price'].toString())),
+                              Text(snapshot.data![index]['description'] ?? '')),
+                          DataCell(Text(
+                              snapshot.data![index]['price'].toString() ?? '')),
                           DataCell(
                             Image.asset(
                               'assets/menu/${snapshot.data![index]['name']}.png',
@@ -230,7 +231,8 @@ class _MenuScreenState extends State<MenuScreen> {
                               },
                             ),
                           ),
-                          DataCell(Text(snapshot.data![index]['category'])),
+                          DataCell(
+                              Text(snapshot.data![index]['category'] ?? '')),
                           DataCell(
                             Row(
                               children: [
@@ -467,12 +469,12 @@ class _EditMenuItemScreenState extends State<EditMenuItemScreen> {
   @override
   void initState() {
     super.initState();
-    name = widget.menuItem['name'];
-    description = widget.menuItem['description'];
-    price = widget.menuItem['price']
-        .toString(); // Convert to String if it's a number
-    image = widget.menuItem['image'];
-    category = widget.menuItem['category'];
+    name = widget.menuItem['name'] ?? '';
+    description = widget.menuItem['description'] ?? '';
+    price = widget.menuItem['price']?.toString() ??
+        ''; // Convert to String if it's a number
+    image = widget.menuItem['image'] ?? '';
+    category = widget.menuItem['category'] ?? '';
   }
 
   void _submitForm() {

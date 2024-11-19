@@ -399,8 +399,34 @@ def delete_inventory(id):
 @app.route('/customer_points', methods=['POST'])
 def add_customer_points():
     data = request.json
-    query = "INSERT INTO customer_points (user_id, points) VALUES (%s, %s)"
-    customer_points_id = execute_query(query, (data['user_id'], data['points']))
+    # Check if the user already has points
+    check_query = "SELECT points FROM customer_points WHERE user_id=%s AND del = 0"
+    existing_points = fetch_data(check_query, (data['user_id'],))
+    
+    if existing_points:
+        # Update the existing points
+        query = "UPDATE customer_points SET points = points + %s WHERE user_id=%s AND del = 0"
+        customer_points_id = update_query(query, (data['points'], data['user_id']))
+    else:
+        # Insert new points
+        query = "INSERT INTO customer_points (user_id, points) VALUES (%s, %s)"
+        customer_points_id = execute_query(query, (data['user_id'], data['points']))
+    return jsonify({'id': customer_points_id}), 201
+
+@app.route('/promotion_points', methods=['POST'])
+def update_promotion_points():
+    data = request.json
+    # Check if the user already has points
+    check_query = "SELECT points FROM customer_points WHERE user_id=%s AND del = 0"
+    existing_points = fetch_data(check_query, (data['user_id'],))
+    
+    if existing_points :
+        # Update the existing points
+        new_points = existing_points[0][0] - data['points']
+        query = "UPDATE customer_points SET points =  %s WHERE user_id=%s AND del = 0"
+        customer_points_id = update_query(query, (new_points, data['user_id']))
+    else:
+        return jsonify({'message': 'Not enough points'}), 400
     return jsonify({'id': customer_points_id}), 201
 
 @app.route('/customer_points/<int:id>', methods=['PUT'])

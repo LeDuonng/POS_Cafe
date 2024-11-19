@@ -115,3 +115,30 @@ Future<List<dynamic>> searchCustomerPoints([String? userId]) async {
     throw Exception('Failed to load customer points');
   }
 }
+
+Future<void> promotionPoints(Map<String, dynamic> points) async {
+  final response = await http.post(
+    Uri.parse('${getPlatformBaseUrl()}/promotion_points'),
+    headers: {'Content-Type': 'application/json'},
+    body: json.encode(points),
+  );
+
+  if (response.statusCode == 201) {
+    final responseBody = json.decode(response.body);
+    if (responseBody['id'] == null) {
+      throw Exception('Failed to update promotion points');
+    } else {
+      // ignore: avoid_print
+      print('Promotion points updated successfully');
+    }
+  } else if (response.statusCode == 400) {
+    final responseBody = json.decode(response.body);
+    if (responseBody['message'] == 'Not enough points') {
+      throw Exception('Not enough points');
+    } else {
+      throw Exception('Failed to update promotion points');
+    }
+  } else {
+    throw Exception('Failed to update promotion points');
+  }
+}

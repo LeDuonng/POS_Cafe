@@ -240,8 +240,7 @@ class _POSScreenState extends State<POSScreen> {
 
   void takeDiscountValue(String query) async {
     try {
-      List<dynamic> promotions =
-          await PromotionController.searchPromotionscustomer(query);
+      List<dynamic> promotions = await searchPromotionscustomer(query);
       if (promotions.isNotEmpty) {
         // Gán giá trị giảm giá cho _selectedPromotionCode và trả về discount_value
         setState(() {
@@ -506,7 +505,7 @@ class _POSScreenState extends State<POSScreen> {
                           ),
                           Text(
                             // ignore: unnecessary_null_comparison
-                            '${(hasTaxMode ? (_totalPrice - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) + _tax - _surcharge != null ? _surcharge : 0 : _promotionValue! : 0)) : _totalPrice - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0 - _surcharge != null ? _surcharge : 0)).toStringAsFixed(2)} VNĐ',
+                            '${(hasTaxMode ? (_totalPrice + _tax - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)) : _totalPrice - (_promotionValue != null ? _promotionType == 'percentage' ? _totalPrice * (_promotionValue! / 100) : _promotionValue! : 0)).toStringAsFixed(0)} VNĐ',
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 20.0),
                           ),

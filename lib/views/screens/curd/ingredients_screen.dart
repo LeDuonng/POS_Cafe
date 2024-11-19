@@ -169,10 +169,11 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                       ),
                       cells: [
                         DataCell(Text((index + 1).toString())),
-                        DataCell(Text(snapshot.data![index]['name'])),
-                        DataCell(Text(snapshot.data![index]['unit'])),
-                        DataCell(
-                            Text(snapshot.data![index]['quantity'].toString())),
+                        DataCell(Text(snapshot.data![index]['name'] ?? '')),
+                        DataCell(Text(snapshot.data![index]['unit'] ?? '')),
+                        DataCell(Text(
+                            snapshot.data![index]['quantity']?.toString() ??
+                                '')),
                         DataCell(
                           Row(
                             children: [
@@ -382,9 +383,9 @@ class _EditIngredientScreenState extends State<EditIngredientScreen> {
   @override
   void initState() {
     super.initState();
-    name = widget.ingredientItem['name'];
-    unit = widget.ingredientItem['unit'];
-    quantity = widget.ingredientItem['quantity'];
+    name = widget.ingredientItem['name'] ?? '';
+    unit = widget.ingredientItem['unit'] ?? '';
+    quantity = widget.ingredientItem['quantity'] ?? 0;
   }
 
   void _submitForm() {

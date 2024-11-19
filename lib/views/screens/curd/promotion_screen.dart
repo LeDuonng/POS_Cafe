@@ -1,4 +1,5 @@
 import 'package:coffeeapp/models/promotion_model.dart';
+import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../responsive.dart'; // Import the Responsive widget
@@ -88,7 +89,7 @@ class _PromotionScreenState extends State<PromotionScreen> {
           return LayoutBuilder(
             builder: (context, constraints) {
               double totalWidth = constraints.maxWidth;
-              double columnWidth = totalWidth / 7; // 7 là tổng số cột hiện có
+              double columnWidth = totalWidth / 8; // 8 là tổng số cột hiện có
 
               return SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -114,6 +115,18 @@ class _PromotionScreenState extends State<PromotionScreen> {
                         width: columnWidth,
                         child: const Text(
                           'Mã giảm giá',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown,
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: SizedBox(
+                        width: columnWidth,
+                        child: const Text(
+                          'Mô tả',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -193,7 +206,9 @@ class _PromotionScreenState extends State<PromotionScreen> {
                       ),
                       cells: [
                         DataCell(Text((index + 1).toString())),
-                        DataCell(Text(snapshot.data![index]['name'])),
+                        DataCell(Text(snapshot.data![index]['name'] ?? '')),
+                        DataCell(
+                            Text(snapshot.data![index]['description'] ?? '')),
                         DataCell(Text(snapshot.data![index]['discount_type'] ==
                                 'percentage'
                             ? 'Phần trăm'
@@ -202,8 +217,9 @@ class _PromotionScreenState extends State<PromotionScreen> {
                                 'percentage'
                             ? '${snapshot.data![index]['discount_value']} %'
                             : '${snapshot.data![index]['discount_value']} VNĐ')),
-                        DataCell(Text(snapshot.data![index]['start_date'])),
-                        DataCell(Text(snapshot.data![index]['end_date'])),
+                        DataCell(
+                            Text(snapshot.data![index]['start_date'] ?? '')),
+                        DataCell(Text(snapshot.data![index]['end_date'] ?? '')),
                         DataCell(
                           Row(
                             children: [
@@ -218,6 +234,8 @@ class _PromotionScreenState extends State<PromotionScreen> {
                                       promotionItem: {
                                         'id': snapshot.data![index]['id'],
                                         'name': snapshot.data![index]['name'],
+                                        'description': snapshot.data![index]
+                                            ['description'],
                                         'discount_type': snapshot.data![index]
                                             ['discount_type'],
                                         'discount_value': snapshot.data![index]
@@ -237,7 +255,12 @@ class _PromotionScreenState extends State<PromotionScreen> {
                                       },
                                     ),
                                   );
-                                  _refreshPromotionsList();
+                                  setState(() {
+                                    promotionsList = fetchPromotions();
+                                    setState(() {
+                                      promotionsList = fetchPromotions();
+                                    });
+                                  });
                                 },
                               ),
                               IconButton(
@@ -260,22 +283,27 @@ class _PromotionScreenState extends State<PromotionScreen> {
                                           ),
                                           TextButton(
                                             onPressed: () {
-                                              setState(() {
-                                                // try {
-                                                //   deletePromotion(snapshot
-                                                //       .data![index]['id']);
-                                                //   snapshot.data!
-                                                //       .removeAt(index);
-                                                // } catch (e) {
-                                                //   ScaffoldMessenger.of(context)
-                                                //       .showSnackBar(
-                                                //     SnackBar(
-                                                //         content:
-                                                //             Text('Error: $e')),
-                                                //   );
-                                                // }
-                                              });
+                                              try {
+                                                deletePromotion(snapshot
+                                                    .data![index]['id']);
+                                                snapshot.data!.removeAt(index);
+                                                ToastNotification.showToast(
+                                                    message:
+                                                        'Xoá mã giảm giá thành công');
+                                              } catch (e) {
+                                                ToastNotification.showToast(
+                                                    message:
+                                                        'Lỗi xoá mã giảm giá: $e');
+                                              }
                                               Navigator.of(context).pop();
+                                              setState(() {
+                                                promotionsList =
+                                                    fetchPromotions();
+                                                setState(() {
+                                                  promotionsList =
+                                                      fetchPromotions();
+                                                });
+                                              });
                                             },
                                             child: const Text('Delete'),
                                           ),
@@ -311,26 +339,29 @@ class AddPromotionScreen extends StatefulWidget {
 
 class _AddPromotionScreenState extends State<AddPromotionScreen> {
   final _formKey = GlobalKey<FormState>();
-  late String name, discountType;
+  late String name, discountType, description;
   late double discountValue, minOrderValue;
-  late DateTime startDate, endDate;
+  late DateTime startDate = DateTime.now(), endDate = DateTime.now();
   late int codeLimit, usageLimit;
-  late bool active;
+  late bool active = false;
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      // addPromotion(
-      //   name: name,
-      //   discountType: discountType,
-      //   discountValue: discountValue,
-      //   startDate: startDate,
-      //   endDate: endDate,
-      //   minOrderValue: minOrderValue,
-      //   codeLimit: codeLimit,
-      //   usageLimit: usageLimit,
-      //   active: active,
-      // );
+      addPromotion(
+        {
+          'name': name,
+          'discount_type': discountType,
+          'discount_value': discountValue,
+          'start_date': DateFormat('yyyy-MM-dd').format(startDate),
+          'end_date': DateFormat('yyyy-MM-dd').format(endDate),
+          'min_order_value': minOrderValue,
+          'code_limit': codeLimit,
+          'usage_limit': usageLimit,
+          'active': active,
+          'description': description,
+        },
+      );
       Navigator.pop(context);
     }
   }
@@ -359,6 +390,19 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                     if (value != null) {
                       name = value;
                     }
+                  },
+                ),
+                //description
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Description'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a description';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    description = value!;
                   },
                 ),
                 DropdownButtonFormField<String>(
@@ -403,11 +447,17 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                   },
                 ),
                 TextFormField(
+                  controller: TextEditingController(
+                    // ignore: unnecessary_null_comparison
+                    text: startDate == null
+                        ? DateFormat('yyyy-MM-dd').format(DateTime.now())
+                        : DateFormat('yyyy-MM-dd').format(startDate),
+                  ),
                   decoration: const InputDecoration(labelText: 'Start Date'),
+                  readOnly: true,
                   onTap: () async {
                     DateTime? pickedDate = await showDatePicker(
                       context: context,
-                      initialDate: DateTime.now(),
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2101),
                     );
@@ -418,21 +468,25 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                     }
                   },
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    // ignore: unnecessary_null_comparison
+                    if (startDate == null) {
                       return 'Please select a start date';
                     }
                     return null;
                   },
-                  onSaved: (value) {
-                    startDate = DateTime.parse(value!);
-                  },
                 ),
                 TextFormField(
+                  controller: TextEditingController(
+                    // ignore: unnecessary_null_comparison
+                    text: endDate == null
+                        ? DateFormat('yyyy-MM-dd').format(DateTime.now())
+                        : DateFormat('yyyy-MM-dd').format(endDate),
+                  ),
                   decoration: const InputDecoration(labelText: 'End Date'),
+                  readOnly: true,
                   onTap: () async {
                     DateTime? pickedDate = await showDatePicker(
                       context: context,
-                      initialDate: DateTime.now(),
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2101),
                     );
@@ -443,13 +497,11 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                     }
                   },
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    // ignore: unnecessary_null_comparison
+                    if (endDate == null) {
                       return 'Please select an end date';
                     }
                     return null;
-                  },
-                  onSaved: (value) {
-                    endDate = DateTime.parse(value!);
                   },
                 ),
                 TextFormField(
@@ -542,8 +594,7 @@ class EditPromotionScreen extends StatefulWidget {
 
 class _EditPromotionScreenState extends State<EditPromotionScreen> {
   final _formKey = GlobalKey<FormState>();
-  late String name, discountType;
-  late double discountValue, minOrderValue;
+  late String name, discountType, discountValue, minOrderValue, description;
   late DateTime startDate, endDate;
   late int codeLimit, usageLimit;
   late bool active;
@@ -551,33 +602,47 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
   @override
   void initState() {
     super.initState();
-    name = widget.promotionItem['name'];
-    discountType = widget.promotionItem['discount_type'];
-    discountValue = widget.promotionItem['discount_value'];
-    startDate = DateTime.parse(widget.promotionItem['start_date']);
-    endDate = DateTime.parse(widget.promotionItem['end_date']);
-    minOrderValue = widget.promotionItem['min_order_value'];
-    codeLimit = widget.promotionItem['code_limit'];
-    usageLimit = widget.promotionItem['usage_limit'];
-    active = widget.promotionItem['active'];
+    name = widget.promotionItem['name'] ?? '';
+    discountType = widget.promotionItem['discount_type'] ?? 'percentage';
+    discountValue = widget.promotionItem['discount_value']?.toString() ?? '0';
+    startDate = widget.promotionItem['start_date'] != null
+        ? DateTime.parse(widget.promotionItem['start_date'])
+        : DateTime.now();
+    endDate = widget.promotionItem['end_date'] != null
+        ? DateTime.parse(widget.promotionItem['end_date'])
+        : DateTime.now();
+    minOrderValue = widget.promotionItem['min_order_value'] ?? 0.0;
+    codeLimit = widget.promotionItem['code_limit'] ?? 0;
+    usageLimit = widget.promotionItem['usage_limit'] ?? 0;
+    active = widget.promotionItem['active'] == 1 ? true : false;
+    description = widget.promotionItem['description'] ?? '';
   }
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      // updatePromotion(
-      //   id: widget.promotionItem['id'],
-      //   name: name,
-      //   discountType: discountType,
-      //   discountValue: discountValue,
-      //   startDate: startDate,
-      //   endDate: endDate,
-      //   minOrderValue: minOrderValue,
-      //   codeLimit: codeLimit,
-      //   usageLimit: usageLimit,
-      //   active: active,
-      // );
-      Navigator.pop(context);
+      try {
+        updatePromotion(
+          widget.promotion['id'],
+          {
+            'name': name,
+            'discount_type': discountType,
+            'discount_value': discountValue,
+            'start_date': DateFormat('yyyy-MM-dd').format(startDate),
+            'end_date': DateFormat('yyyy-MM-dd').format(endDate),
+            'min_order_value': minOrderValue,
+            'code_limit': codeLimit,
+            'usage_limit': usageLimit,
+            'active': active,
+            'description': description,
+          },
+        );
+        Navigator.pop(context);
+        ToastNotification.showToast(message: 'Cập nhật mã giảm giá thành công');
+      } catch (e) {
+        ToastNotification.showToast(
+            message: 'Cập nhật mã giảm giá thất bại: $e');
+      }
     }
   }
 
@@ -606,6 +671,20 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                     if (value != null) {
                       name = value;
                     }
+                  },
+                ),
+                //description
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Description'),
+                  initialValue: description,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a description';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    description = value!;
                   },
                 ),
                 DropdownButtonFormField<String>(
@@ -647,12 +726,14 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                     return null;
                   },
                   onSaved: (value) {
-                    discountValue = double.parse(value!);
+                    discountValue = value.toString();
                   },
                 ),
                 TextFormField(
+                  controller: TextEditingController(
+                      text: DateFormat('yyyy-MM-dd').format(startDate)),
                   decoration: const InputDecoration(labelText: 'Start Date'),
-                  initialValue: DateFormat('yyyy-MM-dd').format(startDate),
+                  readOnly: true,
                   onTap: () async {
                     DateTime? pickedDate = await showDatePicker(
                       context: context,
@@ -664,6 +745,9 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                       setState(() {
                         startDate = pickedDate;
                       });
+                      TextEditingController(
+                              text: DateFormat('yyyy-MM-dd').format(startDate))
+                          .text = DateFormat('yyyy-MM-dd').format(startDate);
                     }
                   },
                   validator: (value) {
@@ -677,8 +761,10 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                   },
                 ),
                 TextFormField(
+                  controller: TextEditingController(
+                      text: DateFormat('yyyy-MM-dd').format(endDate)),
                   decoration: const InputDecoration(labelText: 'End Date'),
-                  initialValue: DateFormat('yyyy-MM-dd').format(endDate),
+                  readOnly: true,
                   onTap: () async {
                     DateTime? pickedDate = await showDatePicker(
                       context: context,
@@ -690,6 +776,9 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                       setState(() {
                         endDate = pickedDate;
                       });
+                      TextEditingController(
+                              text: DateFormat('yyyy-MM-dd').format(endDate))
+                          .text = DateFormat('yyyy-MM-dd').format(endDate);
                     }
                   },
                   validator: (value) {
@@ -713,7 +802,7 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                     return null;
                   },
                   onSaved: (value) {
-                    minOrderValue = double.parse(value!);
+                    minOrderValue = value.toString();
                   },
                 ),
                 TextFormField(
@@ -755,19 +844,33 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                 ElevatedButton(
                   onPressed: () {
                     _submitForm();
+                    setState(() {
+                      promotionsList = fetchPromotions();
+                      setState(() {
+                        promotionsList = fetchPromotions();
+                      });
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Add Item
                   ),
-                  child: const Text('Update Promotion'),
+                  child: const Text('Cập nhật'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      promotionsList = fetchPromotions();
+                      setState(() {
+                        promotionsList = fetchPromotions();
+                      });
+                    });
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Huỷ'),
                 ),
               ],
             ),

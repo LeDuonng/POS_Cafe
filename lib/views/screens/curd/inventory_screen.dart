@@ -185,9 +185,12 @@ class _InventoryScreenState extends State<InventoryScreen> {
                             }
                           },
                         )),
-                        DataCell(
-                            Text(snapshot.data![index]['quantity'].toString())),
-                        DataCell(Text(snapshot.data![index]['last_updated'])),
+                        DataCell(Text(
+                            snapshot.data![index]['quantity']?.toString() ??
+                                'N/A')),
+                        DataCell(Text(
+                            snapshot.data![index]['last_updated']?.toString() ??
+                                'N/A')),
                         DataCell(
                           Row(
                             children: [
@@ -386,9 +389,11 @@ class _EditInventoryItemScreenState extends State<EditInventoryItemScreen> {
   @override
   void initState() {
     super.initState();
-    ingredientId = widget.inventoryItem['ingredient_id'];
-    quantity = widget.inventoryItem['quantity'];
-    lastUpdated = DateTime.parse(widget.inventoryItem['last_updated']);
+    ingredientId = widget.inventoryItem['ingredient_id'] ?? 0;
+    quantity = widget.inventoryItem['quantity'] ?? 0;
+    lastUpdated = widget.inventoryItem['last_updated'] != null
+        ? DateTime.parse(widget.inventoryItem['last_updated'])
+        : DateTime.now();
   }
 
   void _submitForm() {

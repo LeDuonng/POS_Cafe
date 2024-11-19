@@ -170,8 +170,9 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
                       ),
                       cells: [
                         DataCell(Text((index + 1).toString())),
-                        DataCell(
-                            Text(snapshot.data![index]['order_id'].toString())),
+                        DataCell(Text(
+                            snapshot.data![index]['order_id']?.toString() ??
+                                '0')),
                         DataCell(FutureBuilder<String>(
                           future: getNameMenuItemById(int.parse(
                               snapshot.data![index]['menu_id'].toString())),
@@ -186,8 +187,9 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
                             }
                           },
                         )),
-                        DataCell(
-                            Text(snapshot.data![index]['quantity'].toString())),
+                        DataCell(Text(
+                            snapshot.data![index]['quantity']?.toString() ??
+                                '0')),
                         DataCell(
                           Row(
                             children: [
@@ -396,10 +398,11 @@ class _EditOrderItemScreenState extends State<EditOrderItemScreen> {
   @override
   void initState() {
     super.initState();
-    orderId = widget.orderItem['order_id'];
-    menuId = widget.orderItem['menu_id'];
-    quantity = widget.orderItem['quantity'];
-    price = double.parse(widget.orderItem['price']);
+    orderId = widget.orderItem['order_id'] ?? 0;
+    menuId = widget.orderItem['menu_id'] ?? 0;
+    quantity = widget.orderItem['quantity'] ?? 0;
+    price =
+        double.tryParse(widget.orderItem['price']?.toString() ?? '0.0') ?? 0.0;
   }
 
   void _submitForm() {

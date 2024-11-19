@@ -196,10 +196,13 @@ class _StaffScreenState extends State<StaffScreen> {
                             }
                           },
                         )),
+                        DataCell(Text(
+                            snapshot.data![index]['salary']?.toString() ??
+                                'N/A')),
                         DataCell(
-                            Text(snapshot.data![index]['salary'].toString())),
-                        DataCell(Text(snapshot.data![index]['start_date'])),
-                        DataCell(Text(snapshot.data![index]['position'])),
+                            Text(snapshot.data![index]['start_date'] ?? 'N/A')),
+                        DataCell(
+                            Text(snapshot.data![index]['position'] ?? 'N/A')),
                         DataCell(
                           Row(
                             children: [
@@ -424,10 +427,10 @@ class _EditStaffItemScreenState extends State<EditStaffItemScreen> {
   @override
   void initState() {
     super.initState();
-    userId = widget.staffItem['user_id'].toString();
-    salary = widget.staffItem['salary'].toString();
-    startDate = widget.staffItem['start_date'];
-    position = widget.staffItem['position'];
+    userId = widget.staffItem['user_id']?.toString() ?? '';
+    salary = widget.staffItem['salary']?.toString() ?? '';
+    startDate = widget.staffItem['start_date'] ?? '';
+    position = widget.staffItem['position'] ?? '';
   }
 
   void _submitForm() {

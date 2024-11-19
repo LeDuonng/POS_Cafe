@@ -173,8 +173,9 @@ class _CustomerPointsScreenState extends State<CustomerPointsScreen> {
                             }
                           },
                         )),
-                        DataCell(
-                            Text(snapshot.data![index]['points'].toString())),
+                        DataCell(Text(
+                            snapshot.data![index]['points']?.toString() ??
+                                'N/A')),
                         DataCell(
                           Row(
                             children: [
@@ -381,8 +382,8 @@ class _EditCustomerPointsScreenState extends State<EditCustomerPointsScreen> {
   @override
   void initState() {
     super.initState();
-    userId = widget.customerPointsItem['user_id'];
-    points = widget.customerPointsItem['points'];
+    userId = widget.customerPointsItem['user_id'] ?? 'N/A';
+    points = widget.customerPointsItem['points'] ?? 'N/A';
   }
 
   void _submitForm() {
