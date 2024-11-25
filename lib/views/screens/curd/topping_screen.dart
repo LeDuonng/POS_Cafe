@@ -32,7 +32,7 @@ class _ToppingScreenState extends State<ToppingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Topping List'),
+        title: const Text('Quản lý Topping'),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -40,7 +40,7 @@ class _ToppingScreenState extends State<ToppingScreen> {
               width: 300,
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'Search by Name...',
+                  hintText: 'Tìm kiếm topping...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -81,9 +81,9 @@ class _ToppingScreenState extends State<ToppingScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(child: Text('Lỗi: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data available'));
+          return const Center(child: Text('Không có dữ liệu'));
         } else {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -197,7 +197,7 @@ class _ToppingScreenState extends State<ToppingScreen> {
                         DataCell(
                             Text(snapshot.data![index]['description'] ?? '')),
                         DataCell(Text(
-                            snapshot.data![index]['price'].toString() ?? '')),
+                            snapshot.data![index]['price']?.toString() ?? '')),
                         DataCell(
                           Image.asset(
                             'assets/menu/${snapshot.data![index]['name']}.png',
@@ -249,15 +249,15 @@ class _ToppingScreenState extends State<ToppingScreen> {
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: const Text('Confirm Delete'),
+                                        title: const Text('Xác nhận xoá'),
                                         content: const Text(
-                                            'Are you sure you want to delete this topping?'),
+                                            'Bạn có chắc chắn muốn xoá mục này không?'),
                                         actions: <Widget>[
                                           TextButton(
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Cancel'),
+                                            child: const Text('Huỷ'),
                                           ),
                                           TextButton(
                                             onPressed: () {
@@ -272,13 +272,13 @@ class _ToppingScreenState extends State<ToppingScreen> {
                                                       .showSnackBar(
                                                     SnackBar(
                                                         content:
-                                                            Text('Error: $e')),
+                                                            Text('Lỗi: $e')),
                                                   );
                                                 }
                                               });
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Delete'),
+                                            child: const Text('Xoá'),
                                           ),
                                         ],
                                       );
@@ -341,10 +341,10 @@ class _AddToppingItemScreenState extends State<AddToppingItemScreen> {
             child: ListView(
               children: <Widget>[
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Name'),
+                  decoration: const InputDecoration(labelText: 'Tên Topping'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return 'Vui lòng nhập tên topping';
                     }
                     return null;
                   },
@@ -355,10 +355,10 @@ class _AddToppingItemScreenState extends State<AddToppingItemScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Description'),
+                  decoration: const InputDecoration(labelText: 'Mô tả'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
+                      return 'Vui lòng nhập mô tả';
                     }
                     return null;
                   },
@@ -367,10 +367,10 @@ class _AddToppingItemScreenState extends State<AddToppingItemScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Price'),
+                  decoration: const InputDecoration(labelText: 'Giá'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a price';
+                      return 'Vui lòng nhập giá';
                     }
                     return null;
                   },
@@ -379,10 +379,10 @@ class _AddToppingItemScreenState extends State<AddToppingItemScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Image URL'),
+                  decoration: const InputDecoration(labelText: 'Hình ảnh URL'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an image URL';
+                      return 'Vui lòng nhập URL hình ảnh';
                     }
                     return null;
                   },
@@ -391,10 +391,10 @@ class _AddToppingItemScreenState extends State<AddToppingItemScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Category'),
+                  decoration: const InputDecoration(labelText: 'Danh mục'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a category';
+                      return 'Vui lòng nhập danh mục';
                     }
                     return null;
                   },
@@ -410,7 +410,7 @@ class _AddToppingItemScreenState extends State<AddToppingItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Add Item
                   ),
-                  child: const Text('Add Topping'),
+                  child: const Text('Thêm Topping'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -418,7 +418,7 @@ class _AddToppingItemScreenState extends State<AddToppingItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),
@@ -487,15 +487,15 @@ class _EditToppingItemScreenState extends State<EditToppingItemScreen> {
               children: <Widget>[
                 TextFormField(
                   initialValue: widget.toppingItem['id'].toString(),
-                  decoration: const InputDecoration(labelText: 'ID'),
+                  decoration: const InputDecoration(labelText: 'Mã Topping'),
                   readOnly: true,
                 ),
                 TextFormField(
                   initialValue: name,
-                  decoration: const InputDecoration(labelText: 'Name'),
+                  decoration: const InputDecoration(labelText: 'Tên Topping'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return 'Vui lòng nhập tên topping';
                     }
                     return null;
                   },
@@ -507,10 +507,10 @@ class _EditToppingItemScreenState extends State<EditToppingItemScreen> {
                 ),
                 TextFormField(
                   initialValue: description,
-                  decoration: const InputDecoration(labelText: 'Description'),
+                  decoration: const InputDecoration(labelText: 'Mô tả'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
+                      return 'Vui lòng nhập mô tả';
                     }
                     return null;
                   },
@@ -520,10 +520,10 @@ class _EditToppingItemScreenState extends State<EditToppingItemScreen> {
                 ),
                 TextFormField(
                   initialValue: price,
-                  decoration: const InputDecoration(labelText: 'Price'),
+                  decoration: const InputDecoration(labelText: 'Giá'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a price';
+                      return 'Vui lòng nhập giá';
                     }
                     return null;
                   },
@@ -533,10 +533,10 @@ class _EditToppingItemScreenState extends State<EditToppingItemScreen> {
                 ),
                 TextFormField(
                   initialValue: image,
-                  decoration: const InputDecoration(labelText: 'Image URL'),
+                  decoration: const InputDecoration(labelText: 'Hình ảnh'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an image URL';
+                      return 'Vui lòng nhập URL hình ảnh';
                     }
                     return null;
                   },
@@ -546,10 +546,10 @@ class _EditToppingItemScreenState extends State<EditToppingItemScreen> {
                 ),
                 TextFormField(
                   initialValue: category,
-                  decoration: const InputDecoration(labelText: 'Category'),
+                  decoration: const InputDecoration(labelText: 'Danh mục'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a category';
+                      return 'Vui lòng nhập danh mục';
                     }
                     return null;
                   },
@@ -565,7 +565,7 @@ class _EditToppingItemScreenState extends State<EditToppingItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Save
                   ),
-                  child: const Text('Save Changes'),
+                  child: const Text('Lưu thay Đổi'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -573,7 +573,7 @@ class _EditToppingItemScreenState extends State<EditToppingItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),

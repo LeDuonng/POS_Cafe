@@ -33,7 +33,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inventory List'),
+        title: const Text('Quản lý kho'),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -41,7 +41,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               width: 300,
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'Search by Ingredient ID...',
+                  hintText: 'Tìm kiếm nguyên liệu...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -82,9 +82,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(child: Text('Lỗi: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data available'));
+          return const Center(child: Text('Không có dữ liệu'));
         } else {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -179,7 +179,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                 ConnectionState.waiting) {
                               return const CircularProgressIndicator();
                             } else if (nameSnapshot.hasError) {
-                              return Text('Error: ${nameSnapshot.error}');
+                              return Text('Lỗi: ${nameSnapshot.error}');
                             } else {
                               return Text(nameSnapshot.data ?? 'Không có');
                             }
@@ -225,15 +225,15 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: const Text('Confirm Delete'),
+                                        title: const Text('Xác nhận xoá'),
                                         content: const Text(
-                                            'Are you sure you want to delete this inventory item?'),
+                                            'Bạn có chắc chắn muốn xoá mục này không?'),
                                         actions: <Widget>[
                                           TextButton(
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Cancel'),
+                                            child: const Text('Huỷ'),
                                           ),
                                           TextButton(
                                             onPressed: () {
@@ -248,13 +248,13 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                                       .showSnackBar(
                                                     SnackBar(
                                                         content:
-                                                            Text('Error: $e')),
+                                                            Text('Lỗi: $e')),
                                                   );
                                                 }
                                               });
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Delete'),
+                                            child: const Text('Xoá'),
                                           ),
                                         ],
                                       );
@@ -315,10 +315,11 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
             child: ListView(
               children: <Widget>[
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Ingredient ID'),
+                  decoration:
+                      const InputDecoration(labelText: 'Mã nguyên liệu'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an ingredient ID';
+                      return 'Vui lòng nhập mã nguyên liệu';
                     }
                     return null;
                   },
@@ -327,10 +328,10 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Quantity'),
+                  decoration: const InputDecoration(labelText: 'Số lượng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a quantity';
+                      return 'Vui lòng nhập số lượng';
                     }
                     return null;
                   },
@@ -346,7 +347,7 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Add Item
                   ),
-                  child: const Text('Add Item'),
+                  child: const Text('Thêm vào kho'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -354,7 +355,7 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),
@@ -423,15 +424,16 @@ class _EditInventoryItemScreenState extends State<EditInventoryItemScreen> {
               children: <Widget>[
                 TextFormField(
                   initialValue: widget.inventoryItem['id'].toString(),
-                  decoration: const InputDecoration(labelText: 'ID'),
+                  decoration: const InputDecoration(labelText: 'Mã nhập kho'),
                   readOnly: true,
                 ),
                 TextFormField(
                   initialValue: ingredientId.toString(),
-                  decoration: const InputDecoration(labelText: 'Ingredient ID'),
+                  decoration:
+                      const InputDecoration(labelText: 'Mã nguyên liệu'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an ingredient ID';
+                      return 'Vui lòng nhập mã nguyên liệu';
                     }
                     return null;
                   },
@@ -441,10 +443,10 @@ class _EditInventoryItemScreenState extends State<EditInventoryItemScreen> {
                 ),
                 TextFormField(
                   initialValue: quantity.toString(),
-                  decoration: const InputDecoration(labelText: 'Quantity'),
+                  decoration: const InputDecoration(labelText: 'Số lượng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a quantity';
+                      return 'Vui lòng nhập số lượng';
                     }
                     return null;
                   },
@@ -454,7 +456,7 @@ class _EditInventoryItemScreenState extends State<EditInventoryItemScreen> {
                 ),
                 TextFormField(
                   initialValue: lastUpdated.toString(),
-                  decoration: const InputDecoration(labelText: 'Last Updated'),
+                  decoration: const InputDecoration(labelText: 'Ngày cập nhật'),
                   readOnly: true,
                 ),
                 const SizedBox(height: 20),
@@ -465,7 +467,7 @@ class _EditInventoryItemScreenState extends State<EditInventoryItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Save
                   ),
-                  child: const Text('Save Changes'),
+                  child: const Text('Lưu thay đổi'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -473,7 +475,7 @@ class _EditInventoryItemScreenState extends State<EditInventoryItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),

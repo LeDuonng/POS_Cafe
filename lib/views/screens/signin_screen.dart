@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:coffeeapp/views/screens/signup_screen.dart';
 import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
@@ -64,6 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       String username = _usernameController.text;
       String password = _passwordController.text;
+      password = base64Encode(utf8.encode(password));
       try {
         List<dynamic> result = await signin(username, password);
 

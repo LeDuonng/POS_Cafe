@@ -35,7 +35,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Orders List'),
+        title: const Text('Quản lý đơn hàng'),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -43,7 +43,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               width: 300,
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'Search by Order ID...',
+                  hintText: 'Tìm kiếm đơn hàng...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -84,9 +84,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(child: Text('Lỗi: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data available'));
+          return const Center(child: Text('Không có dữ liệu'));
         } else {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -222,7 +222,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                   ConnectionState.waiting) {
                                 return const CircularProgressIndicator();
                               } else if (nameSnapshot.hasError) {
-                                return Text('Error: ${nameSnapshot.error}');
+                                return Text('Lỗi: ${nameSnapshot.error}');
                               } else {
                                 return Text(nameSnapshot.data ?? 'Không có');
                               }
@@ -241,7 +241,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                   ConnectionState.waiting) {
                                 return const CircularProgressIndicator();
                               } else if (nameSnapshot.hasError) {
-                                return Text('Error: ${nameSnapshot.error}');
+                                return Text('Lỗi: ${nameSnapshot.error}');
                               } else {
                                 return Text(nameSnapshot.data ?? 'Không có');
                               }
@@ -256,7 +256,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 ConnectionState.waiting) {
                               return const CircularProgressIndicator();
                             } else if (nameSnapshot.hasError) {
-                              return Text('Error: ${nameSnapshot.error}');
+                              return Text('Lỗi: ${nameSnapshot.error}');
                             } else {
                               return Text(nameSnapshot.data ?? 'Không có');
                             }
@@ -308,15 +308,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: const Text('Confirm Delete'),
+                                        title: const Text('Xác nhận xoá'),
                                         content: const Text(
-                                            'Are you sure you want to delete this order?'),
+                                            'Bạn có chắc chắn muốn xoá đơn hàng này không?'),
                                         actions: <Widget>[
                                           TextButton(
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Cancel'),
+                                            child: const Text('Huỷ'),
                                           ),
                                           TextButton(
                                             onPressed: () {
@@ -331,13 +331,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                                       .showSnackBar(
                                                     SnackBar(
                                                         content:
-                                                            Text('Error: $e')),
+                                                            Text('Lỗi: $e')),
                                                   );
                                                 }
                                               });
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Delete'),
+                                            child: const Text('Xoá'),
                                           ),
                                         ],
                                       );
@@ -403,10 +403,10 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
             child: ListView(
               children: <Widget>[
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Table ID'),
+                  decoration: const InputDecoration(labelText: 'Mã bàn'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a table ID';
+                      return 'Vui lòng nhập mã bàn';
                     }
                     return null;
                   },
@@ -415,10 +415,10 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Customer ID'),
+                  decoration: const InputDecoration(labelText: 'Mã khách hàng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a customer ID';
+                      return 'Vui lòng nhập mã khách hàng';
                     }
                     return null;
                   },
@@ -427,10 +427,10 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Staff ID'),
+                  decoration: const InputDecoration(labelText: 'Mã nhân viên'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a staff ID';
+                      return 'Vui lòng nhập mã nhân viên';
                     }
                     return null;
                   },
@@ -439,10 +439,10 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Order Date'),
+                  decoration: const InputDecoration(labelText: 'Ngày đặt hàng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an order date';
+                      return 'Vui lòng chọn ngày đặt hàng';
                     }
                     return null;
                   },
@@ -451,26 +451,34 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                   },
                 ),
                 DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: 'Status'),
+                  decoration: const InputDecoration(labelText: 'Trạng thái'),
                   value: 'received',
-                  items: ['received', 'preparing', 'paid']
-                      .map((status) => DropdownMenuItem(
-                            value: status,
-                            child: Text(status),
-                          ))
-                      .toList(),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'received',
+                      child: Text('Đã nhận đơn'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'preparing',
+                      child: Text('Đang chuẩn bị'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'paid',
+                      child: Text('Đã hoàn thành'),
+                    ),
+                  ],
                   onChanged: (value) {
                     status = value!;
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please select a status';
+                      return 'Vui lòng chọn trạng thái';
                     }
                     return null;
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Description'),
+                  decoration: const InputDecoration(labelText: 'Mô tả'),
                   onSaved: (value) {
                     description = value!;
                   },
@@ -483,7 +491,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Add Item
                   ),
-                  child: const Text('Add Order'),
+                  child: const Text('Thêm đơn hàng'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -491,7 +499,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),
@@ -567,15 +575,15 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
               children: <Widget>[
                 TextFormField(
                   initialValue: widget.orderItem['id'].toString(),
-                  decoration: const InputDecoration(labelText: 'ID'),
+                  decoration: const InputDecoration(labelText: 'Mã đơn hàng'),
                   readOnly: true,
                 ),
                 TextFormField(
                   initialValue: tableId.toString(),
-                  decoration: const InputDecoration(labelText: 'Table ID'),
+                  decoration: const InputDecoration(labelText: 'Mã bàn'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a table ID';
+                      return 'Vui lòng nhập mã bàn';
                     }
                     return null;
                   },
@@ -585,10 +593,10 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                 ),
                 TextFormField(
                   initialValue: customerId.toString(),
-                  decoration: const InputDecoration(labelText: 'Customer ID'),
+                  decoration: const InputDecoration(labelText: 'Mã khách hàng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a customer ID';
+                      return 'Vui lòng nhập mã khách hàng';
                     }
                     return null;
                   },
@@ -598,10 +606,10 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                 ),
                 TextFormField(
                   initialValue: staffId.toString(),
-                  decoration: const InputDecoration(labelText: 'Staff ID'),
+                  decoration: const InputDecoration(labelText: 'Mã nhân viên'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a staff ID';
+                      return 'Vui lòng nhập mã nhân viên';
                     }
                     return null;
                   },
@@ -611,31 +619,39 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                 ),
                 TextFormField(
                   initialValue: orderDate.toString(),
-                  decoration: const InputDecoration(labelText: 'Order Date'),
+                  decoration: const InputDecoration(labelText: 'Ngày đặt hàng'),
                   readOnly: true,
                 ),
                 DropdownButtonFormField<String>(
                   value: status,
-                  decoration: const InputDecoration(labelText: 'Status'),
-                  items: ['received', 'preparing', 'paid']
-                      .map((status) => DropdownMenuItem(
-                            value: status,
-                            child: Text(status),
-                          ))
-                      .toList(),
+                  decoration: const InputDecoration(labelText: 'Trạng thái'),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'received',
+                      child: Text('Đã nhận đơn'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'preparing',
+                      child: Text('Đang chuẩn bị'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'paid',
+                      child: Text('Đã hoàn thành'),
+                    ),
+                  ],
                   onChanged: (value) {
                     status = value!;
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please select a status';
+                      return 'Vui lòng chọn trạng thái';
                     }
                     return null;
                   },
                 ),
                 TextFormField(
                   initialValue: description,
-                  decoration: const InputDecoration(labelText: 'Description'),
+                  decoration: const InputDecoration(labelText: 'Mô tả'),
                   onSaved: (value) {
                     description = value!;
                   },
@@ -648,7 +664,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Save
                   ),
-                  child: const Text('Save Changes'),
+                  child: const Text('Lưu thay đổi'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -656,7 +672,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),

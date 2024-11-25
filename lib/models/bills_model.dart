@@ -49,7 +49,7 @@ Future<List<dynamic>> searchBills([String? paymentMethod]) async {
   if (response.statusCode == 200) {
     return json.decode(response.body);
   } else {
-    throw Exception('Failed to load bills');
+    throw Exception('Lỗi khi tìm kiếm hóa đơn');
   }
 }
 
@@ -59,7 +59,7 @@ Future<List<dynamic>> fetchBills() async {
   if (response.statusCode == 200) {
     return json.decode(response.body);
   } else {
-    throw Exception('Failed to load bills');
+    throw Exception('Lỗi khi tải hóa đơn');
   }
 }
 
@@ -71,7 +71,7 @@ Future<void> addBillItem(Map<String, dynamic> bill) async {
   );
 
   if (response.statusCode != 201) {
-    throw Exception('Failed to add bill');
+    throw Exception('Lỗi khi thêm hóa đơn');
   }
 }
 
@@ -86,10 +86,10 @@ Future<void> updateBillItem(int id, Map<String, dynamic> bill) async {
     final responseBody = json.decode(response.body);
     if (responseBody['rows_affected'] == null ||
         responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to update bill');
+      throw Exception('Lỗi khi cập nhật hóa đơn');
     } else {
       // ignore: avoid_print
-      print('Bill updated successfully');
+      print('Cập nhật hóa đơn thành công');
     }
   }
 }
@@ -103,10 +103,10 @@ Future<void> deleteBillItem(int id) async {
     final responseBody = json.decode(response.body);
     if (responseBody['rows_affected'] == null ||
         responseBody['rows_affected'] == 0) {
-      throw Exception('Failed to delete bill');
+      throw Exception('Lỗi khi xóa hóa đơn');
     } else {
       // ignore: avoid_print
-      print('Bill deleted successfully');
+      print('Xóa hóa đơn thành công');
     }
   }
 }
@@ -118,6 +118,6 @@ Future<List<dynamic>> fetchBillById(int id) async {
   if (response.statusCode == 200) {
     return json.decode(response.body);
   } else {
-    throw Exception('Failed to load bill');
+    throw Exception('Lỗi khi tải hóa đơn');
   }
 }

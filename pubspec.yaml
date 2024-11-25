@@ -58,6 +58,7 @@ dependencies:
   syncfusion_flutter_pdf: ^21.2.4
   pdf: ^3.11.1
   file_picker: ^8.1.4
+  printing: ^5.13.4
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -84,7 +85,7 @@ flutter:
   assets:
     - assets/data/products.csv
     - assets/menu/
-    - assets/fonts/
+    - assets/fonts/Roboto-Regular.ttf
     - assets/animations/
 
   #   - images/a_dot_burr.jpeg

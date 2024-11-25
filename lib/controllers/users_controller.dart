@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:coffeeapp/models/users_model.dart';
 import 'package:coffeeapp/views/widgets/nofication.dart';
 
@@ -18,7 +20,7 @@ Future<void> addUser({
 }) async {
   Map<String, dynamic> newUser = {
     'username': username,
-    'password': password,
+    'password': base64Encode(utf8.encode(password)),
     'role': role,
     'name': name,
     'email': email,
@@ -89,7 +91,7 @@ Future<bool> registerUser({
 }) async {
   Map<String, dynamic> newUser = {
     'username': username,
-    'password': password,
+    'password': base64Encode(utf8.encode(password)),
     'role': role,
     'name': name,
     'email': email,

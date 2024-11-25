@@ -33,7 +33,7 @@ class _PromotionScreenState extends State<PromotionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Promotion List'),
+        title: const Text('Quản lý mã giảm giá'),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -41,7 +41,7 @@ class _PromotionScreenState extends State<PromotionScreen> {
               width: 300,
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'Search by Name...',
+                  hintText: 'Tìm kiếm mã giảm giá...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -82,14 +82,14 @@ class _PromotionScreenState extends State<PromotionScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(child: Text('Lỗi: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data available'));
+          return const Center(child: Text('Không có dữ liệu'));
         } else {
           return LayoutBuilder(
             builder: (context, constraints) {
               double totalWidth = constraints.maxWidth;
-              double columnWidth = totalWidth / 8; // 8 là tổng số cột hiện có
+              double columnWidth = totalWidth / 12; // 8 là tổng số cột hiện có
 
               return SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -186,6 +186,42 @@ class _PromotionScreenState extends State<PromotionScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
+                          'Đơn hàng từ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown,
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: SizedBox(
+                        width: columnWidth,
+                        child: const Text(
+                          'Số lượng mã',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown,
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: SizedBox(
+                        width: columnWidth,
+                        child: const Text(
+                          'Số lần sử dụng',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown,
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: SizedBox(
+                        width: columnWidth,
+                        child: const Text(
                           'Hành động',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
@@ -220,6 +256,12 @@ class _PromotionScreenState extends State<PromotionScreen> {
                         DataCell(
                             Text(snapshot.data![index]['start_date'] ?? '')),
                         DataCell(Text(snapshot.data![index]['end_date'] ?? '')),
+                        DataCell(Text(
+                            '${snapshot.data![index]['min_order_value']} VNĐ')),
+                        DataCell(Text(
+                            snapshot.data![index]['code_limit'].toString())),
+                        DataCell(Text(
+                            snapshot.data![index]['usage_limit'].toString())),
                         DataCell(
                           Row(
                             children: [
@@ -271,15 +313,15 @@ class _PromotionScreenState extends State<PromotionScreen> {
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: const Text('Confirm Delete'),
+                                        title: const Text('Xác nhận xoá'),
                                         content: const Text(
-                                            'Are you sure you want to delete this promotion?'),
+                                            'Bạn có chắc chắn muốn xoá mã giảm giá này không?'),
                                         actions: <Widget>[
                                           TextButton(
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Cancel'),
+                                            child: const Text('Huỷ'),
                                           ),
                                           TextButton(
                                             onPressed: () {
@@ -305,7 +347,7 @@ class _PromotionScreenState extends State<PromotionScreen> {
                                                 });
                                               });
                                             },
-                                            child: const Text('Delete'),
+                                            child: const Text('Xoá'),
                                           ),
                                         ],
                                       );
@@ -379,10 +421,11 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
             child: ListView(
               children: <Widget>[
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Name'),
+                  decoration:
+                      const InputDecoration(labelText: 'Tên mã giảm giá'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return 'Vui lòng nhập tên mã giảm giá';
                     }
                     return null;
                   },
@@ -394,10 +437,10 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                 ),
                 //description
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Description'),
+                  decoration: const InputDecoration(labelText: 'Mô tả'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
+                      return 'Vui lòng nhập mô tả';
                     }
                     return null;
                   },
@@ -406,16 +449,16 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                   },
                 ),
                 DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: 'Discount Type'),
+                  decoration: const InputDecoration(labelText: 'Kiểu giảm giá'),
                   value: 'percentage',
                   items: const [
                     DropdownMenuItem(
                       value: 'percentage',
-                      child: Text('Percentage'),
+                      child: Text('Phần trăm'),
                     ),
                     DropdownMenuItem(
                       value: 'fixed_amount',
-                      child: Text('Fixed Amount'),
+                      child: Text('Tiền mặt'),
                     ),
                   ],
                   onChanged: (value) {
@@ -425,7 +468,7 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please select a discount type';
+                      return 'Vui lòng chọn kiểu giảm giá';
                     }
                     return null;
                   },
@@ -435,10 +478,10 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                 ),
                 TextFormField(
                   decoration:
-                      const InputDecoration(labelText: 'Discount Value'),
+                      const InputDecoration(labelText: 'Giá trị giảm giá'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a discount value';
+                      return 'Vui lòng nhập giá trị giảm giá';
                     }
                     return null;
                   },
@@ -453,7 +496,7 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                         ? DateFormat('yyyy-MM-dd').format(DateTime.now())
                         : DateFormat('yyyy-MM-dd').format(startDate),
                   ),
-                  decoration: const InputDecoration(labelText: 'Start Date'),
+                  decoration: const InputDecoration(labelText: 'Ngày bắt đầu'),
                   readOnly: true,
                   onTap: () async {
                     DateTime? pickedDate = await showDatePicker(
@@ -470,7 +513,7 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                   validator: (value) {
                     // ignore: unnecessary_null_comparison
                     if (startDate == null) {
-                      return 'Please select a start date';
+                      return 'Vui lòng chọn ngày bắt đầu';
                     }
                     return null;
                   },
@@ -482,7 +525,7 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                         ? DateFormat('yyyy-MM-dd').format(DateTime.now())
                         : DateFormat('yyyy-MM-dd').format(endDate),
                   ),
-                  decoration: const InputDecoration(labelText: 'End Date'),
+                  decoration: const InputDecoration(labelText: 'Ngày kết thúc'),
                   readOnly: true,
                   onTap: () async {
                     DateTime? pickedDate = await showDatePicker(
@@ -499,17 +542,17 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                   validator: (value) {
                     // ignore: unnecessary_null_comparison
                     if (endDate == null) {
-                      return 'Please select an end date';
+                      return 'Vui lòng chọn ngày kết thúc';
                     }
                     return null;
                   },
                 ),
                 TextFormField(
-                  decoration:
-                      const InputDecoration(labelText: 'Min Order Value'),
+                  decoration: const InputDecoration(
+                      labelText: 'Giá trị đơn hàng tối thiểu'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a min order value';
+                      return 'Vui lòng nhập giá trị đơn hàng tối thiểu';
                     }
                     return null;
                   },
@@ -518,10 +561,10 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Code Limit'),
+                  decoration: const InputDecoration(labelText: 'Số lượng mã'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a code limit';
+                      return 'Vui lòng nhập số lượng mã';
                     }
                     return null;
                   },
@@ -530,10 +573,11 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Usage Limit'),
+                  decoration:
+                      const InputDecoration(labelText: 'Số lần sử dụng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a usage limit';
+                      return 'Vui lòng nhập số lần sử dụng';
                     }
                     return null;
                   },
@@ -542,7 +586,7 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                   },
                 ),
                 SwitchListTile(
-                  title: const Text('Active'),
+                  title: const Text('Kích hoạt'),
                   value: active,
                   onChanged: (value) {
                     setState(() {
@@ -558,7 +602,7 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Add Item
                   ),
-                  child: const Text('Add Promotion'),
+                  child: const Text('Thêm mã giảm giá'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -566,7 +610,7 @@ class _AddPromotionScreenState extends State<AddPromotionScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Huỷ'),
                 ),
               ],
             ),
@@ -659,11 +703,12 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
             child: ListView(
               children: <Widget>[
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Name'),
+                  decoration:
+                      const InputDecoration(labelText: 'Tên mã giảm giá'),
                   initialValue: name,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return 'Vui lòng nhập tên mã giảm giá';
                     }
                     return null;
                   },
@@ -675,11 +720,11 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                 ),
                 //description
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Description'),
+                  decoration: const InputDecoration(labelText: 'Mô tả'),
                   initialValue: description,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
+                      return 'Vui lòng nhập mô tả';
                     }
                     return null;
                   },
@@ -688,16 +733,16 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                   },
                 ),
                 DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: 'Discount Type'),
+                  decoration: const InputDecoration(labelText: 'Kiểu giảm giá'),
                   value: discountType,
                   items: const [
                     DropdownMenuItem(
                       value: 'percentage',
-                      child: Text('Percentage'),
+                      child: Text('Phần trăm'),
                     ),
                     DropdownMenuItem(
                       value: 'fixed_amount',
-                      child: Text('Fixed Amount'),
+                      child: Text('Tiền mặt'),
                     ),
                   ],
                   onChanged: (value) {
@@ -707,7 +752,7 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please select a discount type';
+                      return 'Vui lòng chọn kiểu giảm giá';
                     }
                     return null;
                   },
@@ -717,11 +762,11 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                 ),
                 TextFormField(
                   decoration:
-                      const InputDecoration(labelText: 'Discount Value'),
+                      const InputDecoration(labelText: 'Giá trị giảm giá'),
                   initialValue: discountValue.toString(),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a discount value';
+                      return 'Vui lòng nhập giá trị giảm giá';
                     }
                     return null;
                   },
@@ -732,7 +777,7 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                 TextFormField(
                   controller: TextEditingController(
                       text: DateFormat('yyyy-MM-dd').format(startDate)),
-                  decoration: const InputDecoration(labelText: 'Start Date'),
+                  decoration: const InputDecoration(labelText: 'Ngày bắt đầu'),
                   readOnly: true,
                   onTap: () async {
                     DateTime? pickedDate = await showDatePicker(
@@ -752,7 +797,7 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please select a start date';
+                      return 'Vui lòng chọn ngày bắt đầu';
                     }
                     return null;
                   },
@@ -763,7 +808,7 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                 TextFormField(
                   controller: TextEditingController(
                       text: DateFormat('yyyy-MM-dd').format(endDate)),
-                  decoration: const InputDecoration(labelText: 'End Date'),
+                  decoration: const InputDecoration(labelText: 'Ngày kết thúc'),
                   readOnly: true,
                   onTap: () async {
                     DateTime? pickedDate = await showDatePicker(
@@ -783,7 +828,7 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please select an end date';
+                      return 'Vui lòng chọn ngày kết thúc';
                     }
                     return null;
                   },
@@ -792,12 +837,12 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration:
-                      const InputDecoration(labelText: 'Min Order Value'),
+                  decoration: const InputDecoration(
+                      labelText: 'Giá trị đơn hàng tối thiểu'),
                   initialValue: minOrderValue.toString(),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a min order value';
+                      return 'Vui lòng nhập giá trị đơn hàng tối thiểu';
                     }
                     return null;
                   },
@@ -806,11 +851,11 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Code Limit'),
+                  decoration: const InputDecoration(labelText: 'Số lượng mã'),
                   initialValue: codeLimit.toString(),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a code limit';
+                      return 'Vui lòng nhập số lượng mã';
                     }
                     return null;
                   },
@@ -819,11 +864,12 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Usage Limit'),
+                  decoration:
+                      const InputDecoration(labelText: 'Số lần sử dụng'),
                   initialValue: usageLimit.toString(),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a usage limit';
+                      return 'Vui lòng nhập số lần sử dụng';
                     }
                     return null;
                   },
@@ -832,7 +878,7 @@ class _EditPromotionScreenState extends State<EditPromotionScreen> {
                   },
                 ),
                 SwitchListTile(
-                  title: const Text('Active'),
+                  title: const Text('Kích hoạt'),
                   value: active,
                   onChanged: (value) {
                     setState(() {

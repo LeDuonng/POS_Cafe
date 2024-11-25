@@ -34,10 +34,10 @@ class _SignupScreenState extends State<SignupScreen> {
           address: _addressController.text,
         )) {
           // ignore: use_build_context_synchronously
-          ToastNotification.showToast(message: 'Registration successful');
+          ToastNotification.showToast(message: 'Đăng ký thành công');
         } else {
           // ignore: use_build_context_synchronously
-          ToastNotification.showToast(message: 'Registration failed');
+          ToastNotification.showToast(message: 'Đăng ký thất bại');
         }
       } catch (e) {
         // ignore: avoid_print
@@ -50,25 +50,36 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign Up'),
+        title: const Text('Đăng ký tài khoản'),
         centerTitle: true,
         backgroundColor: Colors.teal,
       ),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Card(
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Container(
+                width: 500,
+                height: 800,
+                padding: const EdgeInsets.all(75),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 8,
+                      offset: const Offset(0, 4), // Shadow ở dưới khung
+                    ),
+                  ],
+                ),
                 child: Column(
                   children: [
                     const Text(
-                      'Create Your Account',
+                      'Tạo tài khoản',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -76,65 +87,62 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     const SizedBox(height: 10),
                     const Text(
-                      'Please fill in the details below to create an account.',
+                      'Vui lòng điền thông tin để tạo tài khoản',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          _buildTextField(
-                              controller: _usernameController,
-                              label: 'Username',
-                              icon: Icons.person),
-                          _buildTextField(
-                              controller: _passwordController,
-                              label: 'Password',
-                              icon: Icons.lock,
-                              obscureText: true),
-                          _buildTextField(
-                              controller: _confirmPasswordController,
-                              label: 'Confirm Password',
-                              icon: Icons.lock,
-                              obscureText: true),
-                          _buildTextField(
-                              controller: _nameController,
-                              label: 'Name',
-                              icon: Icons.account_circle),
-                          _buildTextField(
-                              controller: _emailController,
-                              label: 'Email',
-                              icon: Icons.email),
-                          _buildTextField(
-                              controller: _phoneController,
-                              label: 'Phone',
-                              icon: Icons.phone),
-                          _buildTextField(
-                              controller: _addressController,
-                              label: 'Address',
-                              icon: Icons.home),
-                          const SizedBox(height: 30),
-                          ElevatedButton(
-                            onPressed: _registerUser,
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 40, vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              backgroundColor: Colors.teal,
+                    Column(
+                      children: [
+                        _buildTextField(
+                            controller: _usernameController,
+                            label: 'Tên đăng nhập',
+                            icon: Icons.person),
+                        _buildTextField(
+                            controller: _passwordController,
+                            label: 'Mật khẩu',
+                            icon: Icons.lock,
+                            obscureText: true),
+                        _buildTextField(
+                            controller: _confirmPasswordController,
+                            label: 'Nhập lại mật khẩu',
+                            icon: Icons.lock,
+                            obscureText: true),
+                        _buildTextField(
+                            controller: _nameController,
+                            label: 'Tên người dùng',
+                            icon: Icons.account_circle),
+                        _buildTextField(
+                            controller: _emailController,
+                            label: 'Email',
+                            icon: Icons.email),
+                        _buildTextField(
+                            controller: _phoneController,
+                            label: 'Số điện thoại',
+                            icon: Icons.phone),
+                        _buildTextField(
+                            controller: _addressController,
+                            label: 'Địa chỉ',
+                            icon: Icons.home),
+                        const SizedBox(height: 30),
+                        ElevatedButton(
+                          onPressed: _registerUser,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 40, vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
                             ),
-                            child: const Text(
-                              'Sign Up',
-                              style: TextStyle(fontSize: 18),
-                            ),
+                            backgroundColor: Colors.teal,
                           ),
-                        ],
-                      ),
+                          child: const Text(
+                            'Đăng ký',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -165,11 +173,11 @@ class _SignupScreenState extends State<SignupScreen> {
         obscureText: obscureText,
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Please enter your $label';
+            return 'Vui lòng nhập $label';
           }
           if (label == 'Confirm Password' &&
               value != _passwordController.text) {
-            return 'Passwords do not match';
+            return 'Mật khẩu không khớp';
           }
           return null;
         },

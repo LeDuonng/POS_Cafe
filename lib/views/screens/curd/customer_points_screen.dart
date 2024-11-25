@@ -83,9 +83,9 @@ class _CustomerPointsScreenState extends State<CustomerPointsScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(child: Text('Lỗi: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data available'));
+          return const Center(child: Text('Không có dữ liệu'));
         } else {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -167,7 +167,7 @@ class _CustomerPointsScreenState extends State<CustomerPointsScreen> {
                                 ConnectionState.waiting) {
                               return const CircularProgressIndicator();
                             } else if (nameSnapshot.hasError) {
-                              return Text('Error: ${nameSnapshot.error}');
+                              return Text('Lỗi: ${nameSnapshot.error}');
                             } else {
                               return Text(nameSnapshot.data ?? 'Không có');
                             }
@@ -208,15 +208,15 @@ class _CustomerPointsScreenState extends State<CustomerPointsScreen> {
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: const Text('Confirm Delete'),
+                                        title: const Text('Xác nhận xoá'),
                                         content: const Text(
-                                            'Are you sure you want to delete this customer points?'),
+                                            'Bạn có chắc chắn muốn xoá điểm tích luỹ này không?'),
                                         actions: <Widget>[
                                           TextButton(
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Cancel'),
+                                            child: const Text('Huỷ'),
                                           ),
                                           TextButton(
                                             onPressed: () {
@@ -231,13 +231,13 @@ class _CustomerPointsScreenState extends State<CustomerPointsScreen> {
                                                       .showSnackBar(
                                                     SnackBar(
                                                         content:
-                                                            Text('Error: $e')),
+                                                            Text('Lỗi: $e')),
                                                   );
                                                 }
                                               });
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Delete'),
+                                            child: const Text('Xoá'),
                                           ),
                                         ],
                                       );
@@ -298,10 +298,10 @@ class _AddCustomerPointsScreenState extends State<AddCustomerPointsScreen> {
             child: ListView(
               children: <Widget>[
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'User ID'),
+                  decoration: const InputDecoration(labelText: 'Mã Khách Hàng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a user ID';
+                      return 'Vui lòng nhập mã khách hàng';
                     }
                     return null;
                   },
@@ -310,15 +310,15 @@ class _AddCustomerPointsScreenState extends State<AddCustomerPointsScreen> {
                       userId = int.parse(value!);
                     } catch (e) {
                       ToastNotification.showToast(
-                          message: 'Invalid User ID: $e');
+                          message: 'Lỗi mã khách hàng: $e');
                     }
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Points'),
+                  decoration: const InputDecoration(labelText: 'Điểm tích luỹ'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter points';
+                      return 'Vui lòng nhập điểm tích luỹ';
                     }
                     return null;
                   },
@@ -327,7 +327,7 @@ class _AddCustomerPointsScreenState extends State<AddCustomerPointsScreen> {
                       points = value!;
                     } catch (e) {
                       ToastNotification.showToast(
-                          message: 'Invalid Points: $e');
+                          message: 'Lỗi điểm tích luỹ: $e');
                     }
                   },
                 ),
@@ -339,7 +339,7 @@ class _AddCustomerPointsScreenState extends State<AddCustomerPointsScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Add Item
                   ),
-                  child: const Text('Add Points'),
+                  child: const Text('Thêm Điểm Tích Luỹ'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -347,7 +347,7 @@ class _AddCustomerPointsScreenState extends State<AddCustomerPointsScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),
@@ -411,15 +411,16 @@ class _EditCustomerPointsScreenState extends State<EditCustomerPointsScreen> {
               children: <Widget>[
                 TextFormField(
                   initialValue: widget.customerPointsItem['id'].toString(),
-                  decoration: const InputDecoration(labelText: 'ID'),
+                  decoration:
+                      const InputDecoration(labelText: 'Mã Điểm Tích Luỹ'),
                   readOnly: true,
                 ),
                 TextFormField(
                   initialValue: widget.customerPointsItem['user_id'].toString(),
-                  decoration: const InputDecoration(labelText: 'User ID'),
+                  decoration: const InputDecoration(labelText: 'Mã Khách Hàng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a user ID';
+                      return 'Vui lòng nhập mã khách hàng';
                     }
                     return null;
                   },
@@ -428,16 +429,16 @@ class _EditCustomerPointsScreenState extends State<EditCustomerPointsScreen> {
                       userId = int.parse(value!);
                     } catch (e) {
                       ToastNotification.showToast(
-                          message: 'Invalid User ID: $e');
+                          message: 'Lỗi mã khách hàng: $e');
                     }
                   },
                 ),
                 TextFormField(
                   initialValue: widget.customerPointsItem['points'].toString(),
-                  decoration: const InputDecoration(labelText: 'Points'),
+                  decoration: const InputDecoration(labelText: 'Điểm Tích Luỹ'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter points';
+                      return 'Vui lòng nhập điểm tích luỹ';
                     }
                     return null;
                   },
@@ -446,7 +447,7 @@ class _EditCustomerPointsScreenState extends State<EditCustomerPointsScreen> {
                       points = value!;
                     } catch (e) {
                       ToastNotification.showToast(
-                          message: 'Invalid Points: $e');
+                          message: 'Lỗi điểm tích luỹ: $e');
                     }
                   },
                 ),
@@ -458,7 +459,7 @@ class _EditCustomerPointsScreenState extends State<EditCustomerPointsScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Save
                   ),
-                  child: const Text('Save Changes'),
+                  child: const Text('Lưu Thay Đổi'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -466,7 +467,7 @@ class _EditCustomerPointsScreenState extends State<EditCustomerPointsScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),

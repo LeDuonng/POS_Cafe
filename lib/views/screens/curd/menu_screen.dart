@@ -1,7 +1,11 @@
 import 'package:coffeeapp/models/menu_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../controllers/menu_controller.dart';
 import '../../../responsive.dart'; // Import the Responsive widget
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -37,7 +41,7 @@ class _MenuScreenState extends State<MenuScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Menu List'),
+        title: const Text('Quản lý Menu'),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -45,7 +49,7 @@ class _MenuScreenState extends State<MenuScreen> {
               width: 300,
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'Search...',
+                  hintText: 'Tìm kiếm menu...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -70,6 +74,13 @@ class _MenuScreenState extends State<MenuScreen> {
               _refreshMenuList();
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.print),
+            onPressed: () {
+              // Implement print functionality here
+              printMenuList(context);
+            },
+          ),
         ],
       ),
       body: Responsive(
@@ -87,9 +98,9 @@ class _MenuScreenState extends State<MenuScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(child: Text('Lỗi: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data available'));
+          return const Center(child: Text('Không có dữ liệu'));
         } else {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -214,7 +225,8 @@ class _MenuScreenState extends State<MenuScreen> {
                           DataCell(
                               Text(snapshot.data![index]['description'] ?? '')),
                           DataCell(Text(
-                              snapshot.data![index]['price'].toString() ?? '')),
+                              snapshot.data![index]['price']?.toString() ??
+                                  '')),
                           DataCell(
                             Image.asset(
                               'assets/menu/${snapshot.data![index]['name']}.png',
@@ -269,15 +281,15 @@ class _MenuScreenState extends State<MenuScreen> {
                                       context: context,
                                       builder: (BuildContext context) {
                                         return AlertDialog(
-                                          title: const Text('Confirm Delete'),
+                                          title: const Text('Xác nhận xoá'),
                                           content: const Text(
-                                              'Are you sure you want to delete this item?'),
+                                              'Bạn có chắc chắn muốn xoá món này không?'),
                                           actions: <Widget>[
                                             TextButton(
                                               onPressed: () {
                                                 Navigator.of(context).pop();
                                               },
-                                              child: const Text('Cancel'),
+                                              child: const Text('Huỷ'),
                                             ),
                                             TextButton(
                                               onPressed: () {
@@ -299,7 +311,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                                 });
                                                 Navigator.of(context).pop();
                                               },
-                                              child: const Text('Delete'),
+                                              child: const Text('Xoá'),
                                             ),
                                           ],
                                         );
@@ -321,6 +333,170 @@ class _MenuScreenState extends State<MenuScreen> {
         }
       },
     );
+  }
+
+  Future<void> printMenuList(BuildContext context) async {
+    try {
+      // Hiển thị thông báo "Đang tải"
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      final pdf = pw.Document();
+
+      // Load font
+      final font = await rootBundle.load("assets/fonts/Roboto-Regular.ttf");
+      final ttf = pw.Font.ttf(font);
+
+      // Fetch menu data
+      final menuData = await menuList;
+      if (menuData.isEmpty) {
+        // ignore: use_build_context_synchronously
+        Navigator.pop(context);
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Menu trống!')),
+        );
+        return;
+      }
+
+      // Load images
+      final imageMap = <String, pw.MemoryImage>{};
+      for (var item in menuData) {
+        try {
+          final imageBytes = await rootBundle
+              .load('assets/menu/${item['name']}.png')
+              .then((value) => value.buffer.asUint8List());
+          imageMap[item['name']] = pw.MemoryImage(imageBytes);
+        } catch (e) {
+          // Fallback image
+          final placeholderBytes = await rootBundle
+              .load('assets/menu/error.png')
+              .then((value) => value.buffer.asUint8List());
+          imageMap[item['name']] = pw.MemoryImage(placeholderBytes);
+        }
+      }
+
+      // Trang đầu: Tiêu đề "Menu Món"
+      pdf.addPage(
+        pw.Page(
+          build: (pw.Context context) {
+            return pw.Center(
+              child: pw.Text(
+                'Menu Món',
+                style: pw.TextStyle(
+                  fontSize: 36,
+                  fontWeight: pw.FontWeight.bold,
+                  font: ttf,
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      // Phân loại theo danh mục
+      final categories =
+          menuData.map((item) => item['category']).toSet().toList();
+
+      // Tạo các trang danh mục
+      for (var category in categories) {
+        final categoryItems =
+            menuData.where((item) => item['category'] == category).toList();
+
+        // Chia sản phẩm thành các nhóm (4 sản phẩm mỗi hàng, 3 hàng mỗi trang)
+        const itemsPerPage = 12;
+        final totalPages = (categoryItems.length / itemsPerPage).ceil();
+
+        for (var pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+          final itemsOnPage =
+              categoryItems.skip(pageIndex * itemsPerPage).take(itemsPerPage);
+
+          pdf.addPage(
+            pw.Page(
+              build: (pw.Context context) {
+                return pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'Danh mục: $category',
+                      style: pw.TextStyle(
+                        fontSize: 18,
+                        fontWeight: pw.FontWeight.bold,
+                        font: ttf,
+                      ),
+                    ),
+                    pw.SizedBox(height: 10),
+                    pw.Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: itemsOnPage.map((item) {
+                        return pw.Container(
+                          width: 150,
+                          padding: const pw.EdgeInsets.all(8),
+                          decoration: pw.BoxDecoration(
+                            border: pw.Border.all(color: PdfColors.grey),
+                            borderRadius: pw.BorderRadius.circular(8),
+                          ),
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Text(
+                                item['name'],
+                                style: pw.TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: pw.FontWeight.bold,
+                                  font: ttf,
+                                ),
+                              ),
+                              pw.SizedBox(height: 5),
+                              pw.Text(
+                                'Giá: ${item['price']} VNĐ',
+                                style: pw.TextStyle(
+                                  fontSize: 12,
+                                  font: ttf,
+                                ),
+                              ),
+                              pw.SizedBox(height: 5),
+                              pw.Image(
+                                imageMap[item['name']]!,
+                                height: 80,
+                                width: 80,
+                                fit: pw.BoxFit.cover,
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                );
+              },
+            ),
+          );
+        }
+      }
+
+      // Ẩn thông báo "Đang tải"
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context);
+
+      // Hiển thị PDF
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdf.save(),
+      );
+    } catch (e) {
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context); // Đóng thông báo "Đang tải" nếu có lỗi
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi in menu: $e')),
+      );
+    }
   }
 }
 
@@ -352,7 +528,7 @@ class AddMenuItemScreen extends StatelessWidget {
     return Dialog(
         child: ConstrainedBox(
       // Limit the Dialog size
-      constraints: const BoxConstraints(maxWidth: 500, maxHeight: 900),
+      constraints: const BoxConstraints(maxWidth: 500, maxHeight: 400),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -360,10 +536,10 @@ class AddMenuItemScreen extends StatelessWidget {
           child: ListView(
             children: <Widget>[
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Name'),
+                decoration: const InputDecoration(labelText: 'Tên món'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a name';
+                    return 'Vui lòng nhập tên món';
                   }
                   return null;
                 },
@@ -374,10 +550,10 @@ class AddMenuItemScreen extends StatelessWidget {
                 },
               ),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Description'),
+                decoration: const InputDecoration(labelText: 'Mô tả'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a description';
+                    return 'Vui lòng nhập mô tả';
                   }
                   return null;
                 },
@@ -386,10 +562,10 @@ class AddMenuItemScreen extends StatelessWidget {
                 },
               ),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Price'),
+                decoration: const InputDecoration(labelText: 'Giá'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a price';
+                    return 'Vui lòng nhập giá';
                   }
                   return null;
                 },
@@ -398,10 +574,10 @@ class AddMenuItemScreen extends StatelessWidget {
                 },
               ),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Image URL'),
+                decoration: const InputDecoration(labelText: 'Hình ảnh'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter an image URL';
+                    return 'Vui lòng nhập URL hình ảnh';
                   }
                   return null;
                 },
@@ -410,10 +586,10 @@ class AddMenuItemScreen extends StatelessWidget {
                 },
               ),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Category'),
+                decoration: const InputDecoration(labelText: 'Danh mục'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a category';
+                    return 'Vui lòng nhập danh mục';
                   }
                   return null;
                 },
@@ -429,7 +605,7 @@ class AddMenuItemScreen extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green, // Green for Add Item
                 ),
-                child: const Text('Add Item'),
+                child: const Text('Thêm món'),
               ),
               const SizedBox(height: 10),
               ElevatedButton(
@@ -437,7 +613,7 @@ class AddMenuItemScreen extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red, // Red for Cancel
                 ),
-                child: const Text('Cancel'),
+                child: const Text('Hủy'),
               ),
             ],
           ),
@@ -497,7 +673,7 @@ class _EditMenuItemScreenState extends State<EditMenuItemScreen> {
     return Dialog(
       insetPadding: const EdgeInsets.all(10),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 900),
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
@@ -507,15 +683,15 @@ class _EditMenuItemScreenState extends State<EditMenuItemScreen> {
               children: <Widget>[
                 TextFormField(
                   initialValue: widget.menuItem['id'].toString(),
-                  decoration: const InputDecoration(labelText: 'ID'),
+                  decoration: const InputDecoration(labelText: 'Mã món'),
                   readOnly: true,
                 ),
                 TextFormField(
                   initialValue: name,
-                  decoration: const InputDecoration(labelText: 'Name'),
+                  decoration: const InputDecoration(labelText: 'Tên món'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return 'Vui lòng nhập tên món';
                     }
                     return null;
                   },
@@ -525,10 +701,10 @@ class _EditMenuItemScreenState extends State<EditMenuItemScreen> {
                 ),
                 TextFormField(
                   initialValue: description,
-                  decoration: const InputDecoration(labelText: 'Description'),
+                  decoration: const InputDecoration(labelText: 'Mô tả'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
+                      return 'Vui lòng nhập mô tả';
                     }
                     return null;
                   },
@@ -538,11 +714,11 @@ class _EditMenuItemScreenState extends State<EditMenuItemScreen> {
                 ),
                 TextFormField(
                   initialValue: price,
-                  decoration: const InputDecoration(labelText: 'Price'),
+                  decoration: const InputDecoration(labelText: 'Giá'),
                   keyboardType: TextInputType.number, // For numeric input
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a price';
+                      return 'Vui lòng nhập giá';
                     }
                     // Add more validation if needed (e.g., number format)
 
@@ -554,10 +730,10 @@ class _EditMenuItemScreenState extends State<EditMenuItemScreen> {
                 ),
                 TextFormField(
                   initialValue: image,
-                  decoration: const InputDecoration(labelText: 'Image URL'),
+                  decoration: const InputDecoration(labelText: 'Hình ảnh'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an image URL';
+                      return 'Vui lòng nhập URL hình ảnh';
                     }
                     return null;
                   },
@@ -567,10 +743,10 @@ class _EditMenuItemScreenState extends State<EditMenuItemScreen> {
                 ),
                 TextFormField(
                   initialValue: category,
-                  decoration: const InputDecoration(labelText: 'Category'),
+                  decoration: const InputDecoration(labelText: 'Danh mục'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a category';
+                      return 'Vui lòng nhập danh mục';
                     }
                     return null;
                   },
@@ -584,7 +760,7 @@ class _EditMenuItemScreenState extends State<EditMenuItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Save
                   ),
-                  child: const Text('Save Changes'),
+                  child: const Text('Lưu thay đổi'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -592,7 +768,7 @@ class _EditMenuItemScreenState extends State<EditMenuItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),

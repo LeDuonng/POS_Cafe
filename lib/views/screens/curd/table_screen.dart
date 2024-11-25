@@ -33,7 +33,7 @@ class _TableScreenState extends State<TableScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Table List'),
+        title: const Text('Quản lý Bàn'),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -41,7 +41,7 @@ class _TableScreenState extends State<TableScreen> {
               width: 300,
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'Search by Area...',
+                  hintText: 'Tìm kiếm bàn...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -82,9 +82,9 @@ class _TableScreenState extends State<TableScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(child: Text('Lỗi: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data available'));
+          return const Center(child: Text('Không có dữ liệu'));
         } else {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -222,15 +222,15 @@ class _TableScreenState extends State<TableScreen> {
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: const Text('Confirm Delete'),
+                                        title: const Text('Xác nhận xoá'),
                                         content: const Text(
-                                            'Are you sure you want to delete this table?'),
+                                            'Bạn có chắc chắn muốn xoá bàn này không?'),
                                         actions: <Widget>[
                                           TextButton(
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Cancel'),
+                                            child: const Text('Huỷ'),
                                           ),
                                           TextButton(
                                             onPressed: () {
@@ -245,13 +245,13 @@ class _TableScreenState extends State<TableScreen> {
                                                       .showSnackBar(
                                                     SnackBar(
                                                         content:
-                                                            Text('Error: $e')),
+                                                            Text('Lỗi: $e')),
                                                   );
                                                 }
                                               });
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Delete'),
+                                            child: const Text('Xoá'),
                                           ),
                                         ],
                                       );
@@ -314,10 +314,10 @@ class _AddTableScreenState extends State<AddTableScreen> {
             child: ListView(
               children: <Widget>[
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Name'),
+                  decoration: const InputDecoration(labelText: 'Tên bàn'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return 'Vui lòng nhập tên bàn';
                     }
                     return null;
                   },
@@ -328,10 +328,10 @@ class _AddTableScreenState extends State<AddTableScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Floor'),
+                  decoration: const InputDecoration(labelText: 'Tầng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a floor';
+                      return 'Vui lòng nhập tầng';
                     }
                     return null;
                   },
@@ -340,10 +340,10 @@ class _AddTableScreenState extends State<AddTableScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Area'),
+                  decoration: const InputDecoration(labelText: 'Khu vực'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an area';
+                      return 'Vui lòng nhập khu vực';
                     }
                     return null;
                   },
@@ -352,16 +352,16 @@ class _AddTableScreenState extends State<AddTableScreen> {
                   },
                 ),
                 DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: 'Status'),
+                  decoration: const InputDecoration(labelText: 'Trạng thái'),
                   value: 'available',
                   items: const [
                     DropdownMenuItem(
                       value: 'available',
-                      child: Text('Available'),
+                      child: Text('Sẵn sàng'),
                     ),
                     DropdownMenuItem(
                       value: 'occupied',
-                      child: Text('Occupied'),
+                      child: Text('Đang bận'),
                     ),
                   ],
                   onChanged: (value) {
@@ -371,7 +371,7 @@ class _AddTableScreenState extends State<AddTableScreen> {
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please select a status';
+                      return 'Vui lòng chọn trạng thái';
                     }
                     return null;
                   },
@@ -387,7 +387,7 @@ class _AddTableScreenState extends State<AddTableScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Add Item
                   ),
-                  child: const Text('Add Table'),
+                  child: const Text('Thêm Bàn'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -395,7 +395,7 @@ class _AddTableScreenState extends State<AddTableScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),
@@ -463,15 +463,15 @@ class _EditTableScreenState extends State<EditTableScreen> {
               children: <Widget>[
                 TextFormField(
                   initialValue: widget.tableItem['id'].toString(),
-                  decoration: const InputDecoration(labelText: 'ID'),
+                  decoration: const InputDecoration(labelText: 'Mã bàn'),
                   readOnly: true,
                 ),
                 TextFormField(
                   initialValue: name,
-                  decoration: const InputDecoration(labelText: 'Name'),
+                  decoration: const InputDecoration(labelText: 'Tên bàn'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return 'Vui lòng nhập tên bàn';
                     }
                     return null;
                   },
@@ -483,10 +483,10 @@ class _EditTableScreenState extends State<EditTableScreen> {
                 ),
                 TextFormField(
                   initialValue: floor.toString(),
-                  decoration: const InputDecoration(labelText: 'Floor'),
+                  decoration: const InputDecoration(labelText: 'Tầng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a floor';
+                      return 'Vui lòng nhập tầng';
                     }
                     return null;
                   },
@@ -496,10 +496,10 @@ class _EditTableScreenState extends State<EditTableScreen> {
                 ),
                 TextFormField(
                   initialValue: area,
-                  decoration: const InputDecoration(labelText: 'Area'),
+                  decoration: const InputDecoration(labelText: 'Khu vực'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an area';
+                      return 'Vui lòng nhập khu vực';
                     }
                     return null;
                   },
@@ -508,16 +508,16 @@ class _EditTableScreenState extends State<EditTableScreen> {
                   },
                 ),
                 DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: 'Status'),
+                  decoration: const InputDecoration(labelText: 'Trạng thái'),
                   value: status,
                   items: const [
                     DropdownMenuItem(
                       value: 'available',
-                      child: Text('Available'),
+                      child: Text('Sẵn sàng'),
                     ),
                     DropdownMenuItem(
                       value: 'occupied',
-                      child: Text('Occupied'),
+                      child: Text('Đang bận'),
                     ),
                   ],
                   onChanged: (value) {
@@ -527,7 +527,7 @@ class _EditTableScreenState extends State<EditTableScreen> {
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please select a status';
+                      return 'Vui lòng chọn trạng thái';
                     }
                     return null;
                   },
@@ -543,7 +543,7 @@ class _EditTableScreenState extends State<EditTableScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Save
                   ),
-                  child: const Text('Save Changes'),
+                  child: const Text('Lưu thay đổi'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -551,7 +551,7 @@ class _EditTableScreenState extends State<EditTableScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),

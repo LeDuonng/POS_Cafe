@@ -492,11 +492,11 @@ def search_ingredients():
 def search_orders():
     id = request.args.get('id', None)
     if id:
-        query = "SELECT id, table_id, customer_id, staff_id, order_date, status, description FROM orders WHERE del = 0 AND id = %s"
-        rows = fetch_data(query, (id,))
+        query = "SELECT id, table_id, customer_id, staff_id, order_date, status, description FROM orders WHERE del = 0 AND (id = %s OR description LIKE %s OR order_date LIKE %s)"
+        rows = fetch_data(query, (id, f"%{id}%", f"%{id}%"))
     else:
         query = "SELECT id, table_id, customer_id, staff_id, order_date, status, description FROM orders WHERE del = 0"
-        rows = fetch_data(query)
+        rows = fetch_data(query)    
     orders = [{'id': row[0], 'table_id': row[1], 'customer_id': row[2], 'staff_id': row[3], 'order_date': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None, 'status': row[5], 'description': row[6]} for row in rows]
     return jsonify(orders)
 

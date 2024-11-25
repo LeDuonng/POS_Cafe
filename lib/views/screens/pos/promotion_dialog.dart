@@ -36,7 +36,7 @@ class _PromotionScreenState extends State<PromotionScreen> {
     } catch (e) {
       // Handle error, e.g., show a snackbar
       // ignore: avoid_print
-      print('Error searching promotions: $e');
+      print('Lỗi khi tìm kiếm mã giảm giá: $e');
     }
   }
 
@@ -71,6 +71,11 @@ class _PromotionScreenState extends State<PromotionScreen> {
                     itemCount: _foundPromotions.length,
                     itemBuilder: (context, index) {
                       final promotion = _foundPromotions[index];
+                      if (promotion['code_limit'] == 0 ||
+                          promotion['usage_limit'] == 0) {
+                        return const SizedBox
+                            .shrink(); // Don't display this promotion
+                      }
                       return ListTile(
                         title: Text(promotion['name'] ?? 'No Code'),
                         subtitle: Column(

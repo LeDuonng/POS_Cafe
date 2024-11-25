@@ -32,7 +32,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ingredients List'),
+        title: const Text('Quản lý nguyên liệu'),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -40,7 +40,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
               width: 300,
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'Search by Name...',
+                  hintText: 'Tìm kiếm nguyên liệu...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -81,9 +81,9 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(child: Text('Lỗi: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data available'));
+          return const Center(child: Text('Không có dữ liệu'));
         } else {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -205,15 +205,15 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: const Text('Confirm Delete'),
+                                        title: const Text('Xác nhận xoá'),
                                         content: const Text(
-                                            'Are you sure you want to delete this ingredient?'),
+                                            'Bạn có chắc chắn muốn xoá nguyên liệu này không?'),
                                         actions: <Widget>[
                                           TextButton(
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Cancel'),
+                                            child: const Text('Huỷ'),
                                           ),
                                           TextButton(
                                             onPressed: () {
@@ -228,13 +228,13 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                                                       .showSnackBar(
                                                     SnackBar(
                                                         content:
-                                                            Text('Error: $e')),
+                                                            Text('Lỗi: $e')),
                                                   );
                                                 }
                                               });
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Delete'),
+                                            child: const Text('Xoá'),
                                           ),
                                         ],
                                       );
@@ -296,10 +296,11 @@ class _AddIngredientScreenState extends State<AddIngredientScreen> {
             child: ListView(
               children: <Widget>[
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Name'),
+                  decoration:
+                      const InputDecoration(labelText: 'Tên nguyên liệu'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return 'Vui lòng nhập tên nguyên liệu';
                     }
                     return null;
                   },
@@ -310,10 +311,10 @@ class _AddIngredientScreenState extends State<AddIngredientScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Unit'),
+                  decoration: const InputDecoration(labelText: 'Đơn vị'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a unit';
+                      return 'Vui lòng nhập đơn vị';
                     }
                     return null;
                   },
@@ -322,10 +323,10 @@ class _AddIngredientScreenState extends State<AddIngredientScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Quantity'),
+                  decoration: const InputDecoration(labelText: 'Số lượng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a quantity';
+                      return 'Vui lòng nhập số lượng';
                     }
                     return null;
                   },
@@ -341,7 +342,7 @@ class _AddIngredientScreenState extends State<AddIngredientScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Add Item
                   ),
-                  child: const Text('Add Ingredient'),
+                  child: const Text('Thêm nguyên liệu'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -349,7 +350,7 @@ class _AddIngredientScreenState extends State<AddIngredientScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),
@@ -415,15 +416,17 @@ class _EditIngredientScreenState extends State<EditIngredientScreen> {
               children: <Widget>[
                 TextFormField(
                   initialValue: widget.ingredientItem['id'].toString(),
-                  decoration: const InputDecoration(labelText: 'ID'),
+                  decoration:
+                      const InputDecoration(labelText: 'Mã nguyên liệu'),
                   readOnly: true,
                 ),
                 TextFormField(
                   initialValue: name,
-                  decoration: const InputDecoration(labelText: 'Name'),
+                  decoration:
+                      const InputDecoration(labelText: 'Tên nguyên liệu'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return 'Vui lòng nhập tên nguyên liệu';
                     }
                     return null;
                   },
@@ -435,10 +438,10 @@ class _EditIngredientScreenState extends State<EditIngredientScreen> {
                 ),
                 TextFormField(
                   initialValue: unit,
-                  decoration: const InputDecoration(labelText: 'Unit'),
+                  decoration: const InputDecoration(labelText: 'Đơn vị'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a unit';
+                      return 'Vui lòng nhập đơn vị';
                     }
                     return null;
                   },
@@ -448,10 +451,10 @@ class _EditIngredientScreenState extends State<EditIngredientScreen> {
                 ),
                 TextFormField(
                   initialValue: quantity.toString(),
-                  decoration: const InputDecoration(labelText: 'Quantity'),
+                  decoration: const InputDecoration(labelText: 'Số lượng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a quantity';
+                      return 'Vui lòng nhập số lượng';
                     }
                     return null;
                   },
@@ -467,7 +470,7 @@ class _EditIngredientScreenState extends State<EditIngredientScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Save
                   ),
-                  child: const Text('Save Changes'),
+                  child: const Text('Lưu thay đổi'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -475,7 +478,7 @@ class _EditIngredientScreenState extends State<EditIngredientScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),

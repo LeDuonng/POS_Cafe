@@ -33,7 +33,7 @@ class _StaffScreenState extends State<StaffScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Staff List'),
+        title: const Text('Quản lý nhân viên'),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -41,7 +41,7 @@ class _StaffScreenState extends State<StaffScreen> {
               width: 300,
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'Search by Name or Position...',
+                  hintText: 'Tìm kiếm nhân viên...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -82,9 +82,9 @@ class _StaffScreenState extends State<StaffScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(child: Text('Lỗi: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data available'));
+          return const Center(child: Text('Không có dữ liệu'));
         } else {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -190,7 +190,7 @@ class _StaffScreenState extends State<StaffScreen> {
                                 ConnectionState.waiting) {
                               return const CircularProgressIndicator();
                             } else if (nameSnapshot.hasError) {
-                              return Text('Error: ${nameSnapshot.error}');
+                              return Text('Lỗi: ${nameSnapshot.error}');
                             } else {
                               return Text(nameSnapshot.data ?? 'Không có');
                             }
@@ -238,15 +238,15 @@ class _StaffScreenState extends State<StaffScreen> {
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: const Text('Confirm Delete'),
+                                        title: const Text('Xác nhận xoá'),
                                         content: const Text(
-                                            'Are you sure you want to delete this staff member?'),
+                                            'Bạn có chắc chắn muốn xoá nhân viên này không?'),
                                         actions: <Widget>[
                                           TextButton(
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Cancel'),
+                                            child: const Text('Huỷ'),
                                           ),
                                           TextButton(
                                             onPressed: () {
@@ -261,13 +261,13 @@ class _StaffScreenState extends State<StaffScreen> {
                                                       .showSnackBar(
                                                     SnackBar(
                                                         content:
-                                                            Text('Error: $e')),
+                                                            Text('Lỗi: $e')),
                                                   );
                                                 }
                                               });
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Delete'),
+                                            child: const Text('Xoá'),
                                           ),
                                         ],
                                       );
@@ -329,10 +329,10 @@ class _AddStaffItemScreenState extends State<AddStaffItemScreen> {
             child: ListView(
               children: <Widget>[
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'User ID'),
+                  decoration: const InputDecoration(labelText: 'Mã nhân viên'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a user ID';
+                      return 'Vui lòng nhập mã nhân viên';
                     }
                     return null;
                   },
@@ -343,10 +343,10 @@ class _AddStaffItemScreenState extends State<AddStaffItemScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Salary'),
+                  decoration: const InputDecoration(labelText: 'Lương'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a salary';
+                      return 'Vui lòng nhập lương';
                     }
                     return null;
                   },
@@ -355,10 +355,10 @@ class _AddStaffItemScreenState extends State<AddStaffItemScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Start Date'),
+                  decoration: const InputDecoration(labelText: 'Ngày bắt đầu'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a start date';
+                      return 'Vui lòng nhập ngày bắt đầu';
                     }
                     return null;
                   },
@@ -367,10 +367,10 @@ class _AddStaffItemScreenState extends State<AddStaffItemScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Position'),
+                  decoration: const InputDecoration(labelText: 'Vị trí'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a position';
+                      return 'Vui lòng nhập vị trí';
                     }
                     return null;
                   },
@@ -386,7 +386,7 @@ class _AddStaffItemScreenState extends State<AddStaffItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Add Item
                   ),
-                  child: const Text('Add Staff Member'),
+                  child: const Text('Thêm nhân viên'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -394,7 +394,7 @@ class _AddStaffItemScreenState extends State<AddStaffItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),
@@ -466,10 +466,10 @@ class _EditStaffItemScreenState extends State<EditStaffItemScreen> {
                 ),
                 TextFormField(
                   initialValue: userId,
-                  decoration: const InputDecoration(labelText: 'User ID'),
+                  decoration: const InputDecoration(labelText: 'Mã nhân viên'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a user ID';
+                      return 'Vui lòng nhập mã nhân viên';
                     }
                     return null;
                   },
@@ -481,10 +481,10 @@ class _EditStaffItemScreenState extends State<EditStaffItemScreen> {
                 ),
                 TextFormField(
                   initialValue: salary,
-                  decoration: const InputDecoration(labelText: 'Salary'),
+                  decoration: const InputDecoration(labelText: 'Lương'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a salary';
+                      return 'Vui lòng nhập lương';
                     }
                     return null;
                   },
@@ -494,10 +494,10 @@ class _EditStaffItemScreenState extends State<EditStaffItemScreen> {
                 ),
                 TextFormField(
                   initialValue: startDate,
-                  decoration: const InputDecoration(labelText: 'Start Date'),
+                  decoration: const InputDecoration(labelText: 'Ngày bắt đầu'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a start date';
+                      return 'Vui lòng nhập ngày bắt đầu';
                     }
                     return null;
                   },
@@ -507,10 +507,10 @@ class _EditStaffItemScreenState extends State<EditStaffItemScreen> {
                 ),
                 TextFormField(
                   initialValue: position,
-                  decoration: const InputDecoration(labelText: 'Position'),
+                  decoration: const InputDecoration(labelText: 'Vị trí'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a position';
+                      return 'Vui lòng nhập vị trí';
                     }
                     return null;
                   },
@@ -526,7 +526,7 @@ class _EditStaffItemScreenState extends State<EditStaffItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Save
                   ),
-                  child: const Text('Save Changes'),
+                  child: const Text('Lưu thay đổi'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -534,7 +534,7 @@ class _EditStaffItemScreenState extends State<EditStaffItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),

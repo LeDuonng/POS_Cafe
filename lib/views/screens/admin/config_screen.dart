@@ -46,7 +46,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
     } catch (e) {
       // Handle error
       // ignore: avoid_print
-      print('Failed to load config: $e');
+      print('Lỗi khi tải cấu hình: $e');
     }
   }
 
@@ -57,7 +57,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
     } catch (e) {
       // Handle error
       // ignore: avoid_print
-      print('Failed to update config: $e');
+      print('Lỗi khi cập nhật cấu hình: $e');
     }
   }
 

@@ -5,7 +5,11 @@ import 'package:coffeeapp/models/tables_model.dart';
 import 'package:coffeeapp/views/screens/qr_code/qr_code.dart';
 import 'package:coffeeapp/views/widgets/nofication.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 // ignore: must_be_immutable
 class PaymentConfirmationDialog extends StatefulWidget {
@@ -24,6 +28,7 @@ class PaymentConfirmationDialog extends StatefulWidget {
   final String? promotionType;
   final bool hasTaxMode;
   final Function() onPaymentSuccess;
+  String maHD = "HĐ${DateTime.now().millisecondsSinceEpoch}";
 
   PaymentConfirmationDialog({
     super.key,
@@ -81,7 +86,7 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
             const Divider(),
 
             // Thông tin hóa đơn
-            Text('Mã HĐ: #${DateTime.now().millisecondsSinceEpoch}'),
+            Text('Mã HĐ: #${widget.maHD.toString()}'),
             Text('Ngày: ${DateFormat('yyyy-MM-dd').format(DateTime.now())}'),
             Text('Giờ vào: ${DateFormat('HH:mm:ss').format(DateTime.now())}'),
             Text('Bàn: ${widget.tableId ?? '1'}'),
@@ -114,7 +119,7 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
                 ],
               );
               // ignore: unnecessary_to_list_in_spreads
-            }).toList(),
+            }),
             const Divider(),
 
             // Tổng cộng
@@ -230,7 +235,7 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CircularProgressIndicator();
                   } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
+                    return Text('Lỗi: ${snapshot.error}');
                   } else {
                     return snapshot.data ?? const SizedBox();
                   }
@@ -263,7 +268,8 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            _printInvoice(); // Gọi hàm hiển thị xác nhận thanh toán
+            _generateInvoicePdf(); // Gọi hàm tạo PDF hóa đơn
+            // _printInvoice(); // Gọi hàm hiển thị xác nhận thanh toán
           },
           child: const Text('in hoá đơn'),
         ),
@@ -304,7 +310,7 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
                 orderDate: DateTime.now(),
                 status: 'Paid',
                 description:
-                    '${widget.orderType} \n${widget.surcharge > 0 ? ', Phụ thu: ${widget.surcharge} VNĐ, Lý do: ${widget.surchargeReason}' : ''}',
+                    '${widget.maHD}: \n${widget.orderType} \n${widget.surcharge > 0 ? ', Phụ thu: ${widget.surcharge} VNĐ, Lý do: ${widget.surchargeReason}' : ''}',
               );
 
               addBill(
@@ -390,18 +396,19 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
                         : 0))
             .toStringAsFixed(0)),
         // ignore: unnecessary_string_interpolations
-        addInfo: "${DateFormat('yyyyMMddhhmmss').format(DateTime.now())}");
+        addInfo: "${widget.maHD.toString()}");
     try {
       await paymentService.initialize();
       Image qrImage = await paymentService.generatePaymentQR();
-      return Center(child: qrImage);
+      return qrImage;
     } catch (e) {
       // ignore: avoid_print
       print('An error occurred: $e');
-      return const Center(child: Text('Failed to load QR code'));
+      return const Center(child: Text('Lỗi khi tạo mã QR'));
     }
   }
 
+  // ignore: unused_element
   void _printInvoice() {
     // In hóa đơn
     // Tạo nội dung hóa đơn
@@ -480,7 +487,7 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
+                      return Text('Lỗi: ${snapshot.error}');
                     } else {
                       return snapshot.data != null
                           ? SizedBox(
@@ -496,6 +503,7 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
           actions: [
             TextButton(
               onPressed: () {
+                _generateInvoicePdf();
                 Navigator.of(context).pop();
               },
               child: const Text('Đóng'),
@@ -504,5 +512,186 @@ class _PaymentConfirmationDialogState extends State<PaymentConfirmationDialog> {
         );
       },
     );
+  }
+
+  void _generateInvoicePdf() async {
+    final pdf = pw.Document();
+
+    try {
+      // Load custom font
+      final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
+      final ttf = pw.Font.ttf(fontData);
+
+      pdf.addPage(
+        pw.Page(
+          build: (pw.Context context) {
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Center(
+                  child: pw.Column(
+                    children: [
+                      pw.Text(
+                        'LeeDuong Coffee',
+                        style: pw.TextStyle(
+                          font: ttf,
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 18.0,
+                        ),
+                      ),
+                      pw.Text('Số ĐT: 0971533147',
+                          style: pw.TextStyle(font: ttf)),
+                      pw.Text('ĐC: Hóc Môn, Hồ Chí Minh',
+                          style: pw.TextStyle(font: ttf)),
+                    ],
+                  ),
+                ),
+                pw.Divider(),
+
+                // Thông tin hóa đơn
+                pw.Text('Mã HĐ: #${widget.maHD.toString()}',
+                    style: pw.TextStyle(font: ttf)),
+                pw.Text(
+                    'Ngày: ${DateFormat('yyyy-MM-dd').format(DateTime.now())}',
+                    style: pw.TextStyle(font: ttf)),
+                pw.Text(
+                    'Giờ vào: ${DateFormat('HH:mm:ss').format(DateTime.now())}',
+                    style: pw.TextStyle(font: ttf)),
+                pw.Text('Bàn: ${widget.tableId ?? '1'}',
+                    style: pw.TextStyle(font: ttf)),
+                pw.Text('Nhân viên: ${widget.userID ?? 'admin'}',
+                    style: pw.TextStyle(font: ttf)),
+                pw.Divider(),
+
+                // Danh sách món hàng
+                pw.Text(
+                  'Danh sách món',
+                  style: pw.TextStyle(
+                      font: ttf,
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 16.0),
+                ),
+                pw.SizedBox(height: 8.0),
+                ...widget.cartItems.map((item) {
+                  return pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        '${item['name']} - ${item['quantity']} x ${item['price'].toStringAsFixed(0)} VNĐ',
+                        style: pw.TextStyle(font: ttf, fontSize: 14.0),
+                      ),
+                      if (item.containsKey('size'))
+                        pw.Text('Size: ${item['size']}',
+                            style: pw.TextStyle(font: ttf)),
+                      if (item.containsKey('sugar'))
+                        pw.Text('Đường: ${item['sugar']}%',
+                            style: pw.TextStyle(font: ttf)),
+                      if (item.containsKey('toppings') &&
+                          item['toppings'].isNotEmpty)
+                        pw.Text(
+                            'Topping: ${item['toppings'].map((topping) => '$topping').join(', ')}',
+                            style: pw.TextStyle(font: ttf)),
+                      pw.SizedBox(height: 4.0),
+                      pw.Divider(),
+                    ],
+                  );
+                  // ignore: unnecessary_to_list_in_spreads
+                }).toList(),
+                pw.Divider(),
+
+                // Tổng cộng
+                pw.Column(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (widget.selectedPromotionCode != null)
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text('Khuyến mãi:',
+                              style: pw.TextStyle(font: ttf, fontSize: 18.0)),
+                          pw.Text(
+                            widget.selectedPromotionCode != null
+                                ? '${widget.promotionValue} ${widget.promotionType == 'percentage' ? '%' : 'VNĐ'}'
+                                : 'Không',
+                            style: pw.TextStyle(font: ttf, fontSize: 18.0),
+                          ),
+                        ],
+                      ),
+                    if (widget.surchargeReason.isNotEmpty)
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text('Phụ thu:',
+                              style: pw.TextStyle(font: ttf, fontSize: 18.0)),
+                          pw.Text('${widget.surcharge.toStringAsFixed(2)} VNĐ',
+                              style: pw.TextStyle(font: ttf, fontSize: 18.0)),
+                        ],
+                      ),
+                    if (widget.surchargeReason.isNotEmpty)
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text('Lý do phụ thu:',
+                              style: pw.TextStyle(font: ttf, fontSize: 18.0)),
+                          pw.Text(widget.surchargeReason,
+                              style: pw.TextStyle(font: ttf, fontSize: 18.0)),
+                        ],
+                      ),
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Text(
+                          'Tổng cộng:',
+                          style: pw.TextStyle(
+                              font: ttf,
+                              fontWeight: pw.FontWeight.bold,
+                              fontSize: 16.0),
+                        ),
+                        pw.Text(
+                          '${(widget.hasTaxMode ? (widget.totalPrice + widget.tax - (widget.promotionValue != null ? widget.promotionType == 'percentage' ? widget.totalPrice * (widget.promotionValue! / 100) : widget.promotionValue! : 0)) : widget.totalPrice - (widget.promotionValue != null ? widget.promotionType == 'percentage' ? widget.totalPrice * (widget.promotionValue! / 100) : widget.promotionValue! : 0)).toStringAsFixed(0)} VNĐ',
+                          style: pw.TextStyle(font: ttf, fontSize: 16.0),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                pw.Divider(),
+
+                // Chọn phương thức thanh toán
+                pw.Text(
+                  'Phương thức thanh toán: ${widget.selectedPaymentMethod == 'card' ? 'Thẻ' : 'Tiền mặt'}',
+                  style:
+                      pw.TextStyle(font: ttf, fontWeight: pw.FontWeight.bold),
+                ),
+                pw.SizedBox(height: 8.0),
+                pw.Center(
+                  child: pw.Column(
+                    children: [
+                      pw.SizedBox(height: 8.0),
+                      pw.Text(
+                        'Cảm ơn quý khách!',
+                        style: pw.TextStyle(
+                          font: ttf,
+                          fontStyle: pw.FontStyle.italic,
+                          fontSize: 14.0,
+                        ),
+                      ),
+                      pw.Text('Hẹn gặp lại!', style: pw.TextStyle(font: ttf)),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      );
+
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdf.save(),
+      );
+    } catch (e) {
+      // ignore: avoid_print
+      print('Lỗi khi tạo PDF: $e');
+    }
   }
 }

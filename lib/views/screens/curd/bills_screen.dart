@@ -32,7 +32,7 @@ class _BillsScreenState extends State<BillsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bills List'),
+        title: const Text('Quản lý hóa đơn'),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -40,7 +40,7 @@ class _BillsScreenState extends State<BillsScreen> {
               width: 300,
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'Search by Payment Method...',
+                  hintText: 'Tìm kiếm hóa đơn...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -81,9 +81,9 @@ class _BillsScreenState extends State<BillsScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(child: Text('Lỗi: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data available'));
+          return const Center(child: Text('Không có dữ liệu'));
         } else {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -161,7 +161,7 @@ class _BillsScreenState extends State<BillsScreen> {
                       label: SizedBox(
                         width: columnWidth,
                         child: const Text(
-                          'Actions',
+                          'Kích hoạt',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
@@ -226,15 +226,15 @@ class _BillsScreenState extends State<BillsScreen> {
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: const Text('Confirm Delete'),
+                                        title: const Text('Xác nhận xoá'),
                                         content: const Text(
-                                            'Are you sure you want to delete this bill?'),
+                                            'Bạn có chắc chắn muốn xoá hóa đơn này không?'),
                                         actions: <Widget>[
                                           TextButton(
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Cancel'),
+                                            child: const Text('Huỷ'),
                                           ),
                                           TextButton(
                                             onPressed: () {
@@ -249,13 +249,13 @@ class _BillsScreenState extends State<BillsScreen> {
                                                       .showSnackBar(
                                                     SnackBar(
                                                         content:
-                                                            Text('Error: $e')),
+                                                            Text('Lỗi: $e')),
                                                   );
                                                 }
                                               });
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Delete'),
+                                            child: const Text('Xóa'),
                                           ),
                                         ],
                                       );
@@ -317,10 +317,10 @@ class _AddBillScreenState extends State<AddBillScreen> {
             child: ListView(
               children: <Widget>[
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Order ID'),
+                  decoration: const InputDecoration(labelText: 'Mã đơn hàng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an order ID';
+                      return 'Vui lòng nhập mã đơn hàng';
                     }
                     return null;
                   },
@@ -331,10 +331,10 @@ class _AddBillScreenState extends State<AddBillScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Total Amount'),
+                  decoration: const InputDecoration(labelText: 'Tổng tiền'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a total amount';
+                      return 'Vui lòng nhập tổng tiền';
                     }
                     return null;
                   },
@@ -343,18 +343,18 @@ class _AddBillScreenState extends State<AddBillScreen> {
                   },
                 ),
                 DropdownButtonFormField<String>(
-                  decoration:
-                      const InputDecoration(labelText: 'Payment Method'),
+                  decoration: const InputDecoration(
+                      labelText: 'Phương thức thanh toán'),
                   items: const [
-                    DropdownMenuItem(value: 'cash', child: Text('Cash')),
-                    DropdownMenuItem(value: 'card', child: Text('Card')),
+                    DropdownMenuItem(value: 'cash', child: Text('Tiền mặt')),
+                    DropdownMenuItem(value: 'card', child: Text('Thẻ')),
                   ],
                   onChanged: (value) {
                     paymentMethod = value!;
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please select a payment method';
+                      return 'Vui lòng chọn phương thức thanh toán';
                     }
                     return null;
                   },
@@ -367,7 +367,7 @@ class _AddBillScreenState extends State<AddBillScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Add Item
                   ),
-                  child: const Text('Add Bill'),
+                  child: const Text('Thêm hóa đơn'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -375,7 +375,7 @@ class _AddBillScreenState extends State<AddBillScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),
@@ -443,15 +443,15 @@ class _EditBillScreenState extends State<EditBillScreen> {
               children: <Widget>[
                 TextFormField(
                   initialValue: widget.billItem['id'].toString(),
-                  decoration: const InputDecoration(labelText: 'ID'),
+                  decoration: const InputDecoration(labelText: 'Mã hóa đơn'),
                   readOnly: true,
                 ),
                 TextFormField(
                   initialValue: orderId,
-                  decoration: const InputDecoration(labelText: 'Order ID'),
+                  decoration: const InputDecoration(labelText: 'Mã đơn hàng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an order ID';
+                      return 'Vui lòng nhập mã đơn hàng';
                     }
                     return null;
                   },
@@ -463,10 +463,10 @@ class _EditBillScreenState extends State<EditBillScreen> {
                 ),
                 TextFormField(
                   initialValue: totalAmount,
-                  decoration: const InputDecoration(labelText: 'Total Amount'),
+                  decoration: const InputDecoration(labelText: 'Tổng tiền'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a total amount';
+                      return 'Vui lòng nhập tổng tiền';
                     }
                     return null;
                   },
@@ -476,25 +476,26 @@ class _EditBillScreenState extends State<EditBillScreen> {
                 ),
                 DropdownButtonFormField<String>(
                   value: paymentMethod,
-                  decoration:
-                      const InputDecoration(labelText: 'Payment Method'),
+                  decoration: const InputDecoration(
+                      labelText: 'Phương thức thanh toán'),
                   items: const [
-                    DropdownMenuItem(value: 'cash', child: Text('Cash')),
-                    DropdownMenuItem(value: 'card', child: Text('Card')),
+                    DropdownMenuItem(value: 'cash', child: Text('Tiền mặt')),
+                    DropdownMenuItem(value: 'card', child: Text('Thẻ')),
                   ],
                   onChanged: (value) {
                     paymentMethod = value!;
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please select a payment method';
+                      return 'Vui lòng chọn phương thức thanh toán';
                     }
                     return null;
                   },
                 ),
                 TextFormField(
                   initialValue: paymentDate.toString(),
-                  decoration: const InputDecoration(labelText: 'Payment Date'),
+                  decoration:
+                      const InputDecoration(labelText: 'Ngày thanh toán'),
                   readOnly: true,
                 ),
                 const SizedBox(height: 20),
@@ -503,7 +504,7 @@ class _EditBillScreenState extends State<EditBillScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Save
                   ),
-                  child: const Text('Save Changes'),
+                  child: const Text('Lưu hóa đơn'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -511,7 +512,7 @@ class _EditBillScreenState extends State<EditBillScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),

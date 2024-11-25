@@ -31,7 +31,7 @@ class _UserScreenState extends State<UserScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('User List'),
+        title: const Text('Quản lý người dùng'),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -39,7 +39,7 @@ class _UserScreenState extends State<UserScreen> {
               width: 300,
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'Search...',
+                  hintText: 'Tìm kiếm người dùng...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -80,9 +80,9 @@ class _UserScreenState extends State<UserScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(child: Text('Lỗi: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data available'));
+          return const Center(child: Text('Không có dữ liệu'));
         } else {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -253,15 +253,15 @@ class _UserScreenState extends State<UserScreen> {
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: const Text('Confirm Delete'),
+                                        title: const Text('Xác nhận xoá'),
                                         content: const Text(
-                                            'Are you sure you want to delete this user?'),
+                                            'Bạn có chắc chắn muốn xoá người dùng này không?'),
                                         actions: <Widget>[
                                           TextButton(
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Cancel'),
+                                            child: const Text('Huỷ'),
                                           ),
                                           TextButton(
                                             onPressed: () {
@@ -276,13 +276,13 @@ class _UserScreenState extends State<UserScreen> {
                                                       .showSnackBar(
                                                     SnackBar(
                                                         content:
-                                                            Text('Error: $e')),
+                                                            Text('Lỗi: $e')),
                                                   );
                                                 }
                                               });
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Delete'),
+                                            child: const Text('Xoá'),
                                           ),
                                         ],
                                       );
@@ -347,10 +347,10 @@ class _AddUserScreenState extends State<AddUserScreen> {
             child: ListView(
               children: <Widget>[
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Username'),
+                  decoration: const InputDecoration(labelText: 'Tên đăng nhập'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a Username';
+                      return 'Vui lòng nhập tên đăng nhập';
                     }
                     return null;
                   },
@@ -361,10 +361,10 @@ class _AddUserScreenState extends State<AddUserScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Password'),
+                  decoration: const InputDecoration(labelText: 'Mật khẩu'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
+                      return 'Vui lòng nhập mật khẩu';
                     }
                     return null;
                   },
@@ -375,13 +375,13 @@ class _AddUserScreenState extends State<AddUserScreen> {
                   },
                 ),
                 DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: 'Role'),
+                  decoration: const InputDecoration(labelText: 'Quyền'),
                   value: 'customer',
                   items: const [
                     DropdownMenuItem(value: 'admin', child: Text('Admin')),
-                    DropdownMenuItem(value: 'staff', child: Text('Staff')),
+                    DropdownMenuItem(value: 'staff', child: Text('Nhân viên')),
                     DropdownMenuItem(
-                        value: 'customer', child: Text('Customer')),
+                        value: 'customer', child: Text('Khách hàng')),
                   ],
                   onChanged: (value) {
                     if (value != null) {
@@ -397,10 +397,11 @@ class _AddUserScreenState extends State<AddUserScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Name'),
+                  decoration:
+                      const InputDecoration(labelText: 'Tên người dùng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return 'Vui lòng nhập tên người dùng';
                     }
                     return null;
                   },
@@ -414,7 +415,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                   decoration: const InputDecoration(labelText: 'Email'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an email';
+                      return 'Vui lòng nhập email';
                     }
                     return null;
                   },
@@ -423,10 +424,10 @@ class _AddUserScreenState extends State<AddUserScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Phone'),
+                  decoration: const InputDecoration(labelText: 'Số điện thoại'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a phone number';
+                      return 'Vui lòng nhập số điện thoại';
                     }
                     return null;
                   },
@@ -435,10 +436,10 @@ class _AddUserScreenState extends State<AddUserScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Address'),
+                  decoration: const InputDecoration(labelText: 'Địa chỉ'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an address';
+                      return 'Vui lòng nhập địa chỉ';
                     }
                     return null;
                   },
@@ -454,7 +455,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Add Item
                   ),
-                  child: const Text('Add User'),
+                  child: const Text('Thêm người dùng'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -462,7 +463,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),
@@ -531,15 +532,15 @@ class _EditUserScreenState extends State<EditUserScreen> {
               children: <Widget>[
                 TextFormField(
                   initialValue: widget.userItem['id'].toString(),
-                  decoration: const InputDecoration(labelText: 'ID'),
+                  decoration: const InputDecoration(labelText: 'Mã người dùng'),
                   readOnly: true,
                 ),
                 TextFormField(
                   initialValue: username,
-                  decoration: const InputDecoration(labelText: 'Username'),
+                  decoration: const InputDecoration(labelText: 'Tên đăng nhập'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a Username';
+                      return 'Vui lòng nhập tên đăng nhập';
                     }
                     return null;
                   },
@@ -551,10 +552,10 @@ class _EditUserScreenState extends State<EditUserScreen> {
                 ),
                 TextFormField(
                   initialValue: password,
-                  decoration: const InputDecoration(labelText: 'Password'),
+                  decoration: const InputDecoration(labelText: 'Mật khẩu'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
+                      return 'Vui lòng nhập mật khẩu';
                     }
                     return null;
                   },
@@ -565,13 +566,13 @@ class _EditUserScreenState extends State<EditUserScreen> {
                   },
                 ),
                 DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: 'Role'),
+                  decoration: const InputDecoration(labelText: 'Quyền'),
                   value: role,
                   items: const [
                     DropdownMenuItem(value: 'admin', child: Text('Admin')),
-                    DropdownMenuItem(value: 'staff', child: Text('Staff')),
+                    DropdownMenuItem(value: 'staff', child: Text('Nhân viên')),
                     DropdownMenuItem(
-                        value: 'customer', child: Text('Customer')),
+                        value: 'customer', child: Text('Khách hàng')),
                   ],
                   onChanged: (value) {
                     if (value != null) {
@@ -588,10 +589,11 @@ class _EditUserScreenState extends State<EditUserScreen> {
                 ),
                 TextFormField(
                   initialValue: name,
-                  decoration: const InputDecoration(labelText: 'Name'),
+                  decoration:
+                      const InputDecoration(labelText: 'Tên người dùng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return 'Vui lòng nhập tên người dùng';
                     }
                     return null;
                   },
@@ -606,7 +608,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                   decoration: const InputDecoration(labelText: 'Email'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an email';
+                      return 'Vui lòng nhập email';
                     }
                     return null;
                   },
@@ -616,11 +618,10 @@ class _EditUserScreenState extends State<EditUserScreen> {
                 ),
                 TextFormField(
                   initialValue: phone,
-//viết tiếp
-                  decoration: const InputDecoration(labelText: 'Phone'),
+                  decoration: const InputDecoration(labelText: 'Số điện thoại'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a phone number';
+                      return 'Vui lòng nhập số điện thoại';
                     }
                     return null;
                   },
@@ -630,10 +631,10 @@ class _EditUserScreenState extends State<EditUserScreen> {
                 ),
                 TextFormField(
                   initialValue: address,
-                  decoration: const InputDecoration(labelText: 'Address'),
+                  decoration: const InputDecoration(labelText: 'Địa chỉ'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an address';
+                      return 'Vui lòng nhập địa chỉ';
                     }
                     return null;
                   },
@@ -649,7 +650,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Add Item
                   ),
-                  child: const Text('Update User'),
+                  child: const Text('Cập nhật người dùng'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -657,7 +658,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),

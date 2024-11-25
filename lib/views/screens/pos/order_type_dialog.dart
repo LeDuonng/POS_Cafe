@@ -209,11 +209,11 @@ class _OrderTypeDialogState extends State<OrderTypeDialog> {
             return const Text(
                 'Loading...'); // Hoặc hiển thị biểu tượng chờ (spinner)
           } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
+            return Text('Lỗi: ${snapshot.error}');
           } else if (snapshot.hasData) {
             return Text(snapshot.data!);
           } else {
-            return const Text('No data available');
+            return const Text('Không có dữ liệu');
           }
         },
       ),

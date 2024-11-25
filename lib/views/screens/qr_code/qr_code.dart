@@ -16,7 +16,7 @@ void main() async {
     // ignore: avoid_print
     print('An error occurred: $e');
     runApp(const MaterialApp(
-        home: Scaffold(body: Center(child: Text('Failed to load QR code')))));
+        home: Scaffold(body: Center(child: Text('Lỗi khi tạo QR code')))));
   }
 }
 
@@ -47,8 +47,7 @@ class PaymentService {
           configs.firstWhere((config) => config['key'] == 'bank_bin')['value']);
     } catch (e) {
       // ignore: avoid_print
-      print('Failed to load config: $e');
-      throw Exception('Failed to load config: $e');
+      print('Lỗii khi tải cấu hình: $e');
     }
   }
 
@@ -84,13 +83,13 @@ class PaymentService {
           Uint8List bytes = base64Decode(qrDataURL);
           return Image.memory(bytes);
         } else {
-          throw Exception('QR Data URL not found in the response');
+          throw Exception('Không tìm thấy dữ liệu QR code');
         }
       } else {
-        throw Exception('Error generating QR code: ${response.body}');
+        throw Exception('Lỗi khi tạo QR code: ${response.body}');
       }
     } catch (e) {
-      throw Exception('Failed to generate QR: $e');
+      throw Exception('Lỗi khi tạo QR code: $e');
     }
   }
 }

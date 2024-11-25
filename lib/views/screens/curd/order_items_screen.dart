@@ -33,7 +33,7 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Order Items List'),
+        title: const Text('Quản lý Đơn Hàng'),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -41,7 +41,7 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
               width: 300,
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'Search by Order ID...',
+                  hintText: 'Tìm kiếm đon hàng...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -82,9 +82,9 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(child: Text('Lỗi: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data available'));
+          return const Center(child: Text('Không có dữ liệu'));
         } else {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -181,7 +181,7 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
                                 ConnectionState.waiting) {
                               return const CircularProgressIndicator();
                             } else if (nameSnapshot.hasError) {
-                              return Text('Error: ${nameSnapshot.error}');
+                              return Text('Lỗi: ${nameSnapshot.error}');
                             } else {
                               return Text(nameSnapshot.data ?? 'Không có');
                             }
@@ -214,15 +214,15 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: const Text('Confirm Delete'),
+                                        title: const Text('Xác nhận xoá'),
                                         content: const Text(
-                                            'Are you sure you want to delete this order item?'),
+                                            'Bạn có chắc chắn muốn xoá hóa đơn này không?'),
                                         actions: <Widget>[
                                           TextButton(
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Cancel'),
+                                            child: const Text('Huỷ'),
                                           ),
                                           TextButton(
                                             onPressed: () {
@@ -237,13 +237,13 @@ class _OrderItemsScreenState extends State<OrderItemsScreen> {
                                                       .showSnackBar(
                                                     SnackBar(
                                                         content:
-                                                            Text('Error: $e')),
+                                                            Text('Lỗi: $e')),
                                                   );
                                                 }
                                               });
                                               Navigator.of(context).pop();
                                             },
-                                            child: const Text('Delete'),
+                                            child: const Text('Xoá'),
                                           ),
                                         ],
                                       );
@@ -306,10 +306,10 @@ class _AddOrderItemScreenState extends State<AddOrderItemScreen> {
             child: ListView(
               children: <Widget>[
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Order ID'),
+                  decoration: const InputDecoration(labelText: 'Mã đơn hàng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an order ID';
+                      return 'Vui lòng nhập mã đơn hàng';
                     }
                     return null;
                   },
@@ -318,10 +318,10 @@ class _AddOrderItemScreenState extends State<AddOrderItemScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Menu ID'),
+                  decoration: const InputDecoration(labelText: 'Mã sản phẩm'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a menu ID';
+                      return 'Vui lòng nhập mã sản phẩm';
                     }
                     return null;
                   },
@@ -330,10 +330,10 @@ class _AddOrderItemScreenState extends State<AddOrderItemScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Quantity'),
+                  decoration: const InputDecoration(labelText: 'Số lượng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a quantity';
+                      return 'Vui lòng nhập số lượng';
                     }
                     return null;
                   },
@@ -342,10 +342,10 @@ class _AddOrderItemScreenState extends State<AddOrderItemScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Price'),
+                  decoration: const InputDecoration(labelText: 'Giá'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a price';
+                      return 'Vui lòng nhập giá';
                     }
                     return null;
                   },
@@ -361,7 +361,7 @@ class _AddOrderItemScreenState extends State<AddOrderItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Add Item
                   ),
-                  child: const Text('Add Item'),
+                  child: const Text('Thêm mục'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -369,7 +369,7 @@ class _AddOrderItemScreenState extends State<AddOrderItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),
@@ -433,15 +433,15 @@ class _EditOrderItemScreenState extends State<EditOrderItemScreen> {
               children: <Widget>[
                 TextFormField(
                   initialValue: widget.orderItem['id'].toString(),
-                  decoration: const InputDecoration(labelText: 'ID'),
+                  decoration: const InputDecoration(labelText: 'Mã mục'),
                   readOnly: true,
                 ),
                 TextFormField(
                   initialValue: orderId.toString(),
-                  decoration: const InputDecoration(labelText: 'Order ID'),
+                  decoration: const InputDecoration(labelText: 'Mã đơn hàng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an order ID';
+                      return 'Vui lòng nhập mã đơn hàng';
                     }
                     return null;
                   },
@@ -451,10 +451,10 @@ class _EditOrderItemScreenState extends State<EditOrderItemScreen> {
                 ),
                 TextFormField(
                   initialValue: menuId.toString(),
-                  decoration: const InputDecoration(labelText: 'Menu ID'),
+                  decoration: const InputDecoration(labelText: 'Mã sản phẩm'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a menu ID';
+                      return 'Vui lòng nhập mã sản phẩm';
                     }
                     return null;
                   },
@@ -464,10 +464,10 @@ class _EditOrderItemScreenState extends State<EditOrderItemScreen> {
                 ),
                 TextFormField(
                   initialValue: quantity.toString(),
-                  decoration: const InputDecoration(labelText: 'Quantity'),
+                  decoration: const InputDecoration(labelText: 'Số lượng'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a quantity';
+                      return 'Vui lòng nhập số lượng';
                     }
                     return null;
                   },
@@ -477,10 +477,10 @@ class _EditOrderItemScreenState extends State<EditOrderItemScreen> {
                 ),
                 TextFormField(
                   initialValue: price.toString(),
-                  decoration: const InputDecoration(labelText: 'Price'),
+                  decoration: const InputDecoration(labelText: 'Giá'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a price';
+                      return 'Vui lòng nhập giá';
                     }
                     return null;
                   },
@@ -496,7 +496,7 @@ class _EditOrderItemScreenState extends State<EditOrderItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Green for Save
                   ),
-                  child: const Text('Save Changes'),
+                  child: const Text('Lưu thay đổi'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -504,7 +504,7 @@ class _EditOrderItemScreenState extends State<EditOrderItemScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, // Red for Cancel
                   ),
-                  child: const Text('Cancel'),
+                  child: const Text('Hủy'),
                 ),
               ],
             ),

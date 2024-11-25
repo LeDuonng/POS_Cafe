@@ -51,7 +51,7 @@ class _RevenueReportPageState extends State<RevenueReportPage>
         });
       }
     } catch (e) {
-      debugPrint('Error fetching daily revenue: $e');
+      debugPrint('Lỗi khi tải doanh thu hàng ngày: $e');
     }
   }
 
@@ -82,7 +82,7 @@ class _RevenueReportPageState extends State<RevenueReportPage>
             .toList();
       });
     } catch (e) {
-      debugPrint('Error fetching revenue by range: $e');
+      debugPrint('Lỗi khi tải doanh thu trong khoảng thời gian: $e');
     }
   }
 
@@ -102,7 +102,8 @@ class _RevenueReportPageState extends State<RevenueReportPage>
             .toList();
       });
     } catch (e) {
-      debugPrint('Error fetching revenue by category range: $e');
+      debugPrint(
+          'Lỗi khi tải doanh thu theo danh mục trong khoảng thời gian: $e');
     }
   }
 
@@ -121,7 +122,8 @@ class _RevenueReportPageState extends State<RevenueReportPage>
             .toList();
       });
     } catch (e) {
-      debugPrint('Error fetching revenue by staff range: $e');
+      debugPrint(
+          'Lỗi khi tải doanh thu theo nhân viên trong khoảng thời gian: $e');
     }
   }
 
